@@ -840,7 +840,7 @@ async function analyzeSpecificImage(idx,imgIdx){
   const base64=compressed.split(',')[1];
   const prompt=ZONE_PROMPTS[zone.id]||DEFAULT_PROMPT;
   try{
-    const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},{type:'text',text:prompt}]}]})});
+    const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},{type:'text',text:prompt}]}]})});
     const data=await res.json();
     if(data.content?.[0]?.text){state.zones[idx].images[imgIdx].analysis=data.content[0].text;}
     else{state.zones[idx].images[imgIdx].analysis='Kunne ikke analysere dette bildet.';}
@@ -878,7 +878,7 @@ async function buildRapport(){
     if(alleAnalyser||malInfo||zone.note){
       try{
         const kontekst=[alleAnalyser,malInfo?'Målte data: '+malInfo:'',zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
-        const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:`Du skriver tilgjengelighetsprofil for "${name}" som gjester skal lese. Basert på: ${zone.label}:\n\n${kontekst}\n\nSkriv 1-2 setninger på norsk som forteller gjesten konkret hva som finnes og om det er tilgjengelig. Vær faktabasert. Start IKKE med "AI" eller "Basert på". Avslutt med én linje: STATUS:GRONN, STATUS:GUL eller STATUS:ROD`}]})});
+        const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:`Du skriver tilgjengelighetsprofil for "${name}" som gjester skal lese. Basert på: ${zone.label}:\n\n${kontekst}\n\nSkriv 1-2 setninger på norsk som forteller gjesten konkret hva som finnes og om det er tilgjengelig. Vær faktabasert. Start IKKE med "AI" eller "Basert på". Avslutt med én linje: STATUS:GRONN, STATUS:GUL eller STATUS:ROD`}]})});
         const data=await res.json();
         if(data.content?.[0]?.text){const tekst=data.content[0].text;const m=tekst.match(/STATUS:(GRONN|GUL|ROD)/);if(m)status=m[1].toLowerCase();gjesteTekst=tekst.replace(/STATUS:(GRONN|GUL|ROD)/,'').trim();}
       }catch(e){}
@@ -972,7 +972,7 @@ async function sendChat(){
   state.chatHistory.push({role:'user',content:msg});
   try{
     const messages=[{role:'user',content:window._chatKontekst+'\n\n'+state.chatHistory.map(m=>`${m.role==='user'?'Gjest':'Assistent'}: ${m.content}`).join('\n')}];
-    const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages})});
+    const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages})});
     const data=await res.json();
     document.getElementById(loadingId)?.remove();
     const svar=data.content?.[0]?.text||'Beklager, kunne ikke svare nå.';
