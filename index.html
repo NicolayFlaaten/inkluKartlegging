@@ -1180,7 +1180,7 @@ function downloadProfile(){
   const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='accessnorway_profil.json';a.click();URL.revokeObjectURL(url);
 }
 
-window.addEventListener("load", activateApp);
+window.addEventListener("load", function(){ buildSteps(); });
 </script>
 </body>
 </html>
