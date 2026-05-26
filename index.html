@@ -196,6 +196,65 @@ textarea { resize: vertical; min-height: 80px; }
 .btn-primary:active { opacity: 0.85; }
 .btn-secondary { background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border2); border-radius: var(--radius-sm); padding: 14px 18px; font-size: 15px; font-family: inherit; font-weight: 500; cursor: pointer; }
 
+
+/* FANER */
+.tab-bar { display: flex; gap: 6px; margin-bottom: 1.25rem; background: var(--surface); border-radius: var(--radius-sm); padding: 4px; border: 1px solid var(--border); }
+.tab-btn { flex: 1; border: none; background: transparent; border-radius: 8px; padding: 10px 8px; font-size: 13px; font-family: inherit; font-weight: 500; cursor: pointer; color: var(--text2); transition: all 0.15s; }
+.tab-btn.active { background: var(--green); color: #fff; font-weight: 600; }
+
+/* GUIDE */
+.guide-hero { background: #1a1a18; border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
+.guide-hero-img { width: 100%; height: 180px; object-fit: cover; opacity: 0.7; }
+.guide-hero-body { padding: 1.25rem; }
+.guide-hero-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(29,158,117,0.2); border: 1px solid rgba(29,158,117,0.4); border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; color: #4fd1a5; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.guide-hero-name { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -0.5px; margin-bottom: 4px; }
+.guide-hero-type { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 0.5rem; }
+.guide-hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 0.75rem; }
+.guide-meta-pill { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08); border-radius: 20px; padding: 4px 10px; font-size: 12px; color: rgba(255,255,255,0.6); }
+
+/* KART */
+.guide-map { width: 100%; height: 200px; border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; border: 1px solid var(--border); background: var(--surface2); position: relative; }
+.guide-map iframe { width: 100%; height: 100%; border: none; }
+.guide-map-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 8px; color: var(--text3); font-size: 14px; }
+
+/* SEKSJONER */
+.guide-section { margin-bottom: 1.25rem; }
+.guide-section-title { font-size: 11px; font-weight: 800; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px; }
+.guide-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* SONE-RADER */
+.guide-sone { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 0.5rem; }
+.guide-sone-topp { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.guide-sone-ikon { font-size: 20px; }
+.guide-sone-navn { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+.guide-sone-tekst { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.guide-sone-maal { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.guide-sone-maal-chip { background: var(--surface2); border-radius: 20px; padding: 3px 10px; font-size: 11px; color: var(--text2); }
+
+/* BILDER I GUIDE */
+.guide-bilder { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 10px; }
+.guide-bilde { aspect-ratio: 1; border-radius: 8px; overflow: hidden; }
+.guide-bilde img { width: 100%; height: 100%; object-fit: cover; }
+
+/* GPX I GUIDE */
+.guide-gpx { background: var(--blue-light); border: 1px solid rgba(6,90,130,0.2); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem; }
+.guide-gpx-title { font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 0.75rem; }
+.guide-gpx-stats { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+.guide-gpx-stat { background: var(--surface); border-radius: 8px; padding: 8px 10px; }
+.guide-gpx-stat-val { font-size: 18px; font-weight: 700; color: var(--text); }
+.guide-gpx-stat-label { font-size: 11px; color: var(--text3); }
+
+/* TILLEGG */
+.guide-tillegg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
+.guide-tillegg-kort { background: var(--surface); border: 1px solid var(--green-light); border-radius: var(--radius-sm); padding: 0.75rem; display: flex; align-items: center; gap: 8px; }
+.guide-tillegg-ikon { font-size: 20px; }
+.guide-tillegg-tekst { font-size: 12px; color: var(--text2); line-height: 1.3; }
+
+/* LAST NED KNAPP */
+.guide-download-bar { display: flex; gap: 8px; margin-top: 1rem; }
+.guide-btn-dl { flex: 1; background: var(--surface); border: 1.5px solid var(--border2); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; font-family: inherit; font-weight: 600; cursor: pointer; color: var(--text2); text-align: center; }
+.guide-btn-dl.primary { background: var(--green); color: #fff; border-color: var(--green); }
+
 /* TYPE SELECT GROUPS */
 .type-select-optgroup { font-weight: 700; }
 </style>
@@ -325,8 +384,13 @@ textarea { resize: vertical; min-height: 80px; }
 
     <!-- SIDE 3: Rapport -->
     <div class="page" id="page-3">
-      <div class="page-header"><div class="page-title">Tilgjengelighetsprofil</div><div class="page-desc">Rapport for gjester og last ned rådata.</div></div>
-      <div id="rapport-container"></div>
+      <div class="page-header"><div class="page-title">Tilgjengelighetsprofil</div><div class="page-desc">Guide for gjester, AI-analyse og nedlasting.</div></div>
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-guide" onclick="switchTab('guide')">🗺️ Tilgjengelighetsguide</button>
+        <button class="tab-btn" id="tab-analyse" onclick="switchTab('analyse')">🤖 AI-analyse</button>
+      </div>
+      <div id="tab-content-guide"></div>
+      <div id="tab-content-analyse" style="display:none"></div>
     </div>
 
   </div>
@@ -860,25 +924,142 @@ function setAns(id,val,btn){state.answers[id]=val;btn.closest('.yn-group').query
 
 // ── RAPPORT ──
 async function buildRapport(){
-  const container=document.getElementById('rapport-container');
-  container.innerHTML=`<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>Genererer rapport med AI...</div>`;
-  const name=document.getElementById('biz-name').value||'Ukjent sted';
-  const type=document.getElementById('biz-type').value;
-  const config=TYPE_CONFIG[type];
-  const addr=document.getElementById('biz-address').value;
-  const dest=document.getElementById('biz-dest').value;
-  const group=config?config.group:'A';
+  buildGuide();
+  buildAnalyse();
+}
 
-  const soneKorter=await Promise.all(state.zones.map(async zone=>{
-    const hasContent=zone.images.length>0||Object.keys(zone.measures).some(k=>zone.measures[k])||zone.note;
-    if(!hasContent)return null;
-    const alleAnalyser=zone.images.filter(img=>img.analysis).map(img=>img.analysis).join('\n');
-    const malInfo=zone.extraFields.map(fid=>{const f=EXTRA_FIELDS[fid];const val=zone.measures[fid];if(!f||!val)return'';return`${f.label}: ${val} ${f.unit}`;}).filter(Boolean).join(', ');
-    let gjesteTekst='',status='ukjent';
+function switchTab(tab) {
+  document.getElementById('tab-guide').classList.toggle('active', tab==='guide');
+  document.getElementById('tab-analyse').classList.toggle('active', tab==='analyse');
+  document.getElementById('tab-content-guide').style.display = tab==='guide'?'block':'none';
+  document.getElementById('tab-content-analyse').style.display = tab==='analyse'?'block':'none';
+}
+
+function buildGuide() {
+  const name = document.getElementById('biz-name').value || 'Ukjent sted';
+  const type = document.getElementById('biz-type').value;
+  const config = TYPE_CONFIG[type];
+  const addr = document.getElementById('biz-address').value;
+  const dest = document.getElementById('biz-dest').value;
+  const kommune = document.getElementById('biz-kommune').value;
+  const group = config ? config.group : 'A';
+  const firstImg = state.zones.flatMap(z=>z.images)[0];
+  const mapQuery = encodeURIComponent(addr || name);
+  const mapUrl = addr ? `https://maps.google.com/maps?q=${mapQuery}&output=embed&z=15` : null;
+
+  const gpxHtml = state.gpxData ? `
+    <div class="guide-gpx">
+      <div class="guide-gpx-title">🗺️ Rute — GPX-analyse</div>
+      <div class="guide-gpx-stats">
+        <div class="guide-gpx-stat"><div class="guide-gpx-stat-val">${state.gpxData.totalDist} km</div><div class="guide-gpx-stat-label">Distanse</div></div>
+        <div class="guide-gpx-stat"><div class="guide-gpx-stat-val">↑${state.gpxData.totalUp}m</div><div class="guide-gpx-stat-label">Stigning opp</div></div>
+        <div class="guide-gpx-stat"><div class="guide-gpx-stat-val">${state.gpxData.maxSlope}%</div><div class="guide-gpx-stat-label">Maks stigning</div></div>
+        <div class="guide-gpx-stat"><div class="guide-gpx-stat-val">${state.gpxData.minEle}–${state.gpxData.maxEle}m</div><div class="guide-gpx-stat-label">Høyde over havet</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:13px;color:var(--text2)">
+        ${state.gpxData.maxSlope<=5?'✅ Egnet for rullestol og rullator.':state.gpxData.maxSlope<=8?'🟡 Krevende for manuell rullestol.':state.gpxData.maxSlope<=12?'⚠️ For bratt for de fleste rullestoler.':'🔴 Svært bratt — kun erfarne turgåere.'}
+      </div>
+    </div>` : '';
+
+  const sonerHtml = state.zones.map(zone => {
+    const hasContent = zone.images.length > 0 || Object.keys(zone.measures).some(k=>zone.measures[k]) || zone.note;
+    if(!hasContent) return '';
+    const malInfo = zone.extraFields.map(fid=>{const f=EXTRA_FIELDS[fid];const val=zone.measures[fid];if(!f||!val)return '';return `<span class="guide-sone-maal-chip">${f.label}: ${val} ${f.unit}</span>`;}).filter(Boolean).join('');
+    const bilderHtml = zone.images.length > 0 ? `<div class="guide-bilder">${zone.images.map(img=>`<div class="guide-bilde"><img src="${img.dataUrl}" alt="${zone.label}"/></div>`).join('')}</div>` : '';
+    return `<div class="guide-sone">
+      <div class="guide-sone-topp"><div class="guide-sone-ikon">${zone.icon}</div><div class="guide-sone-navn">${zone.label}</div></div>
+      ${zone.note ? `<div class="guide-sone-tekst">${zone.note}</div>` : ''}
+      ${malInfo ? `<div class="guide-sone-maal">${malInfo}</div>` : ''}
+      ${bilderHtml}
+    </div>`;
+  }).filter(Boolean).join('');
+
+  const qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
+  const jaItems = qIds.filter(id=>state.answers[id]==='ja').map(id=>{
+    const q=ALL_QUESTIONS[id];
+    const ikon=q.text.includes('Teleslynge')||q.text.includes('teleslynge')?'🔊':q.text.includes('ledsager')||q.text.includes('Ledsager')?'👥':q.text.includes('allergi')?'🌿':q.text.includes('parfyme')?'🌸':q.text.includes('meny')||q.text.includes('Meny')?'📋':q.text.includes('opplæring')||q.text.includes('opplaering')?'👨‍🏫':q.text.includes('evakuering')?'🚨':q.text.includes('utstyr')?'🎒':'✅';
+    return `<div class="guide-tillegg-kort"><div class="guide-tillegg-ikon">${ikon}</div><div class="guide-tillegg-tekst">${q.text}</div></div>`;
+  }).join('');
+
+  document.getElementById('tab-content-guide').innerHTML = `
+    <div class="guide-hero">
+      ${firstImg ? `<img class="guide-hero-img" src="${firstImg.dataUrl}" alt="${name}"/>` : ''}
+      <div class="guide-hero-body">
+        <div class="guide-hero-badge">AccessNorway · Tilgjengelighetsguide</div>
+        <div class="guide-hero-name">${name}</div>
+        <div class="guide-hero-type">${config ? config.label : ''}</div>
+        <div class="guide-hero-meta">
+          ${dest ? `<div class="guide-meta-pill">🗺️ ${dest}</div>` : ''}
+          ${kommune ? `<div class="guide-meta-pill">📍 ${kommune}</div>` : ''}
+          ${addr ? `<div class="guide-meta-pill">🏠 ${addr}</div>` : ''}
+          ${state.tags.map(t=>`<div class="guide-meta-pill">${t}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    ${mapUrl ? `<div class="guide-map"><iframe src="${mapUrl}" allowfullscreen loading="lazy"></iframe></div>` :
+      addr ? `<div class="guide-map"><div class="guide-map-placeholder"><span style="font-size:32px">📍</span><span>${addr}</span><a href="https://maps.google.com/?q=${mapQuery}" target="_blank" style="font-size:13px;color:var(--green)">Åpne i Google Maps →</a></div></div>` : ''}
+
+    ${gpxHtml}
+
+    ${sonerHtml ? `<div class="guide-section"><div class="guide-section-title">Fasiliteter og tilgjengelighet</div>${sonerHtml}</div>` : ''}
+
+    ${jaItems ? `<div class="guide-section"><div class="guide-section-title">Tilleggstjenester</div><div class="guide-tillegg">${jaItems}</div></div>` : ''}
+
+    <div class="guide-section">
+      <div class="guide-section-title">Spør om tilgjengelighet</div>
+      <div class="chat-card">
+        <div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">Tilgjengelighetsassistent</div><div class="chat-header-sub">AI</div></div>
+        <div class="chat-messages" id="guide-chat-messages">
+          <div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten på ${name}. Hva lurer du på?</div></div>
+        </div>
+        <div class="chat-suggestions">
+          <button class="chat-suggestion" onclick="sendGuideChatMsg(this.textContent)">Passer det for rullestol?</button>
+          <button class="chat-suggestion" onclick="sendGuideChatMsg(this.textContent)">Finnes HC-parkering?</button>
+          <button class="chat-suggestion" onclick="sendGuideChatMsg(this.textContent)">Hva med allergi?</button>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" class="chat-input" id="guide-chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key==='Enter')sendGuideChatMsg()"/>
+          <button class="chat-send" onclick="sendGuideChatMsg()">➤</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-download-bar">
+      <button class="guide-btn-dl" onclick="downloadGuideHTML()">📄 Last ned guide (HTML)</button>
+      <button class="guide-btn-dl primary" onclick="downloadProfile()">⬇️ Last ned rådata (JSON)</button>
+    </div>
+    <div style="text-align:center;font-size:11px;color:var(--text3);margin-top:1rem;padding-bottom:1rem">
+      Tilgjengelighetsguide generert med AccessNorway · ${new Date().toLocaleDateString('nb-NO')}
+    </div>`;
+
+  // Sett opp chatbot kontekst for guide
+  const soner = state.zones.filter(z=>z.images.length>0||z.note);
+  window._guideChatKontekst = `Du er tilgjengelighetsassistent for "${name}". Svar kort og konkret på norsk. Fasiliteter: ${soner.map(z=>z.label+(z.note?' - '+z.note:'')).join(', ')}. Kun bruk informasjonen gitt.`;
+  window._guideChatHistory = [];
+}
+
+async function buildAnalyse(){
+  const container = document.getElementById('tab-content-analyse');
+  const name = document.getElementById('biz-name').value || 'Ukjent sted';
+  const type = document.getElementById('biz-type').value;
+  const config = TYPE_CONFIG[type];
+  const qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
+
+  // Bygg AI-analyse visning
+  const spinner = '<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>Genererer AI-rapport...</div>';
+  container.innerHTML = spinner;
+
+  const soneKorter = await Promise.all(state.zones.map(async zone => {
+    const hasContent = zone.images.length > 0 || Object.keys(zone.measures).some(k=>zone.measures[k]) || zone.note;
+    if(!hasContent) return null;
+    const alleAnalyser = zone.images.filter(img=>img.analysis).map(img=>img.analysis).join('\n');
+    const malInfo = zone.extraFields.map(fid=>{const f=EXTRA_FIELDS[fid];const val=zone.measures[fid];if(!f||!val)return'';return`${f.label}: ${val} ${f.unit}`;}).filter(Boolean).join(', ');
+    let gjesteTekst='', status='ukjent';
     if(alleAnalyser||malInfo||zone.note){
       try{
         const kontekst=[alleAnalyser,malInfo?'Målte data: '+malInfo:'',zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
-        const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:`Du skriver tilgjengelighetsprofil for "${name}" som gjester skal lese. Basert på: ${zone.label}:\n\n${kontekst}\n\nSkriv 1-2 setninger på norsk som forteller gjesten konkret hva som finnes og om det er tilgjengelig. Vær faktabasert. Start IKKE med "AI" eller "Basert på". Avslutt med én linje: STATUS:GRONN, STATUS:GUL eller STATUS:ROD`}]})});
+        const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:`Du skriver tilgjengelighetsprofil for "${name}" som gjester skal lese. Basert på: ${zone.label}:\n\n${kontekst}\n\nSkriv 1-2 setninger på norsk som forteller gjesten konkret hva som finnes og om det er tilgjengelig. Vær faktabasert. Avslutt med én linje: STATUS:GRONN, STATUS:GUL eller STATUS:ROD`}]})});
         const data=await res.json();
         if(data.content?.[0]?.text){const tekst=data.content[0].text;const m=tekst.match(/STATUS:(GRONN|GUL|ROD)/);if(m)status=m[1].toLowerCase();gjesteTekst=tekst.replace(/STATUS:(GRONN|GUL|ROD)/,'').trim();}
       }catch(e){}
@@ -887,62 +1068,34 @@ async function buildRapport(){
     const faktaRader=zone.extraFields.map(fid=>{const f=EXTRA_FIELDS[fid];const val=zone.measures[fid];if(!f||!val)return'';return`<div class="fakta-rad"><span class="fakta-etikett">${f.label}:</span><span class="fakta-verdi">${val} ${f.unit}</span></div>`;}).filter(Boolean).join('');
     return{zone,gjesteTekst,status,statusTekst:statusTekst[status],faktaRader};
   }));
-  const gyldigeSoner=soneKorter.filter(Boolean);
 
-  // GPX-kort
-  const gpxKort=state.gpxData?`
-    <div class="sone-kort">
-      <div class="sone-topp"><div class="sone-ikon">🗺️</div><div class="sone-navn">Rute / GPX</div>
-        <div class="status-badge ${slopeClass(state.gpxData.maxSlope)==='ok'?'gronn':slopeClass(state.gpxData.maxSlope)==='caution'?'gul':'rod'}">
-          ${state.gpxData.maxSlope<=5?'✅ Lett':state.gpxData.maxSlope<=8?'🟡 Moderat':'🔴 Krevende'}
-        </div>
-      </div>
-      <div class="sone-fakta">
-        <div class="fakta-rad"><span class="fakta-etikett">Distanse:</span><span class="fakta-verdi">${state.gpxData.totalDist} km</span></div>
-        <div class="fakta-rad"><span class="fakta-etikett">Stigning totalt:</span><span class="fakta-verdi">↑${state.gpxData.totalUp}m ↓${state.gpxData.totalDown}m</span></div>
-        <div class="fakta-rad"><span class="fakta-etikett">Maks stigning:</span><span class="fakta-verdi">${state.gpxData.maxSlope}%</span></div>
-        <div class="fakta-rad"><span class="fakta-etikett">Snitt stigning:</span><span class="fakta-verdi">${state.gpxData.avgSlope}%</span></div>
-      </div>
-      <div style="margin-top:8px;font-size:13px;color:var(--text2)">${state.gpxData.maxSlope<=5?'Egnet for rullestol og rullator på flat til svakt hellende terreng.':state.gpxData.maxSlope<=8?'Krevende for manuell rullestol. Elektrisk rullestol kan passe på deler av ruten.':state.gpxData.maxSlope<=12?'For bratt for de fleste rullestoler. Passer for gående med god kondisjon.':'Svært bratt. Anbefales kun for erfarne turgåere.'}</div>
-    </div>`:'';
+  const gyldigeSoner = soneKorter.filter(Boolean);
+  const chatKontekst = byggChatKontekst(name,type,config,gyldigeSoner,qIds);
 
-  const qIds=config?config.questions:Object.keys(ALL_QUESTIONS);
-  const jaItems=qIds.filter(id=>state.answers[id]==='ja').map(id=>ALL_QUESTIONS[id]?.text).filter(Boolean);
-  const tilleggKort=jaItems.map(t=>{
-    const ikon=t.includes('teleslynge')||t.includes('Teleslynge')?'🔊':t.includes('ledsager')||t.includes('Ledsager')?'👥':t.includes('allergi')?'🌿':t.includes('parfyme')?'🌸':t.includes('meny')||t.includes('Meny')?'📋':t.includes('opplæring')||t.includes('opplaering')?'👨‍🏫':t.includes('evakuering')?'🚨':t.includes('utstyr')?'🎒':t.includes('rullestol')?'♿':t.includes('rampe')?'🏊':'✅';
-    return`<div class="tillegg-kort"><div class="tillegg-ikon">${ikon}</div><div class="tillegg-verdi">${t}</div></div>`;
+  const jaItems = qIds.filter(id=>state.answers[id]==='ja').map(id=>{
+    const q=ALL_QUESTIONS[id];
+    const ikon=q.text.includes('Teleslynge')||q.text.includes('teleslynge')?'🔊':q.text.includes('ledsager')||q.text.includes('Ledsager')?'👥':q.text.includes('allergi')?'🌿':q.text.includes('parfyme')?'🌸':q.text.includes('meny')||q.text.includes('Meny')?'📋':q.text.includes('opplæring')||q.text.includes('opplaering')?'👨‍🏫':q.text.includes('evakuering')?'🚨':q.text.includes('utstyr')?'🎒':'✅';
+    return`<div class="tillegg-kort"><div class="tillegg-ikon">${ikon}</div><div class="tillegg-verdi">${q.text}</div></div>`;
   }).join('');
 
-  const chatKontekst=byggChatKontekst(name,type,config,gyldigeSoner,qIds);
-  const grpLabel={A:'Bygningsbasert bedrift',B:'Naturbasert aktivitetsbedrift',C:'Fellesgode / felles rom'}[group];
-  const grpBadge=`<span class="group-badge ${group}">${grpLabel}</span>`;
-
-  container.innerHTML=`
-    <div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">Tilgjengelighetsprofil generert</div><div class="success-text">Rapporten er klar til å deles med gjester.</div></div></div>
-    <div class="rapport-header">
-      <div class="rapport-logo">Access<span>Norway</span></div>
-      <div class="rapport-navn">${name}</div>
-      <div class="rapport-meta">${config?config.label:''} ${addr?'· '+addr:''}</div>
-      ${grpBadge}
-      ${state.tags.length?`<div class="rapport-chips">${state.tags.map(t=>`<span class="rapport-chip">${t}</span>`).join('')}</div>`:''}
-    </div>
-    ${gpxKort}
+  container.innerHTML = `
+    <div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">AI-analyse fullført</div><div class="success-text">Detaljert tilgjengelighetsvurdering per sone.</div></div></div>
     ${gyldigeSoner.map(s=>`<div class="sone-kort">
       <div class="sone-topp"><div class="sone-ikon">${s.zone.icon}</div><div class="sone-navn">${s.zone.label}</div>
         <div class="status-badge ${s.status}">${s.status==='gronn'?'✅':s.status==='gul'?'🟡':s.status==='rod'?'🔴':'⬜'} ${s.statusTekst}</div>
       </div>
       ${s.gjesteTekst?`<div class="sone-tekst">${s.gjesteTekst}</div>`:''}
       ${s.faktaRader?`<div class="sone-fakta">${s.faktaRader}</div>`:''}
+      ${s.zone.images.filter(img=>img.analysis).map(img=>`<div class="ai-summary-block" style="margin-top:0.5rem;background:var(--surface2);border-radius:8px;padding:0.75rem;font-size:13px;color:var(--text2);line-height:1.6">${img.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`).join('')}
     </div>`).join('')}
-    ${tilleggKort?`<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">${tilleggKort}</div></div>`:''}
+    ${jaItems?`<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">${jaItems}</div></div>`:''}
     <div class="chat-card">
       <div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">Spør om tilgjengelighet</div><div class="chat-header-sub">AI-assistent</div></div>
-      <div class="chat-messages" id="chat-messages">
-        <div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten på ${name}. Hva lurer du på?</div></div>
-      </div>
+      <div class="chat-messages" id="chat-messages"><div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten her. Hva lurer du på?</div></div></div>
       <div class="chat-suggestions">
-        ${group==='C'?`<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer for rullestol?</button><button class="chat-suggestion" onclick="sendChatSuggestion(this)">Hva er stigningen?</button><button class="chat-suggestion" onclick="sendChatSuggestion(this)">Er det HC-toalett?</button>`:
-        `<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer det for rullestol?</button><button class="chat-suggestion" onclick="sendChatSuggestion(this)">Finnes det HC-parkering?</button><button class="chat-suggestion" onclick="sendChatSuggestion(this)">Hva med allergi?</button>`}
+        <button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer for rullestol?</button>
+        <button class="chat-suggestion" onclick="sendChatSuggestion(this)">Finnes HC-parkering?</button>
+        <button class="chat-suggestion" onclick="sendChatSuggestion(this)">Hva med allergi?</button>
       </div>
       <div class="chat-input-row">
         <input type="text" class="chat-input" id="chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key==='Enter')sendChat()"/>
@@ -950,8 +1103,8 @@ async function buildRapport(){
       </div>
     </div>`;
 
-  window._chatKontekst=chatKontekst;
-  state.chatHistory=[];
+  window._chatKontekst = chatKontekst;
+  state.chatHistory = [];
 }
 
 function byggChatKontekst(name,type,config,soner,qIds){
@@ -981,6 +1134,37 @@ async function sendChat(){
   }catch(err){document.getElementById(loadingId)?.remove();appendChatMsg('Beklager, noe gikk galt.','bot');}
 }
 function sendChatSuggestion(btn){document.getElementById('chat-input').value=btn.textContent;sendChat();}
+
+async function sendGuideChatMsg(msg) {
+  const input = document.getElementById('guide-chat-input');
+  const text = msg || (input ? input.value.trim() : '');
+  if(!text) return;
+  if(input) input.value = '';
+  const msgs = document.getElementById('guide-chat-messages');
+  const uDiv = document.createElement('div'); uDiv.className='chat-msg user'; uDiv.innerHTML=`<div class="chat-bubble">${text}</div>`; msgs.appendChild(uDiv);
+  const loadId='gl-'+Date.now(); const bDiv=document.createElement('div'); bDiv.className='chat-msg bot'; bDiv.id=loadId; bDiv.innerHTML=`<div class="chat-bubble"><span class="chat-spinner"></span>Tenker...</div>`; msgs.appendChild(bDiv); msgs.scrollTop=msgs.scrollHeight;
+  if(!window._guideChatHistory) window._guideChatHistory=[];
+  window._guideChatHistory.push({role:'user',content:text});
+  try{
+    const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:250,messages:[{role:'user',content:(window._guideChatKontekst||'')+'
+
+'+window._guideChatHistory.map(m=>`${m.role==='user'?'Gjest':'Assistent'}: ${m.content}`).join('
+')}]})});
+    const data=await res.json();
+    document.getElementById(loadId)?.remove();
+    const svar=data.content?.[0]?.text||'Beklager, kunne ikke svare nå.';
+    window._guideChatHistory.push({role:'assistant',content:svar});
+    const rDiv=document.createElement('div'); rDiv.className='chat-msg bot'; rDiv.innerHTML=`<div class="chat-bubble">${svar}</div>`; msgs.appendChild(rDiv); msgs.scrollTop=msgs.scrollHeight;
+  }catch(err){document.getElementById(loadId)?.remove(); const eDiv=document.createElement('div'); eDiv.className='chat-msg bot'; eDiv.innerHTML=`<div class="chat-bubble">Feil: ${err.message}</div>`; msgs.appendChild(eDiv);}
+}
+
+function downloadGuideHTML() {
+  const guideContent = document.getElementById('tab-content-guide').innerHTML;
+  const name = document.getElementById('biz-name').value || 'AccessNorway';
+  const blob = new Blob([`<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${name} — Tilgjengelighetsguide</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1efe8;padding:1rem;max-width:600px;margin:0 auto}img{max-width:100%}${document.querySelector('style').textContent}</style></head><body>${guideContent}</body></html>`], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=name.replace(/\s+/g,'_')+'_tilgjengelighetsguide.html'; a.click(); URL.revokeObjectURL(url);
+}
 function appendChatMsg(text,role,id){const msgs=document.getElementById('chat-messages');const div=document.createElement('div');div.className=`chat-msg ${role}`;if(id)div.id=id;div.innerHTML=`<div class="chat-bubble">${text}</div>`;msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;}
 
 // ── MODAL ──
