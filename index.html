@@ -206,13 +206,8 @@ textarea { resize: vertical; min-height: 80px; }
   <div class="welcome-logo">Access<span>Norway</span></div>
   <div class="welcome-tagline">Kartleggingsverktøy</div>
   <div class="welcome-card">
-    <div class="welcome-title">Koble til AI-analyse</div>
-    <div class="welcome-desc">For å analysere bilder trenger appen din personlige Anthropic API-nøkkel. Den lagres kun på din enhet.</div>
-    <div class="welcome-label">Anthropic API-nøkkel</div>
-    <input type="text" class="welcome-input" id="welcome-key" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
-    <div class="welcome-error" id="welcome-error">Nøkkelen ser ikke riktig ut.</div>
-    <button class="welcome-btn" ontouchend="event.preventDefault();activateApp()" onclick="activateApp()">Start kartlegging</button>
-    <div class="welcome-hint">Finn nøkkelen på console.anthropic.com under API Keys.</div>
+    <div class="welcome-title">Laster...</div>
+    <div class="welcome-desc">Starter kartleggingsverktøyet.</div>
   </div>
 </div>
 
@@ -351,7 +346,7 @@ textarea { resize: vertical; min-height: 80px; }
 </div>
 
 <script>
-let API_KEY = '';
+// API-nøkkel håndteres av Cloudflare Worker
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
 
 // ── TYPE MAPPING ──
@@ -628,9 +623,6 @@ const DEFAULT_PROMPT = `Du er ekspert på universell utforming for norsk reiseli
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null};
 
 function activateApp(){
-  const key=document.getElementById('welcome-key').value.trim();
-  if(key.length<10){document.getElementById('welcome-error').textContent='Nøkkelen er for kort.';document.getElementById('welcome-error').classList.add('visible');return;}
-  API_KEY=key;
   document.getElementById('welcome-screen').style.display='none';
   document.getElementById('app').classList.add('active');
   buildSteps();
@@ -826,7 +818,7 @@ function renderZoneCard(zone,idx){
   const noteHtml=`<div class="field" style="margin-top:0.75rem"><label class="field-label">Egne notater (valgfritt)</label><textarea placeholder="Ekstra observasjoner, kontekst eller beskrivelse..." oninput="state.zones[${idx}].note=this.value">${zone.note||''}</textarea></div>`;
   return`<div class="zone-card" id="zone-card-${idx}">
     <div class="zone-card-title">${zone.icon} ${zone.label}${zone.optional?'<span class="zone-optional">(valgfri)</span>':''}</div>
-    <div class="upload-zone"><input type="file" accept="image/*" multiple capture="environment" onchange="handleFiles(event,${idx})"/><div class="upload-icon">📷</div><div class="upload-title">Ta bilde eller velg fra bibliotek</div><div class="upload-hint">Alle bilder kan analyseres individuelt</div></div>
+    <div class="upload-zone"><input type="file" accept="image/*" multiple onchange="handleFiles(event,${idx})"/><div class="upload-icon">📷</div><div class="upload-title">Ta bilde eller velg fra bibliotek</div><div class="upload-hint">Alle bilder kan analyseres individuelt</div></div>
     ${zone.images.length?`<div class="image-preview">${previewHtml}</div>`:''}
     ${combinedAnalysis?`<div class="ai-box visible"><div class="ai-header"><span>AI-analyse (${allAnalyses.length} bilde${allAnalyses.length>1?'r':''})</span></div><div class="ai-text">${combinedAnalysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div></div>`:''}
     <div class="ai-box" id="ai-loading-${idx}" style="display:none"><div class="ai-header"><div class="ai-spinner on"></div><span>Analyserer...</span></div></div>
@@ -1004,5 +996,6 @@ function downloadProfile(){
   const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='accessnorway_profil.json';a.click();URL.revokeObjectURL(url);
 }
 </script>
+<script>window.addEventListener("load", activateApp);</script>
 </body>
 </html>
