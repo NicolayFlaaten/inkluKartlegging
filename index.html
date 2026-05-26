@@ -701,7 +701,7 @@ function goTo(step){
   if(step<0||step>3)return;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+step).classList.add('active');
-  for(let i=0;i<4;i++){const el=document.getElementById('sp'+i);el.classList.remove('active','done');if(i<step)el.classList.add('done');else if(i===step)el.classList.add('active');}
+  for(let i=0;i<4;i++){const el=document.getElementById('sp'+i);if(el){el.classList.remove('active','done');if(i<step)el.classList.add('done');else if(i===step)el.classList.add('active');}}
   document.getElementById('btn-back').style.display=step>0?'block':'none';
   const labels=['Start kartlegging →','Neste: Spørsmål →','Generer rapport →','Last ned data'];
   document.getElementById('btn-next').textContent=labels[step];
@@ -710,7 +710,7 @@ function goTo(step){
   if(step===2)buildQuestions();
   if(step===3)buildRapport();
   window.scrollTo(0,0);
-  document.getElementById('sp'+step).scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  const spEl=document.getElementById('sp'+step);if(spEl)spEl.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
 }
 function goNext(){if(state.step===3){downloadProfile();return;}goTo(state.step+1);}
 function goBack(){if(state.step>0)goTo(state.step-1);}
@@ -1180,7 +1180,8 @@ function downloadProfile(){
   const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='accessnorway_profil.json';a.click();URL.revokeObjectURL(url);
 }
 
-window.addEventListener("load", function(){ buildSteps(); });
+document.addEventListener("DOMContentLoaded", function(){ buildSteps(); });
+if(document.readyState!=="loading"){ buildSteps(); }
 </script>
 </body>
 </html>
