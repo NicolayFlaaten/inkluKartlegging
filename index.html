@@ -10,6 +10,7 @@
   --green: #1D9E75; --green-dark: #0F6E56; --green-light: #E1F5EE;
   --amber: #BA7517; --amber-light: #FAEEDA;
   --red: #E24B4A; --red-light: #FCEBEB;
+  --blue: #065A82; --blue-light: #E3F2FA;
   --text: #1a1a18; --text2: #5f5e5a; --text3: #999890;
   --surface: #ffffff; --surface2: #f7f6f2; --surface3: #f1efe8;
   --border: rgba(0,0,0,0.09); --border2: rgba(0,0,0,0.16);
@@ -63,6 +64,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 input[type=text], input[type=number], select, textarea { width: 100%; border: 1.5px solid var(--border2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 16px; font-family: inherit; color: var(--text); background: var(--surface); outline: none; -webkit-appearance: none; transition: border-color 0.15s; }
 input:focus, select:focus, textarea:focus { border-color: var(--green); }
 select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+textarea { resize: vertical; min-height: 80px; }
 .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
 .tag-btn { border: 1.5px solid var(--border2); background: var(--surface); border-radius: 20px; padding: 6px 14px; font-size: 14px; cursor: pointer; font-family: inherit; color: var(--text2); }
 .tag-btn.active { background: var(--green-light); border-color: var(--green); color: var(--green-dark); font-weight: 500; }
@@ -75,7 +77,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .preview-item { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); }
 .preview-item img { width: 100%; height: 100%; object-fit: cover; }
 .preview-remove { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; background: rgba(0,0,0,0.65); border: none; border-radius: 50%; color: #fff; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.preview-analyze { position: absolute; bottom: 4px; left: 4px; right: 4px; background: rgba(29,158,117,0.9); border: none; border-radius: 6px; color: #fff; font-size: 11px; font-family: inherit; font-weight: 600; padding: 4px; cursor: pointer; text-align: center; }
+.preview-analyze { position: absolute; bottom: 4px; left: 4px; right: 4px; background: rgba(29,158,117,0.9); border: none; border-radius: 6px; color: #fff; font-size: 11px; font-family: inherit; font-weight: 600; padding: 4px; cursor: pointer; }
 .preview-analyzed { position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.5); border-radius: 6px; color: #fff; font-size: 10px; padding: 3px 6px; }
 .ai-box { background: var(--amber-light); border: 1px solid rgba(186,117,23,0.2); border-radius: var(--radius-sm); padding: 1rem; margin-top: 1rem; display: none; }
 .ai-box.visible { display: block; }
@@ -97,6 +99,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 1rem; }
 .modal-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
 .modal-option { border: 1.5px solid var(--border2); border-radius: var(--radius-sm); padding: 12px 14px; font-size: 15px; font-family: inherit; background: var(--surface2); cursor: pointer; text-align: left; }
+.modal-option:active { background: var(--green-light); border-color: var(--green); }
 .modal-custom { display: flex; gap: 8px; margin-top: 8px; }
 .modal-custom input { flex: 1; }
 .modal-custom button { background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); padding: 12px 16px; font-family: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
@@ -111,11 +114,30 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .yn-btn.no.active { background: var(--red-light); border-color: var(--red); color: #A32D2D; }
 .yn-btn.na.active { background: var(--surface2); border-color: var(--border2); color: var(--text3); }
 .notice { background: var(--green-light); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 13px; color: var(--green-dark); margin-bottom: 1rem; line-height: 1.5; }
-.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 0.875rem 1rem; padding-bottom: calc(0.875rem + env(safe-area-inset-bottom)); display: flex; gap: 10px; z-index: 100; }
-.btn-primary { flex: 1; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); padding: 14px; font-size: 15px; font-family: inherit; font-weight: 600; cursor: pointer; }
-.btn-primary:active { opacity: 0.85; }
-.btn-secondary { background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border2); border-radius: var(--radius-sm); padding: 14px 18px; font-size: 15px; font-family: inherit; font-weight: 500; cursor: pointer; }
-.chip { display: inline-flex; background: var(--green-light); color: var(--green-dark); border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 500; margin: 2px; }
+.notice-blue { background: var(--blue-light); border-radius: var(--radius-sm); padding: 0.75rem 1rem; font-size: 13px; color: var(--blue); margin-bottom: 1rem; line-height: 1.5; }
+
+/* GPX */
+.gpx-zone { border: 2px dashed rgba(6,90,130,0.3); border-radius: var(--radius); padding: 1.25rem 1rem; text-align: center; cursor: pointer; background: var(--blue-light); position: relative; margin-bottom: 1rem; }
+.gpx-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.gpx-icon { font-size: 28px; margin-bottom: 6px; }
+.gpx-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; color: var(--blue); }
+.gpx-hint { font-size: 12px; color: var(--text3); }
+.gpx-result { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-top: 0.75rem; }
+.gpx-result-title { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+.gpx-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.gpx-stat { background: var(--surface2); border-radius: 8px; padding: 10px; }
+.gpx-stat-val { font-size: 20px; font-weight: 700; color: var(--text); }
+.gpx-stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.gpx-stat.warning .gpx-stat-val { color: var(--red); }
+.gpx-stat.ok .gpx-stat-val { color: var(--green-dark); }
+.gpx-stat.caution .gpx-stat-val { color: var(--amber); }
+.gpx-profile { width: 100%; height: 80px; margin-top: 0.75rem; border-radius: 8px; overflow: hidden; }
+
+/* GROUP BADGE */
+.group-badge { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700; margin-bottom: 0.5rem; }
+.group-badge.A { background: var(--green-light); color: var(--green-dark); }
+.group-badge.B { background: var(--amber-light); color: var(--amber); }
+.group-badge.C { background: var(--blue-light); color: var(--blue); }
 
 /* RAPPORT */
 .rapport-header { background: #1a1a18; border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; color: #fff; }
@@ -125,7 +147,6 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .rapport-meta { font-size: 14px; color: rgba(255,255,255,0.5); }
 .rapport-chips { margin-top: 0.75rem; display: flex; flex-wrap: wrap; gap: 6px; }
 .rapport-chip { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border-radius: 20px; padding: 3px 10px; font-size: 12px; }
-
 .sone-kort { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 0.75rem; }
 .sone-topp { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
 .sone-ikon { font-size: 22px; }
@@ -140,14 +161,10 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .fakta-rad { display: flex; gap: 8px; font-size: 13px; }
 .fakta-etikett { color: var(--text3); min-width: 130px; }
 .fakta-verdi { color: var(--text); font-weight: 500; }
-
 .tillegg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
 .tillegg-kort { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.875rem; }
 .tillegg-ikon { font-size: 20px; margin-bottom: 4px; }
-.tillegg-tekst { font-size: 13px; color: var(--text2); line-height: 1.4; }
 .tillegg-verdi { font-size: 13px; font-weight: 600; color: var(--text); }
-
-/* CHATBOT */
 .chat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
 .chat-header { background: #1a1a18; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 10px; }
 .chat-header-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
@@ -161,27 +178,33 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 .chat-msg.bot .chat-bubble { background: var(--surface2); color: var(--text); border-radius: 4px 16px 16px 16px; }
 .chat-msg.user .chat-bubble { background: var(--green); color: #fff; border-radius: 16px 16px 4px 16px; }
 .chat-spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(0,0,0,0.15); border-top-color: var(--text3); border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 6px; }
-.chat-input-row { display: flex; gap: 8px; padding: 0.75rem 1rem; border-top: 1px solid var(--border); background: var(--surface); }
+.chat-input-row { display: flex; gap: 8px; padding: 0.75rem 1rem; border-top: 1px solid var(--border); }
 .chat-input { flex: 1; border: 1.5px solid var(--border2); border-radius: 20px; padding: 10px 14px; font-size: 14px; font-family: inherit; outline: none; }
 .chat-input:focus { border-color: var(--green); }
 .chat-send { background: var(--green); color: #fff; border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .chat-suggestions { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 1rem 0.75rem; }
 .chat-suggestion { border: 1.5px solid var(--border2); background: var(--surface2); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-family: inherit; cursor: pointer; color: var(--text2); }
-.chat-suggestion:active { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
-
 .success-banner { background: var(--green-light); border: 1px solid rgba(29,158,117,0.2); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; display: flex; gap: 12px; align-items: flex-start; }
 .success-icon { font-size: 28px; flex-shrink: 0; }
 .success-title { font-weight: 600; color: var(--green-dark); margin-bottom: 3px; }
 .success-text { font-size: 13px; color: var(--text2); }
 .rapport-spinner { text-align: center; padding: 2rem; color: var(--text3); font-size: 14px; }
 .rapport-spinner-ring { width: 32px; height: 32px; border: 3px solid var(--border2); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 0.75rem; }
+.chip { display: inline-flex; background: var(--green-light); color: var(--green-dark); border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 500; margin: 2px; }
+.bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 0.875rem 1rem; padding-bottom: calc(0.875rem + env(safe-area-inset-bottom)); display: flex; gap: 10px; z-index: 100; }
+.btn-primary { flex: 1; background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); padding: 14px; font-size: 15px; font-family: inherit; font-weight: 600; cursor: pointer; }
+.btn-primary:active { opacity: 0.85; }
+.btn-secondary { background: var(--surface2); color: var(--text2); border: 1.5px solid var(--border2); border-radius: var(--radius-sm); padding: 14px 18px; font-size: 15px; font-family: inherit; font-weight: 500; cursor: pointer; }
+
+/* TYPE SELECT GROUPS */
+.type-select-optgroup { font-weight: 700; }
 </style>
 </head>
 <body>
 
 <div id="welcome-screen" class="welcome">
   <div class="welcome-logo">Access<span>Norway</span></div>
-  <div class="welcome-tagline">Kartleggingsverktøy for bedrifter</div>
+  <div class="welcome-tagline">Kartleggingsverktøy</div>
   <div class="welcome-card">
     <div class="welcome-title">Koble til AI-analyse</div>
     <div class="welcome-desc">For å analysere bilder trenger appen din personlige Anthropic API-nøkkel. Den lagres kun på din enhet.</div>
@@ -198,32 +221,55 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
     <div class="topbar-logo">Access<span>Norway</span></div>
     <div class="api-indicator"><div class="api-dot"></div><span>AI aktiv</span></div>
   </div>
-  <div class="progress-bar">
-    <div class="steps-scroll" id="steps-scroll"></div>
-  </div>
+  <div class="progress-bar"><div class="steps-scroll" id="steps-scroll"></div></div>
   <div class="content">
 
-    <!-- Side 0: Bedrift -->
+    <!-- SIDE 0: Bedrift/sted -->
     <div class="page active" id="page-0">
-      <div class="page-header"><div class="page-title">Registrer bedrift</div><div class="page-desc">Grunnleggende informasjon om bedriften din.</div></div>
+      <div class="page-header"><div class="page-title">Registrer sted</div><div class="page-desc">Grunnleggende informasjon om stedet du kartlegger.</div></div>
       <div class="card">
-        <div class="card-title">🏢 Bedriftsinformasjon</div>
-        <div class="field"><label class="field-label">Bedriftsnavn</label><input type="text" id="biz-name" placeholder="f.eks. Fjordhotellet AS"/></div>
-        <div class="field"><label class="field-label">Type tilbud</label>
-          <select id="biz-type">
+        <div class="card-title">📍 Informasjon</div>
+        <div class="field"><label class="field-label">Navn</label><input type="text" id="biz-name" placeholder="f.eks. Fjordhotellet AS eller Beitostølen tursti"/></div>
+        <div class="field">
+          <label class="field-label">Type</label>
+          <select id="biz-type" onchange="onTypeChange()">
             <option value="">Velg type</option>
-            <option value="hotell">Hotell</option>
-            <option value="hytte">Hytte / leilighet</option>
-            <option value="restaurant">Restaurant / servering</option>
-            <option value="aktivitet">Aktivitetsbedrift</option>
-            <option value="idrett">Idrettsanlegg</option>
-            <option value="guidet">Guidet tur / utstyrsutleie</option>
+            <optgroup label="A — Bygningsbaserte bedrifter">
+              <option value="hotell">Hotell</option>
+              <option value="hytte">Hytte / leilighet</option>
+              <option value="restaurant">Restaurant / servering</option>
+              <option value="aktivitet">Aktivitetsbedrift (innendørs)</option>
+              <option value="idrett">Idrettsanlegg</option>
+              <option value="camping">Camping</option>
+              <option value="annet_a">Annet (bygg)</option>
+            </optgroup>
+            <optgroup label="B — Naturbaserte aktivitetsbedrifter">
+              <option value="guidet">Guidet tur / opplevelse</option>
+              <option value="kajakkpadling">Kajakkutleie / padling</option>
+              <option value="sykling_b">Sykling og sykkelutleie</option>
+              <option value="ridning">Ridning</option>
+              <option value="tilpasset_natur">Tilpassede naturopplevelser</option>
+              <option value="annet_b">Annet (naturbasert bedrift)</option>
+            </optgroup>
+            <optgroup label="C — Fellesgoder og felles rom">
+              <option value="tursti">Tursti / natursti</option>
+              <option value="sykkelsti">Sykkelløype</option>
+              <option value="skiloype">Skiløype</option>
+              <option value="badeplass">Badeplass</option>
+              <option value="utsiktspunkt">Utsiktspunkt / attraksjon</option>
+              <option value="hc_parkering">HC-parkering / toalett i utmark</option>
+              <option value="annet_c">Annet (fellesgode)</option>
+            </optgroup>
           </select>
         </div>
-        <div class="field"><label class="field-label">Adresse</label><input type="text" id="biz-address" placeholder="Gateadresse, postnummer, sted"/></div>
+        <div id="custom-name-field" style="display:none" class="field">
+          <label class="field-label">Beskriv type</label>
+          <input type="text" id="biz-custom-type" placeholder="Skriv hva slags sted dette er..."/>
+        </div>
+        <div class="field"><label class="field-label">Adresse / sted</label><input type="text" id="biz-address" placeholder="Adresse, postnummer, sted eller GPS-koordinat"/></div>
         <div class="field"><label class="field-label">Destinasjonsselskap</label><input type="text" id="biz-dest" placeholder="f.eks. Visit Valdres"/></div>
         <div class="field"><label class="field-label">Kommune</label><input type="text" id="biz-kommune" placeholder="f.eks. Øystre Slidre"/></div>
-        <div class="field"><label class="field-label">Kontaktperson</label><input type="text" id="biz-contact" placeholder="Navn — e-post"/></div>
+        <div class="field"><label class="field-label">Kontaktperson / forvalter</label><input type="text" id="biz-contact" placeholder="Navn — e-post"/></div>
       </div>
       <div class="card">
         <div class="card-title">🏷️ Tagger</div>
@@ -235,6 +281,7 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
             <button class="tag-btn" onclick="toggleTag(this)">Vandring</button>
             <button class="tag-btn" onclick="toggleTag(this)">Svømming</button>
             <button class="tag-btn" onclick="toggleTag(this)">Ridning</button>
+            <button class="tag-btn" onclick="toggleTag(this)">Padling</button>
           </div>
         </div>
         <div class="field"><label class="field-label">Tilrettelegging</label>
@@ -244,25 +291,44 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
             <button class="tag-btn" onclick="toggleTag(this)">Teleslynge</button>
             <button class="tag-btn" onclick="toggleTag(this)">Assistansehund</button>
             <button class="tag-btn" onclick="toggleTag(this)">Tilpasset utstyr</button>
+            <button class="tag-btn" onclick="toggleTag(this)">Rullestolvennlig</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Side 1: Fasiliteter -->
+    <!-- SIDE 1: Fasiliteter/soner -->
     <div class="page" id="page-1">
-      <div class="page-header"><div class="page-title" id="zones-title">Fasiliteter</div><div class="page-desc" id="zones-desc">Last opp bilder og registrer mål.</div></div>
+      <div class="page-header">
+        <div id="group-badge-container"></div>
+        <div class="page-title" id="zones-title">Fasiliteter</div>
+        <div class="page-desc" id="zones-desc">Last opp bilder og registrer mål.</div>
+      </div>
+      <!-- GPX for B og C -->
+      <div id="gpx-section" style="display:none">
+        <div class="card">
+          <div class="card-title">🗺️ GPX-fil (valgfritt)</div>
+          <div class="notice-blue">Last opp en GPX-fil fra Garmin, Strava eller Komoot for automatisk analyse av stigning, bratthet og høydeprofil.</div>
+          <div class="gpx-zone" id="gpx-zone">
+            <input type="file" accept=".gpx" onchange="handleGpx(event)"/>
+            <div class="gpx-icon">📍</div>
+            <div class="gpx-title">Last opp GPX-fil</div>
+            <div class="gpx-hint">.gpx fra Garmin, Strava, Komoot, UT.no osv.</div>
+          </div>
+          <div id="gpx-result" style="display:none"></div>
+        </div>
+      </div>
       <div id="zones-container"></div>
-      <button class="btn-add-zone" onclick="openAddZoneModal()">+ Legg til fasilitet</button>
+      <button class="btn-add-zone" onclick="openAddZoneModal()">+ Legg til sone / område</button>
     </div>
 
-    <!-- Side 2: Spørsmål -->
+    <!-- SIDE 2: Spørsmål -->
     <div class="page" id="page-2">
       <div class="page-header"><div class="page-title">Tilleggsspørsmål</div><div class="page-desc">Spørsmål om ting AI-en ikke kan se på bilder.</div></div>
       <div class="card" id="questions-container"></div>
     </div>
 
-    <!-- Side 3: Rapport -->
+    <!-- SIDE 3: Rapport -->
     <div class="page" id="page-3">
       <div class="page-header"><div class="page-title">Tilgjengelighetsprofil</div><div class="page-desc">Rapport for gjester og last ned rådata.</div></div>
       <div id="rapport-container"></div>
@@ -277,9 +343,9 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalIfBg(event)">
   <div class="modal-sheet">
-    <div class="modal-title">Legg til fasilitet</div>
+    <div class="modal-title">Legg til sone / område</div>
     <div class="modal-options" id="modal-options"></div>
-    <div class="modal-custom"><input type="text" id="custom-zone-name" placeholder="Annet navn..."/><button onclick="addCustomZone()">Legg til</button></div>
+    <div class="modal-custom"><input type="text" id="custom-zone-name" placeholder="Eget navn..."/><button onclick="addCustomZone()">Legg til</button></div>
     <button class="modal-cancel" onclick="closeAddZoneModal()">Avbryt</button>
   </div>
 </div>
@@ -288,8 +354,16 @@ select { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns
 let API_KEY = '';
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
 
+// ── TYPE MAPPING ──
+function getGroup(type) {
+  if(['hotell','hytte','restaurant','aktivitet','idrett','camping','annet_a'].includes(type)) return 'A';
+  if(['guidet','kajakkpadling','sykling_b','ridning','tilpasset_natur','annet_b'].includes(type)) return 'B';
+  return 'C';
+}
+
 const TYPE_CONFIG = {
-  hotell:{label:'Hotell',pageTitle:'Hotellfasiliteter',pageDesc:'Last opp bilder av hotellets fasiliteter.',
+  // ── GRUPPE A ──
+  hotell:{label:'Hotell',group:'A',pageTitle:'Hotellfasiliteter',pageDesc:'Last opp bilder av hotellets fasiliteter.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
@@ -301,9 +375,9 @@ const TYPE_CONFIG = {
       {id:'bar',label:'Bar',icon:'🍷',extraFields:[],optional:true},
       {id:'konferanse',label:'Konferanserom',icon:'📋',extraFields:[],optional:true},
     ],
-    extraOptions:['Treningssenter','Basseng','Spa','Butikk','Frokostrom'],
+    extraOptions:['Treningssenter','Basseng','Spa','Butikk','Frokostrom','Fellesareal'],
     questions:['q_allergi','q_parfyme','q_meny','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_evakuering']},
-  hytte:{label:'Hytte / leilighet',pageTitle:'Hytte / leilighetsfasiliteter',pageDesc:'Last opp bilder. Legg til flere rom ved behov.',
+  hytte:{label:'Hytte / leilighet',group:'A',pageTitle:'Hytte / leilighetsfasiliteter',pageDesc:'Last opp bilder. Legg til flere rom ved behov.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
@@ -314,7 +388,7 @@ const TYPE_CONFIG = {
     ],
     extraOptions:['Bad 2','Soverom 2','Soverom 3','TVstue','Vaskerom','Terrasse'],
     questions:['q_allergi','q_parfyme','q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
-  restaurant:{label:'Restaurant / servering',pageTitle:'Restaurantfasiliteter',pageDesc:'Last opp bilder av restaurantens tilgjengelighet.',
+  restaurant:{label:'Restaurant / servering',group:'A',pageTitle:'Restaurantfasiliteter',pageDesc:'Last opp bilder av restaurantens tilgjengelighet.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
@@ -326,7 +400,7 @@ const TYPE_CONFIG = {
     ],
     extraOptions:['Uteplass','Bar','Privat rom','Terrasse'],
     questions:['q_meny','q_allergi','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager']},
-  aktivitet:{label:'Aktivitetsbedrift',pageTitle:'Aktivitetsfasiliteter',pageDesc:'Last opp bilder fra aktivitetsbedriften.',
+  aktivitet:{label:'Aktivitetsbedrift',group:'A',pageTitle:'Aktivitetsfasiliteter',pageDesc:'Last opp bilder fra aktivitetsbedriften.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
@@ -338,7 +412,7 @@ const TYPE_CONFIG = {
     ],
     extraOptions:['Garderobe','Uteplass','Annet aktivitetsrom'],
     questions:['q_allergi','q_tilpassetutstyr','q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
-  idrett:{label:'Idrettsanlegg',pageTitle:'Idrettsanlegget',pageDesc:'Last opp bilder av idrettsanlegget.',
+  idrett:{label:'Idrettsanlegg',group:'A',pageTitle:'Idrettsanlegget',pageDesc:'Last opp bilder av idrettsanlegget.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false},
@@ -347,28 +421,167 @@ const TYPE_CONFIG = {
     ],
     extraOptions:['Kiosk','Tribune','Svømmebasseng','Treningssenter'],
     questions:['q_teleslynge','q_ledsager','q_opplaering','q_evakuering','q_skriftlig']},
-  guidet:{label:'Guidet tur / utstyrsutleie',pageTitle:'Tur og utstyr',pageDesc:'Last opp bilder av møtepunkt, terreng og utstyr.',
+  camping:{label:'Camping',group:'A',pageTitle:'Campingfasiliteter',pageDesc:'Last opp bilder av campingplassens fasiliteter.',
     defaultZones:[
-      {id:'parkering',label:'Parkering / møtepunkt',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering / innkjøring',icon:'🅿️',extraFields:[],optional:false},
+      {id:'inngang',label:'Inngang / resepsjon',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'sanitaer',label:'Sanitæranlegg',icon:'🚿',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'fellesareal',label:'Fellesareal',icon:'🏕️',extraFields:[],optional:false},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false},
+    ],
+    extraOptions:['Kiosk','Lekeplass','Badeplass','Tilrettelagt campingplass'],
+    questions:['q_allergi','q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
+  annet_a:{label:'Annet (bygg)',group:'A',pageTitle:'Fasiliteter',pageDesc:'Last opp bilder av stedet.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:true},
+      {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false},
+    ],
+    extraOptions:['Rom','Sal','Kiosk','Bar','Fellesareal'],
+    questions:['q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
+
+  // ── GRUPPE B ──
+  guidet:{label:'Guidet tur / opplevelse',group:'B',pageTitle:'Guidet tur',pageDesc:'Last opp bilder og evt. GPX-fil fra turen.',
+    defaultZones:[
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'terreng',label:'Terreng / underlag',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
       {id:'utstyr',label:'Utstyr',icon:'🎒',extraFields:[],optional:false},
       {id:'transport',label:'Transport',icon:'🚌',extraFields:[],optional:true},
+      {id:'wc',label:'WC underveis',icon:'🚻',extraFields:[],optional:true},
     ],
-    extraOptions:['Hvilepunkt','Serveringssted','Oversiktsbilde','Annet terreng'],
-    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']}
+    extraOptions:['Hvilepunkt','Serveringssted','Utsiktspunkt','Bratt parti','Krevende terreng'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager','q_gpx_rute']},
+  kajakkpadling:{label:'Kajakkutleie / padling',group:'B',pageTitle:'Padleopplevelse',pageDesc:'Last opp bilder og GPX-rute for padleturen.',
+    defaultZones:[
+      {id:'utleiested',label:'Utleiestedet',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'innsjosett',label:'Inn/ut av sjøen',icon:'🌊',extraFields:[],optional:false},
+      {id:'utstyr',label:'Utstyr og tilpasning',icon:'🚣',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+    ],
+    extraOptions:['Rolig vann','Krevende parti','Rasteplass','WC ved vannet'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  sykling_b:{label:'Sykling og sykkelutleie',group:'B',pageTitle:'Sykkelopplevelse',pageDesc:'Last opp bilder og GPX-rute.',
+    defaultZones:[
+      {id:'utleiested',label:'Utleiestedet',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'startpunkt',label:'Startpunkt',icon:'📍',extraFields:[],optional:false},
+      {id:'terreng',label:'Terreng / underlag',icon:'🚵',extraFields:['stigningsgrad'],optional:false},
+      {id:'utstyr',label:'Sykler og utstyr',icon:'🚲',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+    ],
+    extraOptions:['Hvilepunkt','Krevende bakke','Serveringssted','WC'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  ridning:{label:'Ridning',group:'B',pageTitle:'Ridestall og tur',pageDesc:'Last opp bilder av stall, ridesenter og rute.',
+    defaultZones:[
+      {id:'stall',label:'Stall / ridesenter',icon:'🐴',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'terreng',label:'Rideterreng',icon:'🌿',extraFields:[],optional:false},
+      {id:'utstyr',label:'Utstyr og tilpasning',icon:'🎒',extraFields:[],optional:false},
+    ],
+    extraOptions:['WC','Hvileplass','Krevende terreng'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  tilpasset_natur:{label:'Tilpassede naturopplevelser',group:'B',pageTitle:'Tilpasset naturopplevelse',pageDesc:'Last opp bilder og beskriv opplevelsen.',
+    defaultZones:[
+      {id:'motepunkt',label:'Møtepunkt',icon:'📍',extraFields:[],optional:false},
+      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
+      {id:'utstyr',label:'Tilpasset utstyr',icon:'🎒',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+    ],
+    extraOptions:['Hvilepunkt','WC','Transport','Oversiktsbilde'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  annet_b:{label:'Annet (naturbasert bedrift)',group:'B',pageTitle:'Naturbasert opplevelse',pageDesc:'Last opp bilder og evt. GPX.',
+    defaultZones:[
+      {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
+      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:true},
+    ],
+    extraOptions:['Utstyr','WC','Serveringssted','Hvilepunkt','Oversiktsbilde'],
+    questions:['q_tilpassetutstyr','q_skriftlig','q_opplaering','q_ledsager']},
+
+  // ── GRUPPE C ──
+  tursti:{label:'Tursti / natursti',group:'C',pageTitle:'Tursti',pageDesc:'Last opp bilder og GPX-fil for stien.',
+    defaultZones:[
+      {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering ved start',icon:'🅿️',extraFields:[],optional:false},
+      {id:'underlag',label:'Underlag og sti',icon:'👟',extraFields:['sti_bredde_cm','stigningsgrad'],optional:false},
+      {id:'wc',label:'Toalett ved start / underveis',icon:'🚻',extraFields:[],optional:true},
+      {id:'endepunkt',label:'Endepunkt / topp',icon:'🔴',extraFields:[],optional:true},
+    ],
+    extraOptions:['Hvileplass','Bratt parti','Krevende underlag','Utsiktspunkt','HC-tilrettelagt del'],
+    questions:['q_sti_rullestol','q_sti_barnevogn','q_sti_merking','q_sti_belysning','q_hc_wc','q_ledsager']},
+  sykkelsti:{label:'Sykkelløype',group:'C',pageTitle:'Sykkelløype',pageDesc:'Last opp bilder og GPX-fil for løypen.',
+    defaultZones:[
+      {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'underlag',label:'Underlag og løype',icon:'🚲',extraFields:['stigningsgrad'],optional:false},
+      {id:'wc',label:'Toalett',icon:'🚻',extraFields:[],optional:true},
+    ],
+    extraOptions:['Hvileplass','Krevende parti','Serveringssted','Utsiktspunkt'],
+    questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_ledsager']},
+  skiloype:{label:'Skiløype',group:'C',pageTitle:'Skiløype',pageDesc:'Last opp bilder og GPX-fil for løypen.',
+    defaultZones:[
+      {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'loype',label:'Løypetrase',icon:'⛷️',extraFields:['stigningsgrad'],optional:false},
+      {id:'wc',label:'Toalett / hytte',icon:'🚻',extraFields:[],optional:true},
+    ],
+    extraOptions:['Hvileplass','Krevende bakke','Serveringssted','Løypemaskin-tilgang'],
+    questions:['q_sti_merking','q_hc_wc','q_ledsager','q_opplaering']},
+  badeplass:{label:'Badeplass',group:'C',pageTitle:'Badeplass',pageDesc:'Last opp bilder av badeplassen og fasiliteter.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'adkomst',label:'Adkomst til vannet',icon:'🌊',extraFields:[],optional:false},
+      {id:'wc',label:'Toalett / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false},
+    ],
+    extraOptions:['Rampe til vann','Badestol / amfistol','Hvileplass','Kiosk'],
+    questions:['q_hc_wc','q_badeplass_rampe','q_ledsager','q_opplaering']},
+  utsiktspunkt:{label:'Utsiktspunkt / attraksjon',group:'C',pageTitle:'Utsiktspunkt',pageDesc:'Last opp bilder av stedet og adkomsten.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:['stigningsgrad'],optional:false},
+      {id:'selve_stedet',label:'Selve utsiktspunktet',icon:'🏔️',extraFields:[],optional:false},
+      {id:'wc',label:'Toalett i nærheten',icon:'🚻',extraFields:[],optional:true},
+    ],
+    extraOptions:['Informasjonsskilt','Sitteplasser','Krevende parti','Oversiktsbilde'],
+    questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_ledsager']},
+  hc_parkering:{label:'HC-parkering / toalett i utmark',group:'C',pageTitle:'HC-parkering / toalett',pageDesc:'Last opp bilder av parkering og toalett.',
+    defaultZones:[
+      {id:'parkering',label:'HC-parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:true},
+    ],
+    extraOptions:['Rampe','Skilting','Belysning'],
+    questions:['q_hc_wc','q_sti_merking','q_ledsager']},
+  annet_c:{label:'Annet (fellesgode)',group:'C',pageTitle:'Fellesgode / felles rom',pageDesc:'Last opp bilder og evt. GPX.',
+    defaultZones:[
+      {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:true},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false},
+    ],
+    extraOptions:['WC','Hvileplass','Informasjonsskilt','Krevende parti','Serveringssted'],
+    questions:['q_sti_rullestol','q_hc_wc','q_sti_merking','q_ledsager']},
 };
 
 const ALL_QUESTIONS = {
-  q_allergi:{text:'Er det allergivennlige rom / områder tilgjengelig?',ctx:'Uten dun, parfyme, kjæledyr'},
+  q_allergi:{text:'Er det allergivennlige alternativer tilgjengelig?',ctx:'Uten dun, parfyme, kjæledyr'},
   q_parfyme:{text:'Kan rom bestilles med parfymefrie produkter?',ctx:''},
-  q_meny:{text:'Er menyen tilgjengelig digitalt, storskrift eller med allergenmerkinger?',ctx:'Gjelder restaurant og frokost'},
+  q_meny:{text:'Er menyen tilgjengelig digitalt, storskrift eller med allergenmerkinger?',ctx:''},
   q_skriftlig:{text:'Kan gjester kommunisere skriftlig (SMS/e-post)?',ctx:'Viktig for hørselshemmede'},
-  q_opplaering:{text:'Har ansatte fått opplæring i å møte gjester med ulike behov?',ctx:''},
-  q_teleslynge:{text:'Er det teleslyngeanlegg i resepsjon eller fellesarealer?',ctx:'Viktig for hørselapparatbrukere'},
-  q_ledsager:{text:'Godtar dere ledsagerbevis?',ctx:'Ledsager for person med funksjonsnedsettelse'},
-  q_evakuering:{text:'Finnes det evakueringsplan som ivaretar gjester med nedsatt funksjonsevne?',ctx:''},
-  q_tilpassetutstyr:{text:'Har dere tilpasset utstyr for personer med nedsatt funksjonsevne?',ctx:'Rullestol, spesialutstyr, tilpasninger'}
+  q_opplaering:{text:'Har ansatte / guider fått opplæring i å møte gjester med ulike behov?',ctx:''},
+  q_teleslynge:{text:'Er det teleslyngeanlegg i resepsjon eller fellesarealer?',ctx:''},
+  q_ledsager:{text:'Godtas ledsagerbevis?',ctx:'Ledsager for person med funksjonsnedsettelse'},
+  q_evakuering:{text:'Finnes det evakueringsplan som ivaretar alle?',ctx:''},
+  q_tilpassetutstyr:{text:'Har dere tilpasset utstyr for personer med nedsatt funksjonsevne?',ctx:'Sit-ski, handbike, amfistol, tilpassede kajakker osv.'},
+  q_gpx_rute:{text:'Er ruten digitalt tilgjengelig (GPX/kart)?',ctx:''},
+  q_sti_rullestol:{text:'Er stien / løypen fremkommelig med rullestol eller rullator?',ctx:''},
+  q_sti_barnevogn:{text:'Er stien fremkommelig med barnevogn?',ctx:''},
+  q_sti_merking:{text:'Er stien / løypen tydelig merket?',ctx:'Skilting, stikker, kart'},
+  q_sti_belysning:{text:'Er det belysning langs stien?',ctx:''},
+  q_hc_wc:{text:'Er det tilgjengelig HC-toalett i nærheten?',ctx:''},
+  q_badeplass_rampe:{text:'Er det rampe eller tilrettelagt adkomst til vannet?',ctx:'Amfistol, rampe, fast underlag'},
 };
 
 const EXTRA_FIELDS = {
@@ -381,36 +594,38 @@ const EXTRA_FIELDS = {
   disk_cm:{label:'Skrankehøyde',unit:'cm',ph:'f.eks. 80'},
   bord_cm:{label:'Bordhøyde',unit:'cm',ph:'f.eks. 72'},
   stigningsgrad:{label:'Stigningsgrad',unit:'%',ph:'f.eks. 8'},
+  sti_bredde_cm:{label:'Sti-bredde',unit:'cm',ph:'f.eks. 120'},
 };
 
 const ZONE_PROMPTS = {
-  parkering:`Du er ekspert på universell utforming. Analyser parkeringsplassen. Se etter HC-parkering, avstand til inngang, underlag, nivåforskjeller. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [tilgjengelighetsvurdering]`,
-  inngang:`Du er ekspert på universell utforming. Analyser inngangspartiet. Se etter terskel, dørtype, dørbredde, rampe, underlag, belysning. Svar med: **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]`,
-  resepsjon:`Du er ekspert på universell utforming. Analyser resepsjonen. Se etter skrankehøyde, lav del for rullestol, plass foran, teleslynge-skilt. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  spisesal:`Du er ekspert på universell utforming. Analyser spisesalen (ikke et soverom). Se etter avstand mellom bord (min 90 cm), bordtype og høyde, tilgjengelig vei. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  hotellrom:`Du er ekspert på universell utforming. Analyser hotellrommet. Se etter snuplass (min 150 cm), sengehøyde (ca 45-50 cm), plass ved seng, dørbredde. Svar med: **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]`,
-  bad:`Du er ekspert på universell utforming. Analyser badet. Se etter terskel, dørbredde (min 85 cm), snuplass (min 150 cm), støttehåndtak, dusjtype. Svar med: **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]`,
-  heis:`Du er ekspert på universell utforming. Analyser heisen. Se etter størrelse, dørbredde, knappepanel høyde (maks 120 cm), taleanrop, blindeskrift. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  bar:`Du er ekspert på universell utforming. Analyser baren (ikke et soverom). Se etter barhøyde, lav del, plass foran, tilkomst. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  konferanse:`Du er ekspert på universell utforming. Analyser konferanserommet. Se etter plass mellom stoler, teleslynge-skilt, tilkomst, dørbredde. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  stue:`Du er ekspert på universell utforming. Analyser stuen. Se etter bevegelsesplass, terskler, møblering. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  kjokken:`Du er ekspert på universell utforming. Analyser kjøkkenet. Se etter benkehøyde, plass under benk for rullestol, knotter vs hendler. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  soverom:`Du er ekspert på universell utforming. Analyser soverommet. Se etter sengehøyde, plass på begge sider, snuplass. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  mottakelse:`Du er ekspert på universell utforming. Analyser mottakelsen. Se etter plass, disk høyde, terskler, belysning. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  wc:`Du er ekspert på universell utforming. Analyser WC/toalettet. Se etter dørbredde (min 85 cm), snuplass (min 150 cm), støttehåndtak. Svar med: **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]`,
-  spisebord:`Du er ekspert på universell utforming. Analyser spisebordet (restaurant). Se etter bordtyper, plass rundt (min 90 cm), rullestol under bord. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  buffet:`Du er ekspert på universell utforming. Analyser buffeten. Se etter høyde på serveringsbord (maks 85 cm fra rullestol), plass. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  oversikt:`Du er ekspert på universell utforming. Analyser oversiktsbildet. Gi generell vurdering: nivåforskjeller, underlag, hindringer. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  aktivitetsomrade:`Du er ekspert på universell utforming. Analyser aktivitetsområdet. Se etter underlag, terskler, plass, rullestoltilgjengelighet. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  utstyr:`Du er ekspert på universell utforming. Analyser utstyret. Se etter tilpasbarhet, spesialutstyr, tilgjengelighet. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  terreng:`Du er ekspert på universell utforming og friluftsliv. Analyser terrenget. Se etter underlagstype, bratthet, hindringer, bredde på sti, fremkommelighet. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [tilgjengelighet for ulike grupper]`,
-  motepunkt:`Du er ekspert på universell utforming. Analyser møtepunktet. Se etter parkering nærhet, underlag, sittemuligheter, informasjonsskilting. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  transport:`Du er ekspert på universell utforming. Analyser transportmiddelet. Se etter stigehøyde, rampe/lift, plass for rullestol. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
-  servering:`Du er ekspert på universell utforming. Analyser serveringsstedet. Se etter tilgjengelighet, disk høyde, plass, terskler. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  parkering:`Du er ekspert på universell utforming. Analyser parkeringsplassen. Se etter HC-parkering (antall, merking, bredde ca 4,5m), avstand til inngang, underlag, nivåforskjeller. **Det jeg ser:** [observasjoner] **Vurdering:** [tilgjengelighetsvurdering]`,
+  inngang:`Du er ekspert på universell utforming. Analyser inngangspartiet. Se etter terskel, dørtype, dørbredde, rampe, underlag, belysning. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]`,
+  resepsjon:`Du er ekspert på universell utforming. Analyser resepsjonen. Se etter skrankehøyde (lav del for rullestol?), plass foran, teleslynge-skilt. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  spisesal:`Du er ekspert på universell utforming. Analyser spisesalen (ikke et soverom). Se etter avstand mellom bord (min 90 cm), bordtype og høyde. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  hotellrom:`Du er ekspert på universell utforming. Analyser hotellrommet. Se etter snuplass (min 150 cm), sengehøyde (ca 45-50 cm), plass ved seng, dørbredde. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]`,
+  bad:`Du er ekspert på universell utforming. Analyser badet. Se etter terskel, dørbredde (min 85 cm), snuplass (min 150 cm), støttehåndtak, dusjtype. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]`,
+  heis:`Du er ekspert på universell utforming. Analyser heisen. Se etter størrelse, dørbredde, knappepanel høyde (maks 120 cm), taleanrop, blindeskrift. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  wc:`Du er ekspert på universell utforming. Analyser WC/toalettet. Se etter dørbredde (min 85 cm), snuplass (min 150 cm), støttehåndtak. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]`,
+  terreng:`Du er ekspert på universell utforming og friluftsliv. Analyser terrenget/underlaget. Se etter underlagstype (asfalt/grus/sti/gress/fjell), bratthet, hindringer, bredde, fremkommelighet for rullestol eller rullator. **Det jeg ser:** [observasjoner] **Vurdering:** [tilgjengelighet for ulike grupper]`,
+  underlag:`Du er ekspert på universell utforming og friluftsliv. Analyser stien/underlaget. Se etter type underlag, bredde, jevnhet, hindringer som røtter eller steiner, bratthet. **Det jeg ser:** [observasjoner] **Vurdering:** [fremkommelighet for rullestol, rullator, barnevogn]`,
+  motepunkt:`Du er ekspert på universell utforming. Analyser møtepunktet/startstedet. Se etter underlag, sittemuligheter, toalett nærhet, informasjonsskilting, parkering nærhet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  startpunkt:`Du er ekspert på universell utforming. Analyser startpunktet. Se etter parkering nærhet, underlag, informasjonsskilt, fasiliteter. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  adkomst:`Du er ekspert på universell utforming. Analyser adkomsten. Se etter underlag, bratthet, hindringer, bredde, fremkommelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  utstyr:`Du er ekspert på inkluderende reiseliv. Analyser utstyret. Se etter tilpasbarhet, spesialutstyr for ulike behov, tilgjengelighet og lagring. **Det jeg ser:** [observasjoner] **Vurdering:** [om utstyret ser tilgjengelig/tilpassbart ut]`,
+  oversikt:`Du er ekspert på universell utforming. Analyser oversiktsbildet. Gi generell vurdering: nivåforskjeller, underlag, hindringer, planløsning. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  transport:`Du er ekspert på universell utforming. Analyser transportmiddelet. Se etter stigehøyde, rampe/lift, plass for rullestol, sikkerhetsbelte. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  stue:`Du er ekspert på universell utforming. Analyser stuen. Se etter bevegelsesplass, terskler, møblering. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  kjokken:`Du er ekspert på universell utforming. Analyser kjøkkenet. Se etter benkehøyde, plass under benk for rullestol, knotter vs hendler. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  soverom:`Du er ekspert på universell utforming. Analyser soverommet. Se etter sengehøyde, plass på begge sider, snuplass. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  aktivitetsomrade:`Du er ekspert på universell utforming. Analyser aktivitetsområdet. Se etter underlag, terskler, plass, rullestoltilgjengelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  selve_stedet:`Du er ekspert på universell utforming. Analyser selve utsiktspunktet/attraksjonen. Se etter rekkverk, underlag, plass, tilgjengelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  sanitaer:`Du er ekspert på universell utforming. Analyser sanitæranlegget. Se etter dørbredde, snuplass, støttehåndtak, terskel. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  innsjosett:`Du er ekspert på universell utforming. Analyser inn/ut-stedet ved vannet. Se etter underlag, brygge, rampe, sikkerhet, tilgjengelighet for rullestoler. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
+  utleiestedet:`Du er ekspert på universell utforming. Analyser utleiestedet. Se etter adkomst, terskel, dørbredde, plass inne, disk-høyde. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`,
 };
-const DEFAULT_PROMPT = `Du er ekspert på universell utforming. Analyser bildet med fokus på tilgjengelighet. Se etter terskler, dørbredder, snuplass, underlag. Svar med: **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`;
+const DEFAULT_PROMPT = `Du er ekspert på universell utforming for norsk reiseliv. Analyser bildet med fokus på tilgjengelighet for personer med nedsatt funksjonsevne. Se etter terskler, dørbredder, snuplass, underlag og hindringer. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]`;
 
-const state = {step:0,tags:[],zones:[],answers:{},_builtForType:'',chatHistory:[]};
+const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null};
 
 function activateApp(){
   const key=document.getElementById('welcome-key').value.trim();
@@ -422,7 +637,7 @@ function activateApp(){
 }
 
 function buildSteps(){
-  const labels=['Bedrift','Fasiliteter','Spørsmål','Rapport'];
+  const labels=['Sted','Fasiliteter','Spørsmål','Rapport'];
   document.getElementById('steps-scroll').innerHTML=labels.map((l,i)=>`<div class="step-pill ${i===0?'active':''}" id="sp${i}"><div class="step-num">${i+1}</div>${l}</div>`).join('');
 }
 
@@ -443,17 +658,154 @@ function goTo(step){
 }
 function goNext(){if(state.step===3){downloadProfile();return;}goTo(state.step+1);}
 function goBack(){if(state.step>0)goTo(state.step-1);}
+
+function onTypeChange(){
+  const type=document.getElementById('biz-type').value;
+  const isAnnet=['annet_a','annet_b','annet_c'].includes(type);
+  document.getElementById('custom-name-field').style.display=isAnnet?'block':'none';
+}
+
 function toggleTag(btn){btn.classList.toggle('active');const tag=btn.textContent.trim();if(btn.classList.contains('active')){if(!state.tags.includes(tag))state.tags.push(tag);}else{state.tags=state.tags.filter(t=>t!==tag);}}
+
+// ── GPX ──
+function handleGpx(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const gpxText=ev.target.result;
+    const result=parseGpx(gpxText);
+    state.gpxData=result;
+    renderGpxResult(result);
+  };
+  reader.readAsText(file);
+}
+
+function parseGpx(gpxText){
+  const parser=new DOMParser();
+  const doc=parser.parseFromString(gpxText,'text/xml');
+  const points=[...doc.querySelectorAll('trkpt,rtept')];
+  if(points.length<2)return null;
+
+  const data=points.map(p=>({
+    lat:parseFloat(p.getAttribute('lat')),
+    lon:parseFloat(p.getAttribute('lon')),
+    ele:parseFloat(p.querySelector('ele')?.textContent||0)
+  }));
+
+  // Beregn distanse
+  let totalDist=0;
+  const dists=[0];
+  for(let i=1;i<data.length;i++){
+    const d=haversine(data[i-1].lat,data[i-1].lon,data[i].lat,data[i].lon);
+    totalDist+=d;
+    dists.push(totalDist);
+  }
+
+  // Høyde-statistikk
+  const eles=data.map(p=>p.ele).filter(e=>e>0);
+  const minEle=Math.min(...eles);
+  const maxEle=Math.max(...eles);
+  let totalUp=0,totalDown=0;
+  for(let i=1;i<eles.length;i++){
+    const diff=eles[i]-eles[i-1];
+    if(diff>0)totalUp+=diff;
+    else totalDown+=Math.abs(diff);
+  }
+
+  // Maksimal stigning per 10m
+  let maxSlope=0;
+  for(let i=1;i<data.length;i++){
+    const dist=dists[i]-dists[i-1];
+    if(dist>0){
+      const rise=Math.abs(data[i].ele-data[i-1].ele);
+      const slope=(rise/dist)*100;
+      if(slope>maxSlope&&slope<50)maxSlope=slope;
+    }
+  }
+
+  // Gjennomsnittlig stigning (opp-partier)
+  const avgSlope=totalDist>0?(totalUp/(totalDist/2))*100:0;
+
+  return{
+    totalDist:Math.round(totalDist/10)/100, // km
+    totalUp:Math.round(totalUp),
+    totalDown:Math.round(totalDown),
+    minEle:Math.round(minEle),
+    maxEle:Math.round(maxEle),
+    maxSlope:Math.round(maxSlope),
+    avgSlope:Math.round(avgSlope*10)/10,
+    points:data,
+    dists:dists.map(d=>Math.round(d/10)/100),
+    eles
+  };
+}
+
+function haversine(lat1,lon1,lat2,lon2){
+  const R=6371000;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function slopeClass(slope){
+  if(slope<=5)return'ok';
+  if(slope<=8)return'caution';
+  return'warning';
+}
+
+function renderGpxResult(r){
+  const el=document.getElementById('gpx-result');
+  if(!r){el.style.display='none';return;}
+  el.style.display='block';
+
+  // Lag SVG høydeprofil
+  const w=320,h=60;
+  const minE=r.minEle,maxE=r.maxEle,rangeE=maxE-minE||1;
+  const maxD=r.totalDist;
+  const pts=r.points.filter((_,i)=>i%Math.max(1,Math.floor(r.points.length/80))===0);
+  const dpts=r.dists.filter((_,i)=>i%Math.max(1,Math.floor(r.dists.length/80))===0);
+  const svgPts=pts.map((p,i)=>`${(dpts[i]/maxD)*w},${h-((p.ele-minE)/rangeE)*(h-8)+4}`).join(' ');
+
+  el.innerHTML=`
+    <div class="gpx-result-title">📊 GPX-analyse</div>
+    <div class="gpx-stats">
+      <div class="gpx-stat"><div class="gpx-stat-val">${r.totalDist} km</div><div class="gpx-stat-label">Total distanse</div></div>
+      <div class="gpx-stat"><div class="gpx-stat-val">↑${r.totalUp}m ↓${r.totalDown}m</div><div class="gpx-stat-label">Høydeforskjell</div></div>
+      <div class="gpx-stat ${slopeClass(r.maxSlope)}"><div class="gpx-stat-val">${r.maxSlope}%</div><div class="gpx-stat-label">Maks stigning</div></div>
+      <div class="gpx-stat ${slopeClass(r.avgSlope)}"><div class="gpx-stat-val">${r.avgSlope}%</div><div class="gpx-stat-label">Snitt stigning</div></div>
+    </div>
+    <div style="margin-top:8px;font-size:12px;color:var(--text3)">
+      ${r.maxSlope<=5?'✅ Egnet for rullestol og rullator':r.maxSlope<=8?'🟡 Krevende for rullestol — kan passe med elektrisk':r.maxSlope<=12?'⚠️ For bratt for de fleste rullestoler':'🔴 Ikke egnet for rullestol'}
+    </div>
+    <svg class="gpx-profile" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="${w}" height="${h}" fill="#f1efe8" rx="4"/>
+      <polyline points="${svgPts}" fill="none" stroke="#1D9E75" stroke-width="2"/>
+      <text x="4" y="12" font-size="9" fill="#999">↑${r.maxEle}m</text>
+      <text x="4" y="${h-3}" font-size="9" fill="#999">↓${r.minEle}m</text>
+    </svg>`;
+}
 
 // ── SONER ──
 function buildZones(){
   const type=document.getElementById('biz-type').value;
   const config=TYPE_CONFIG[type];
-  if(!config){document.getElementById('zones-container').innerHTML='<div class="notice">⚠️ Velg type bedrift på forrige side først.</div>';return;}
+  if(!config){document.getElementById('zones-container').innerHTML='<div class="notice">⚠️ Velg type på forrige side først.</div>';return;}
+
   document.getElementById('zones-title').textContent=config.pageTitle;
   document.getElementById('zones-desc').textContent=config.pageDesc;
+
+  // Group badge
+  const grp=config.group;
+  const grpLabel={A:'A — Bygningsbasert bedrift',B:'B — Naturbasert aktivitetsbedrift',C:'C — Fellesgode / felles rom'}[grp];
+  document.getElementById('group-badge-container').innerHTML=`<div class="group-badge ${grp}">${grpLabel}</div>`;
+
+  // Vis GPX for B og C
+  document.getElementById('gpx-section').style.display=(grp==='B'||grp==='C')?'block':'none';
+
   if(state.zones.length===0||state._builtForType!==type){
-    state.zones=config.defaultZones.map(z=>({...z,images:[],aiAnalyses:[],measures:{}}));
+    state.zones=config.defaultZones.map(z=>({...z,images:[],aiAnalysis:null,measures:{}}));
     state._builtForType=type;
   }
   renderZones();
@@ -466,15 +818,12 @@ function renderZones(){
 function renderZoneCard(zone,idx){
   const previewHtml=zone.images.map((img,i)=>{
     const analyzed=img.analysis!=null;
-    return`<div class="preview-item">
-      <img src="${img.dataUrl}" alt="">
-      <button class="preview-remove" onclick="removeImg(${idx},${i})">×</button>
-      ${analyzed?`<div class="preview-analyzed">✓ Analysert</div>`:`<button class="preview-analyze" onclick="analyzeSpecificImage(${idx},${i})">🔍 Analyser</button>`}
-    </div>`;
+    return`<div class="preview-item"><img src="${img.dataUrl}" alt=""><button class="preview-remove" onclick="removeImg(${idx},${i})">×</button>${analyzed?`<div class="preview-analyzed">✓ Analysert</div>`:`<button class="preview-analyze" onclick="analyzeSpecificImage(${idx},${i})">🔍 Analyser</button>`}</div>`;
   }).join('');
   const allAnalyses=zone.images.filter(img=>img.analysis).map(img=>img.analysis);
   const combinedAnalysis=allAnalyses.join('\n\n---\n\n');
   const extraFieldsHtml=zone.extraFields.map(fid=>{const f=EXTRA_FIELDS[fid];if(!f)return'';return`<div class="field"><label class="field-label">${f.label} (${f.unit})</label><div class="number-field"><input type="number" placeholder="${f.ph}" value="${zone.measures[fid]||''}" oninput="state.zones[${idx}].measures['${fid}']=this.value"/><span class="unit">${f.unit}</span></div></div>`;}).join('');
+  const noteHtml=`<div class="field" style="margin-top:0.75rem"><label class="field-label">Egne notater (valgfritt)</label><textarea placeholder="Ekstra observasjoner, kontekst eller beskrivelse..." oninput="state.zones[${idx}].note=this.value">${zone.note||''}</textarea></div>`;
   return`<div class="zone-card" id="zone-card-${idx}">
     <div class="zone-card-title">${zone.icon} ${zone.label}${zone.optional?'<span class="zone-optional">(valgfri)</span>':''}</div>
     <div class="upload-zone"><input type="file" accept="image/*" multiple capture="environment" onchange="handleFiles(event,${idx})"/><div class="upload-icon">📷</div><div class="upload-title">Ta bilde eller velg fra bibliotek</div><div class="upload-hint">Alle bilder kan analyseres individuelt</div></div>
@@ -482,26 +831,14 @@ function renderZoneCard(zone,idx){
     ${combinedAnalysis?`<div class="ai-box visible"><div class="ai-header"><span>AI-analyse (${allAnalyses.length} bilde${allAnalyses.length>1?'r':''})</span></div><div class="ai-text">${combinedAnalysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div></div>`:''}
     <div class="ai-box" id="ai-loading-${idx}" style="display:none"><div class="ai-header"><div class="ai-spinner on"></div><span>Analyserer...</span></div></div>
     ${zone.extraFields.length?`<div style="margin-top:1rem">${extraFieldsHtml}</div>`:''}
+    ${noteHtml}
   </div>`;
 }
 
-function handleFiles(e,idx){
-  Array.from(e.target.files).forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      const imgObj={dataUrl:ev.target.result,file,analysis:null};
-      state.zones[idx].images.push(imgObj);
-      renderZones();
-      analyzeSpecificImage(idx,state.zones[idx].images.length-1);
-    };
-    reader.readAsDataURL(file);
-  });
-}
+function handleFiles(e,idx){Array.from(e.target.files).forEach(file=>{const reader=new FileReader();reader.onload=ev=>{const imgObj={dataUrl:ev.target.result,file,analysis:null};state.zones[idx].images.push(imgObj);renderZones();analyzeSpecificImage(idx,state.zones[idx].images.length-1);};reader.readAsDataURL(file);});}
 function removeImg(zi,ii){state.zones[zi].images.splice(ii,1);renderZones();}
 
-async function compressImage(dataUrl,maxWidth=1024,quality=0.7){
-  return new Promise(resolve=>{const imgEl=new Image();imgEl.onload=()=>{const canvas=document.createElement('canvas');let w=imgEl.width,h=imgEl.height;if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(imgEl,0,0,w,h);resolve(canvas.toDataURL('image/jpeg',quality));};imgEl.src=dataUrl;});
-}
+async function compressImage(dataUrl,maxWidth=1024,quality=0.7){return new Promise(resolve=>{const imgEl=new Image();imgEl.onload=()=>{const canvas=document.createElement('canvas');let w=imgEl.width,h=imgEl.height;if(w>maxWidth){h=Math.round(h*maxWidth/w);w=maxWidth;}canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(imgEl,0,0,w,h);resolve(canvas.toDataURL('image/jpeg',quality));};imgEl.src=dataUrl;});}
 
 async function analyzeSpecificImage(idx,imgIdx){
   const zone=state.zones[idx];
@@ -533,92 +870,87 @@ function setAns(id,val,btn){state.answers[id]=val;btn.closest('.yn-group').query
 async function buildRapport(){
   const container=document.getElementById('rapport-container');
   container.innerHTML=`<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>Genererer rapport med AI...</div>`;
-
-  const name=document.getElementById('biz-name').value||'Ukjent bedrift';
+  const name=document.getElementById('biz-name').value||'Ukjent sted';
   const type=document.getElementById('biz-type').value;
   const config=TYPE_CONFIG[type];
   const addr=document.getElementById('biz-address').value;
   const dest=document.getElementById('biz-dest').value;
+  const group=config?config.group:'A';
 
-  // Bygg sone-kortene med AI-oppsummering
-  const soneKorter = await Promise.all(state.zones.map(async zone=>{
-    const hasContent=zone.images.length>0||Object.keys(zone.measures).some(k=>zone.measures[k]);
+  const soneKorter=await Promise.all(state.zones.map(async zone=>{
+    const hasContent=zone.images.length>0||Object.keys(zone.measures).some(k=>zone.measures[k])||zone.note;
     if(!hasContent)return null;
     const alleAnalyser=zone.images.filter(img=>img.analysis).map(img=>img.analysis).join('\n');
     const malInfo=zone.extraFields.map(fid=>{const f=EXTRA_FIELDS[fid];const val=zone.measures[fid];if(!f||!val)return'';return`${f.label}: ${val} ${f.unit}`;}).filter(Boolean).join(', ');
-
-    let gjesteTekst='';
-    let status='ukjent';
-
-    if(alleAnalyser){
+    let gjesteTekst='',status='ukjent';
+    if(alleAnalyser||malInfo||zone.note){
       try{
-        const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:`Du skriver en tilgjengelighetsprofil for reiselivsbedriften "${name}" som gjester skal lese. Basert på denne AI-analysen av ${zone.label}:\n\n${alleAnalyser}\n${malInfo?'Målte data: '+malInfo:''}\n\nSkriv 1-2 setninger på norsk som forteller gjesten konkret hva som finnes her og om det er tilgjengelig for rullestolbrukere eller andre med nedsatt funksjonsevne. Vær faktabasert og nøktern. Start IKKE med "AI" eller "Basert på". Avslutt med én linje som bare inneholder: STATUS:GRONN, STATUS:GUL eller STATUS:ROD`}]})});
+        const kontekst=[alleAnalyser,malInfo?'Målte data: '+malInfo:'',zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
+        const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:`Du skriver tilgjengelighetsprofil for "${name}" som gjester skal lese. Basert på: ${zone.label}:\n\n${kontekst}\n\nSkriv 1-2 setninger på norsk som forteller gjesten konkret hva som finnes og om det er tilgjengelig. Vær faktabasert. Start IKKE med "AI" eller "Basert på". Avslutt med én linje: STATUS:GRONN, STATUS:GUL eller STATUS:ROD`}]})});
         const data=await res.json();
-        if(data.content?.[0]?.text){
-          const tekst=data.content[0].text;
-          const statusMatch=tekst.match(/STATUS:(GRONN|GUL|ROD)/);
-          if(statusMatch)status=statusMatch[1].toLowerCase();
-          gjesteTekst=tekst.replace(/STATUS:(GRONN|GUL|ROD)/,'').trim();
-        }
-      }catch(e){gjesteTekst='';}
+        if(data.content?.[0]?.text){const tekst=data.content[0].text;const m=tekst.match(/STATUS:(GRONN|GUL|ROD)/);if(m)status=m[1].toLowerCase();gjesteTekst=tekst.replace(/STATUS:(GRONN|GUL|ROD)/,'').trim();}
+      }catch(e){}
     }
-
     const statusTekst={gronn:'Tilgjengelig',gul:'Delvis tilgjengelig',rod:'Begrenset tilgjengelighet',ukjent:'Ikke vurdert'};
     const faktaRader=zone.extraFields.map(fid=>{const f=EXTRA_FIELDS[fid];const val=zone.measures[fid];if(!f||!val)return'';return`<div class="fakta-rad"><span class="fakta-etikett">${f.label}:</span><span class="fakta-verdi">${val} ${f.unit}</span></div>`;}).filter(Boolean).join('');
-
-    return{zone,gjesteTekst,status,statusTekst:statusTekst[status]||'Ikke vurdert',faktaRader};
+    return{zone,gjesteTekst,status,statusTekst:statusTekst[status],faktaRader};
   }));
-
   const gyldigeSoner=soneKorter.filter(Boolean);
 
-  // Tilleggsspørsmål
-  const type2config=TYPE_CONFIG[type];
-  const qIds=type2config?type2config.questions:Object.keys(ALL_QUESTIONS);
+  // GPX-kort
+  const gpxKort=state.gpxData?`
+    <div class="sone-kort">
+      <div class="sone-topp"><div class="sone-ikon">🗺️</div><div class="sone-navn">Rute / GPX</div>
+        <div class="status-badge ${slopeClass(state.gpxData.maxSlope)==='ok'?'gronn':slopeClass(state.gpxData.maxSlope)==='caution'?'gul':'rod'}">
+          ${state.gpxData.maxSlope<=5?'✅ Lett':state.gpxData.maxSlope<=8?'🟡 Moderat':'🔴 Krevende'}
+        </div>
+      </div>
+      <div class="sone-fakta">
+        <div class="fakta-rad"><span class="fakta-etikett">Distanse:</span><span class="fakta-verdi">${state.gpxData.totalDist} km</span></div>
+        <div class="fakta-rad"><span class="fakta-etikett">Stigning totalt:</span><span class="fakta-verdi">↑${state.gpxData.totalUp}m ↓${state.gpxData.totalDown}m</span></div>
+        <div class="fakta-rad"><span class="fakta-etikett">Maks stigning:</span><span class="fakta-verdi">${state.gpxData.maxSlope}%</span></div>
+        <div class="fakta-rad"><span class="fakta-etikett">Snitt stigning:</span><span class="fakta-verdi">${state.gpxData.avgSlope}%</span></div>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:var(--text2)">${state.gpxData.maxSlope<=5?'Egnet for rullestol og rullator på flat til svakt hellende terreng.':state.gpxData.maxSlope<=8?'Krevende for manuell rullestol. Elektrisk rullestol kan passe på deler av ruten.':state.gpxData.maxSlope<=12?'For bratt for de fleste rullestoler. Passer for gående med god kondisjon.':'Svært bratt. Anbefales kun for erfarne turgåere.'}</div>
+    </div>`:'';
+
+  const qIds=config?config.questions:Object.keys(ALL_QUESTIONS);
   const jaItems=qIds.filter(id=>state.answers[id]==='ja').map(id=>ALL_QUESTIONS[id]?.text).filter(Boolean);
   const tilleggKort=jaItems.map(t=>{
-    const ikon=t.includes('Teleslynge')?'🔊':t.includes('ledsager')?'👥':t.includes('allergi')?'🌿':t.includes('parfyme')?'🌸':t.includes('meny')?'📋':t.includes('opplæring')?'👨‍🏫':t.includes('evakuering')?'🚨':t.includes('utstyr')?'🎒':'✅';
-    const kort=t.replace('Er det allergivennlige rom / områder tilgjengelig?','Allergivennlig alternativ tilgjengelig').replace('Kan rom bestilles med parfymefrie produkter?','Parfymefrie produkter på forespørsel').replace('Er menyen tilgjengelig digitalt, storskrift eller med allergenmerkinger?','Meny i tilgjengelig format').replace('Kan gjester kommunisere skriftlig (SMS/e-post)?','Skriftlig kommunikasjon mulig').replace('Har ansatte fått opplæring i å møte gjester med ulike behov?','Ansatte har tilgjengelighetskompetanse').replace('Er det teleslyngeanlegg i resepsjon eller fellesarealer?','Teleslynge installert').replace('Godtar dere ledsagerbevis?','Ledsagerbevis godtas').replace('Finnes det evakueringsplan som ivaretar gjester med nedsatt funksjonsevne?','Evakueringsplan for alle').replace('Har dere tilpasset utstyr for personer med nedsatt funksjonsevne?','Tilpasset utstyr tilgjengelig');
-    return`<div class="tillegg-kort"><div class="tillegg-ikon">${ikon}</div><div class="tillegg-verdi">${kort}</div></div>`;
+    const ikon=t.includes('teleslynge')||t.includes('Teleslynge')?'🔊':t.includes('ledsager')||t.includes('Ledsager')?'👥':t.includes('allergi')?'🌿':t.includes('parfyme')?'🌸':t.includes('meny')||t.includes('Meny')?'📋':t.includes('opplæring')||t.includes('opplaering')?'👨‍🏫':t.includes('evakuering')?'🚨':t.includes('utstyr')?'🎒':t.includes('rullestol')?'♿':t.includes('rampe')?'🏊':'✅';
+    return`<div class="tillegg-kort"><div class="tillegg-ikon">${ikon}</div><div class="tillegg-verdi">${t}</div></div>`;
   }).join('');
 
-  // Chatbot kontekst
   const chatKontekst=byggChatKontekst(name,type,config,gyldigeSoner,qIds);
+  const grpLabel={A:'Bygningsbasert bedrift',B:'Naturbasert aktivitetsbedrift',C:'Fellesgode / felles rom'}[group];
+  const grpBadge=`<span class="group-badge ${group}">${grpLabel}</span>`;
 
   container.innerHTML=`
-    <div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">Tilgjengelighetsprofil generert</div><div class="success-text">Rapporten nedenfor er klar til å deles med gjester.</div></div></div>
-
+    <div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">Tilgjengelighetsprofil generert</div><div class="success-text">Rapporten er klar til å deles med gjester.</div></div></div>
     <div class="rapport-header">
       <div class="rapport-logo">Access<span>Norway</span></div>
       <div class="rapport-navn">${name}</div>
-      <div class="rapport-meta">${config?config.label:''}${addr?' · '+addr:''}</div>
+      <div class="rapport-meta">${config?config.label:''} ${addr?'· '+addr:''}</div>
+      ${grpBadge}
       ${state.tags.length?`<div class="rapport-chips">${state.tags.map(t=>`<span class="rapport-chip">${t}</span>`).join('')}</div>`:''}
     </div>
-
-    ${gyldigeSoner.map(s=>`
-      <div class="sone-kort">
-        <div class="sone-topp">
-          <div class="sone-ikon">${s.zone.icon}</div>
-          <div class="sone-navn">${s.zone.label}</div>
-          <div class="status-badge ${s.status}">
-            ${s.status==='gronn'?'✅':s.status==='gul'?'🟡':s.status==='rod'?'🔴':'⬜'} ${s.statusTekst}
-          </div>
-        </div>
-        ${s.gjesteTekst?`<div class="sone-tekst">${s.gjesteTekst}</div>`:''}
-        ${s.faktaRader?`<div class="sone-fakta">${s.faktaRader}</div>`:''}
-      </div>`).join('')}
-
+    ${gpxKort}
+    ${gyldigeSoner.map(s=>`<div class="sone-kort">
+      <div class="sone-topp"><div class="sone-ikon">${s.zone.icon}</div><div class="sone-navn">${s.zone.label}</div>
+        <div class="status-badge ${s.status}">${s.status==='gronn'?'✅':s.status==='gul'?'🟡':s.status==='rod'?'🔴':'⬜'} ${s.statusTekst}</div>
+      </div>
+      ${s.gjesteTekst?`<div class="sone-tekst">${s.gjesteTekst}</div>`:''}
+      ${s.faktaRader?`<div class="sone-fakta">${s.faktaRader}</div>`:''}
+    </div>`).join('')}
     ${tilleggKort?`<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">${tilleggKort}</div></div>`:''}
-
     <div class="chat-card">
       <div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">Spør om tilgjengelighet</div><div class="chat-header-sub">AI-assistent</div></div>
       <div class="chat-messages" id="chat-messages">
         <div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten på ${name}. Hva lurer du på?</div></div>
       </div>
       <div class="chat-suggestions">
-        <button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer det for rullestol?</button>
-        <button class="chat-suggestion" onclick="sendChatSuggestion(this)">Finnes det HC-parkering?</button>
-        <button class="chat-suggestion" onclick="sendChatSuggestion(this)">Er badet tilgjengelig?</button>
-        <button class="chat-suggestion" onclick="sendChatSuggestion(this)">Hva med allergi?</button>
+        ${group==='C'?`<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer for rullestol?</button><button class="chat-suggestion" onclick="sendChatSuggestion(this)">Hva er stigningen?</button><button class="chat-suggestion" onclick="sendChatSuggestion(this)">Er det HC-toalett?</button>`:
+        `<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer det for rullestol?</button><button class="chat-suggestion" onclick="sendChatSuggestion(this)">Finnes det HC-parkering?</button><button class="chat-suggestion" onclick="sendChatSuggestion(this)">Hva med allergi?</button>`}
       </div>
       <div class="chat-input-row">
         <input type="text" class="chat-input" id="chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key==='Enter')sendChat()"/>
@@ -626,15 +958,15 @@ async function buildRapport(){
       </div>
     </div>`;
 
-  // Lagre chatKontekst globalt
   window._chatKontekst=chatKontekst;
   state.chatHistory=[];
 }
 
 function byggChatKontekst(name,type,config,soner,qIds){
+  const gpxInfo=state.gpxData?`GPX-rute: ${state.gpxData.totalDist}km, maks stigning ${state.gpxData.maxSlope}%, snitt ${state.gpxData.avgSlope}%, høydeforskjell ↑${state.gpxData.totalUp}m`:'';
   const soneInfo=soner.map(s=>`${s.zone.label} (${s.statusTekst}): ${s.gjesteTekst} ${s.faktaRader.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ')}`).join('\n');
   const svarInfo=qIds.map(id=>{const q=ALL_QUESTIONS[id];const v=state.answers[id];if(!q||!v)return'';return`${q.text}: ${v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'}`;}).filter(Boolean).join('\n');
-  return`Du er en hjelpsom tilgjengelighetsassistent for reiselivsbedriften "${name}" (${config?config.label:type}). Svar på norsk, vennlig og konkret. Bruk kun informasjonen nedenfor — ikke finn på noe.\n\nFASILITETER:\n${soneInfo||'Ikke registrert'}\n\nTILLEGGSINFO:\n${svarInfo||'Ikke registrert'}\n\nHvis du ikke vet svaret, si det ærlig og be gjesten kontakte bedriften direkte.`;
+  return`Du er en hjelpsom tilgjengelighetsassistent for "${name}" (${config?config.label:type}). Svar på norsk, vennlig og konkret. Bruk kun informasjonen nedenfor.\n\n${gpxInfo?'RUTE:\n'+gpxInfo+'\n\n':''}FASILITETER:\n${soneInfo||'Ikke registrert'}\n\nTILLEGGSINFO:\n${svarInfo||'Ikke registrert'}\n\nHvis du ikke vet svaret, si det ærlig og be gjesten kontakte stedet direkte.`;
 }
 
 async function sendChat(){
@@ -647,7 +979,7 @@ async function sendChat(){
   appendChatMsg('<span class="chat-spinner"></span>Tenker...','bot',loadingId);
   state.chatHistory.push({role:'user',content:msg});
   try{
-    const messages=[{role:'user',content:window._chatKontekst+'\n\nBrukerens spørsmål: '+state.chatHistory.map(m=>`${m.role==='user'?'Gjest':'Assistent'}: ${m.content}`).join('\n')}];
+    const messages=[{role:'user',content:window._chatKontekst+'\n\n'+state.chatHistory.map(m=>`${m.role==='user'?'Gjest':'Assistent'}: ${m.content}`).join('\n')}];
     const res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages})});
     const data=await res.json();
     document.getElementById(loadingId)?.remove();
@@ -656,32 +988,19 @@ async function sendChat(){
     appendChatMsg(svar,'bot');
   }catch(err){document.getElementById(loadingId)?.remove();appendChatMsg('Beklager, noe gikk galt.','bot');}
 }
+function sendChatSuggestion(btn){document.getElementById('chat-input').value=btn.textContent;sendChat();}
+function appendChatMsg(text,role,id){const msgs=document.getElementById('chat-messages');const div=document.createElement('div');div.className=`chat-msg ${role}`;if(id)div.id=id;div.innerHTML=`<div class="chat-bubble">${text}</div>`;msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;}
 
-function sendChatSuggestion(btn){
-  document.getElementById('chat-input').value=btn.textContent;
-  sendChat();
-}
-
-function appendChatMsg(text,role,id){
-  const msgs=document.getElementById('chat-messages');
-  const div=document.createElement('div');
-  div.className=`chat-msg ${role}`;
-  if(id)div.id=id;
-  div.innerHTML=`<div class="chat-bubble">${text}</div>`;
-  msgs.appendChild(div);
-  msgs.scrollTop=msgs.scrollHeight;
-}
-
-// ── LEGG TIL SONE ──
+// ── MODAL ──
 function openAddZoneModal(){const type=document.getElementById('biz-type').value;const config=TYPE_CONFIG[type];if(!config)return;document.getElementById('modal-options').innerHTML=config.extraOptions.map(name=>`<button class="modal-option" onclick="addZoneFromModal('${name}')">${name}</button>`).join('');document.getElementById('modal-overlay').classList.add('open');document.getElementById('custom-zone-name').value='';}
 function closeAddZoneModal(){document.getElementById('modal-overlay').classList.remove('open');}
 function closeModalIfBg(e){if(e.target===document.getElementById('modal-overlay'))closeAddZoneModal();}
 function addZoneFromModal(name){addZone(name);closeAddZoneModal();}
 function addCustomZone(){const name=document.getElementById('custom-zone-name').value.trim();if(!name)return;addZone(name);closeAddZoneModal();}
-function addZone(name){state.zones.push({id:name.toLowerCase().replace(/\s+/g,'_'),label:name,icon:'📋',extraFields:[],optional:true,images:[],aiAnalyses:[],measures:{}});renderZones();}
+function addZone(name){state.zones.push({id:name.toLowerCase().replace(/\s+/g,'_'),label:name,icon:'📋',extraFields:[],optional:true,images:[],aiAnalysis:null,measures:{}});renderZones();}
 
 function downloadProfile(){
-  const json=JSON.stringify({bedrift:{navn:document.getElementById('biz-name').value,type:document.getElementById('biz-type').value,adresse:document.getElementById('biz-address').value,destinasjon:document.getElementById('biz-dest').value,kommune:document.getElementById('biz-kommune').value,kontakt:document.getElementById('biz-contact').value,tagger:state.tags},kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(z=>({id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,ai_analyser:z.images.filter(img=>img.analysis).map(img=>img.analysis)})),svar:state.answers}},null,2);
+  const json=JSON.stringify({bedrift:{navn:document.getElementById('biz-name').value,type:document.getElementById('biz-type').value,adresse:document.getElementById('biz-address').value,destinasjon:document.getElementById('biz-dest').value,kommune:document.getElementById('biz-kommune').value,kontakt:document.getElementById('biz-contact').value,tagger:state.tags},gpx:state.gpxData?{distanse_km:state.gpxData.totalDist,stigning_opp_m:state.gpxData.totalUp,stigning_ned_m:state.gpxData.totalDown,maks_stigning_pst:state.gpxData.maxSlope,snitt_stigning_pst:state.gpxData.avgSlope}:null,kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(z=>({id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,note:z.note||'',ai_analyser:z.images.filter(img=>img.analysis).map(img=>img.analysis)})),svar:state.answers}},null,2);
   const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='accessnorway_profil.json';a.click();URL.revokeObjectURL(url);
 }
 </script>
