@@ -261,7 +261,7 @@ textarea { resize: vertical; min-height: 80px; }
 </head>
 <body>
 
-<div id="welcome-screen" class="welcome">
+<div id="welcome-screen" class="welcome" style="display:none">
   <div class="welcome-logo">Access<span>Norway</span></div>
   <div class="welcome-tagline">Kartleggingsverktøy</div>
   <div class="welcome-card">
@@ -270,7 +270,7 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
 </div>
 
-<div id="app" class="app">
+<div id="app" class="app active">
   <div class="topbar">
     <div class="topbar-logo">Access<span>Norway</span></div>
     <div class="api-indicator"><div class="api-dot"></div><span>AI aktiv</span></div>
@@ -1179,7 +1179,8 @@ function downloadProfile(){
   const json=JSON.stringify({bedrift:{navn:document.getElementById('biz-name').value,type:document.getElementById('biz-type').value,adresse:document.getElementById('biz-address').value,destinasjon:document.getElementById('biz-dest').value,kommune:document.getElementById('biz-kommune').value,kontakt:document.getElementById('biz-contact').value,tagger:state.tags},gpx:state.gpxData?{distanse_km:state.gpxData.totalDist,stigning_opp_m:state.gpxData.totalUp,stigning_ned_m:state.gpxData.totalDown,maks_stigning_pst:state.gpxData.maxSlope,snitt_stigning_pst:state.gpxData.avgSlope}:null,kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(z=>({id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,note:z.note||'',ai_analyser:z.images.filter(img=>img.analysis).map(img=>img.analysis)})),svar:state.answers}},null,2);
   const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='accessnorway_profil.json';a.click();URL.revokeObjectURL(url);
 }
+
+window.addEventListener("load", activateApp);
 </script>
-<script>window.addEventListener("load", activateApp);</script>
 </body>
 </html>
