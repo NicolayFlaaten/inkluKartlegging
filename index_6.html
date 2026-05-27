@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AccessNorway — Kartlegging</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
+  --amber:#BA7517;--amber-light:#FAEEDA;
+  --red:#E24B4A;--red-light:#FCEBEB;
+  --blue:#065A82;--blue-light:#E3F2FA;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#999890;
+  --surface:#fff;--surface2:#f7f6f2;--surface3:#f1efe8;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface3);color:var(--text);min-height:100vh;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+.topbar{background:#1a1a18;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:17px;font-weight:700;color:#fff}
+.topbar-logo span{color:var(--green)}
+.api-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px}
+.progress-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.625rem 1rem;position:sticky;top:54px;z-index:90}
+.steps-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
+.steps-scroll::-webkit-scrollbar{display:none}
+.step-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:500;white-space:nowrap;border:1.5px solid var(--border2);color:var(--text3);background:var(--surface);flex-shrink:0}
+.step-pill.active{background:var(--green);border-color:var(--green);color:#fff}
+.step-pill.done{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
+.step-num{width:17px;height:17px;border-radius:50%;background:rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.step-pill.active .step-num{background:rgba(255,255,255,0.25)}
+.step-pill.done .step-num{background:rgba(15,110,86,0.15)}
+.content{padding:1.25rem 1rem 7rem;max-width:600px;margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+.page-header{margin-bottom:1.25rem}
+.page-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.3px}
+.page-desc{font-size:14px;color:var(--text2);line-height:1.6}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.field{margin-bottom:.875rem}
+.field-label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+input[type=text],input[type=number],select,textarea{width:100%;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:16px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;-webkit-appearance:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+textarea{resize:vertical;min-height:80px}
+.tag-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.tag-btn{border:1.5px solid var(--border2);background:var(--surface);border-radius:20px;padding:6px 14px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--text2)}
+.tag-btn.active{background:var(--green-light);border-color:var(--green);color:var(--green-dark);font-weight:500}
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:1.25rem 1rem;text-align:center;cursor:pointer;background:var(--surface2);position:relative}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:28px;margin-bottom:6px}
+.upload-title{font-size:14px;font-weight:500;margin-bottom:2px}
+.upload-hint{font-size:12px;color:var(--text3)}
+.image-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:1rem}
+.preview-item{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1.5px solid var(--border)}
+.preview-item img{width:100%;height:100%;object-fit:cover}
+.preview-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(0,0,0,.65);border:none;border-radius:50%;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.preview-analyze{position:absolute;bottom:4px;left:4px;right:4px;background:rgba(29,158,117,.9);border:none;border-radius:6px;color:#fff;font-size:11px;font-family:inherit;font-weight:600;padding:4px;cursor:pointer}
+.preview-analyzed{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.5);border-radius:6px;color:#fff;font-size:10px;padding:3px 6px}
+.ai-box{background:var(--amber-light);border:1px solid rgba(186,117,23,.2);border-radius:var(--radius-sm);padding:1rem;margin-top:1rem;display:none}
+.ai-box.visible{display:block}
+.ai-header{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+.ai-spinner{width:14px;height:14px;border:2px solid rgba(186,117,23,.3);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;display:none}
+.ai-spinner.on{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-text{font-size:14px;color:var(--text);line-height:1.6}
+.zone-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+.zone-card-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.zone-optional{font-size:11px;color:var(--text3);font-weight:400;margin-left:4px}
+.number-field{display:flex;gap:8px;align-items:center}
+.number-field input{flex:1}
+.number-field .unit{font-size:14px;color:var(--text2);white-space:nowrap;min-width:30px}
+.btn-add-zone{background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:14px;font-size:14px;font-family:inherit;font-weight:600;cursor:pointer;width:100%;margin-bottom:1rem}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal-sheet{background:var(--surface);border-radius:var(--radius) var(--radius) 0 0;padding:1.5rem 1rem;width:100%;max-height:80vh;overflow-y:auto}
+.modal-title{font-size:17px;font-weight:700;margin-bottom:1rem}
+.modal-options{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.modal-option{border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:15px;font-family:inherit;background:var(--surface2);cursor:pointer;text-align:left}
+.modal-custom{display:flex;gap:8px;margin-top:8px}
+.modal-custom input{flex:1}
+.modal-custom button{background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:12px 16px;font-family:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+.modal-cancel{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px;font-size:15px;font-family:inherit;cursor:pointer;margin-top:8px;color:var(--text2)}
+.question-item{padding:1rem 0;border-bottom:1px solid var(--border)}
+.question-item:last-child{border-bottom:none;padding-bottom:0}
+.question-text{font-size:15px;color:var(--text);line-height:1.5;margin-bottom:4px}
+.question-context{font-size:12px;color:var(--text3);margin-bottom:8px}
+.yn-group{display:flex;gap:8px;margin-top:8px}
+.yn-btn{flex:1;border:1.5px solid var(--border2);background:var(--surface2);border-radius:var(--radius-sm);padding:10px;font-size:15px;font-family:inherit;font-weight:500;cursor:pointer;color:var(--text2);text-align:center}
+.yn-btn.yes.active{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
+.yn-btn.no.active{background:var(--red-light);border-color:var(--red);color:#A32D2D}
+.yn-btn.na.active{background:var(--surface2);border-color:var(--border2);color:var(--text3)}
+.notice{background:var(--green-light);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);margin-bottom:1rem;line-height:1.5}
+.notice-blue{background:var(--blue-light);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--blue);margin-bottom:1rem;line-height:1.5}
+.gpx-zone{border:2px dashed rgba(6,90,130,.3);border-radius:var(--radius);padding:1.25rem 1rem;text-align:center;cursor:pointer;background:var(--blue-light);position:relative;margin-bottom:1rem}
+.gpx-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.gpx-icon{font-size:28px;margin-bottom:6px}
+.gpx-title{font-size:14px;font-weight:500;margin-bottom:2px;color:var(--blue)}
+.gpx-hint{font-size:12px;color:var(--text3)}
+.gpx-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-top:.75rem}
+.gpx-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.gpx-stat{background:var(--surface2);border-radius:8px;padding:10px}
+.gpx-stat-val{font-size:20px;font-weight:700;color:var(--text)}
+.gpx-stat-label{font-size:11px;color:var(--text3);margin-top:2px}
+.gpx-stat.warning .gpx-stat-val{color:var(--red)}
+.gpx-stat.ok .gpx-stat-val{color:var(--green-dark)}
+.gpx-stat.caution .gpx-stat-val{color:var(--amber)}
+.gpx-profile{width:100%;height:80px;margin-top:.75rem;border-radius:8px}
+.group-badge{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-bottom:.5rem}
+.group-badge.A{background:var(--green-light);color:var(--green-dark)}
+.group-badge.B{background:var(--amber-light);color:var(--amber)}
+.group-badge.C{background:var(--blue-light);color:var(--blue)}
+.tab-bar{display:flex;gap:6px;margin-bottom:1.25rem;background:var(--surface);border-radius:var(--radius-sm);padding:4px;border:1px solid var(--border)}
+.tab-btn{flex:1;border:none;background:transparent;border-radius:8px;padding:10px 8px;font-size:13px;font-family:inherit;font-weight:500;cursor:pointer;color:var(--text2);transition:all .15s}
+.tab-btn.active{background:var(--green);color:#fff;font-weight:600}
+.guide-hero{background:#1a1a18;border-radius:var(--radius);overflow:hidden;margin-bottom:1rem}
+.guide-hero-img{width:100%;height:180px;object-fit:cover;opacity:.7}
+.guide-hero-body{padding:1.25rem}
+.guide-hero-badge{display:inline-flex;align-items:center;background:rgba(29,158,117,.2);border:1px solid rgba(29,158,117,.4);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;color:#4fd1a5;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em}
+.guide-hero-name{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:4px}
+.guide-hero-type{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:.5rem}
+.guide-hero-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:.75rem}
+.guide-meta-pill{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.08);border-radius:20px;padding:4px 10px;font-size:12px;color:rgba(255,255,255,.6)}
+.guide-map{width:100%;height:200px;border-radius:var(--radius);overflow:hidden;margin-bottom:1rem;border:1px solid var(--border);background:var(--surface2);position:relative}
+.guide-map iframe{width:100%;height:100%;border:none}
+.guide-map-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:8px;color:var(--text3);font-size:14px}
+.guide-section{margin-bottom:1.25rem}
+.guide-section-title{font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
+.guide-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.guide-sone{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.5rem}
+.guide-sone-topp{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.guide-sone-ikon{font-size:20px}
+.guide-sone-navn{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.guide-sone-tekst{font-size:13px;color:var(--text2);line-height:1.5}
+.guide-sone-maal{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.guide-sone-maal-chip{background:var(--surface2);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2)}
+.guide-bilder{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.guide-bilde{aspect-ratio:1;border-radius:8px;overflow:hidden}
+.guide-bilde img{width:100%;height:100%;object-fit:cover}
+.guide-gpx{background:var(--blue-light);border:1px solid rgba(6,90,130,.2);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem}
+.guide-gpx-title{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:.75rem}
+.guide-gpx-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.guide-gpx-stat{background:var(--surface);border-radius:8px;padding:8px 10px}
+.guide-gpx-stat-val{font-size:18px;font-weight:700;color:var(--text)}
+.guide-gpx-stat-label{font-size:11px;color:var(--text3)}
+.guide-tillegg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.guide-tillegg-kort{background:var(--surface);border:1px solid var(--green-light);border-radius:var(--radius-sm);padding:.75rem;display:flex;align-items:center;gap:8px}
+.guide-tillegg-ikon{font-size:20px}
+.guide-tillegg-tekst{font-size:12px;color:var(--text2);line-height:1.3}
+.guide-download-bar{display:flex;gap:8px;margin-top:1rem}
+.guide-btn-dl{flex:1;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px;font-size:13px;font-family:inherit;font-weight:600;cursor:pointer;color:var(--text2);text-align:center}
+.guide-btn-dl.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.sone-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:.75rem}
+.sone-topp{display:flex;align-items:center;gap:10px;margin-bottom:.75rem}
+.sone-ikon{font-size:22px}
+.sone-navn{font-size:16px;font-weight:600;flex:1}
+.status-badge{display:flex;align-items:center;gap:5px;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700}
+.status-badge.gronn{background:var(--green-light);color:var(--green-dark)}
+.status-badge.gul{background:var(--amber-light);color:var(--amber)}
+.status-badge.rod{background:var(--red-light);color:var(--red)}
+.status-badge.ukjent{background:var(--surface2);color:var(--text3)}
+.sone-tekst{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:.75rem}
+.sone-fakta{display:flex;flex-direction:column;gap:4px}
+.fakta-rad{display:flex;gap:8px;font-size:13px}
+.fakta-etikett{color:var(--text3);min-width:130px}
+.fakta-verdi{color:var(--text);font-weight:500}
+.tillegg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.tillegg-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.875rem}
+.tillegg-ikon{font-size:20px;margin-bottom:4px}
+.tillegg-verdi{font-size:13px;font-weight:600;color:var(--text)}
+.chat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1rem}
+.chat-header{background:#1a1a18;padding:1rem 1.25rem;display:flex;align-items:center;gap:10px}
+.chat-header-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-header-title{font-size:14px;font-weight:600;color:#fff}
+.chat-header-sub{font-size:12px;color:rgba(255,255,255,.4);margin-left:auto}
+.chat-messages{padding:1rem;min-height:120px;max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.chat-msg{max-width:85%}
+.chat-msg.bot{align-self:flex-start}
+.chat-msg.user{align-self:flex-end}
+.chat-bubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5}
+.chat-msg.bot .chat-bubble{background:var(--surface2);color:var(--text);border-radius:4px 16px 16px 16px}
+.chat-msg.user .chat-bubble{background:var(--green);color:#fff;border-radius:16px 16px 4px 16px}
+.chat-spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--text3);border-radius:50%;animation:spin .8s linear infinite;margin-right:6px}
+.chat-input-row{display:flex;gap:8px;padding:.75rem 1rem;border-top:1px solid var(--border)}
+.chat-input{flex:1;border:1.5px solid var(--border2);border-radius:20px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none}
+.chat-input:focus{border-color:var(--green)}
+.chat-send{background:var(--green);color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 1rem .75rem}
+.chat-suggestion{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:5px 12px;font-size:12px;font-family:inherit;cursor:pointer;color:var(--text2)}
+.success-banner{background:var(--green-light);border:1px solid rgba(29,158,117,.2);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;display:flex;gap:12px;align-items:flex-start}
+.success-icon{font-size:28px;flex-shrink:0}
+.success-title{font-weight:600;color:var(--green-dark);margin-bottom:3px}
+.success-text{font-size:13px;color:var(--text2)}
+.rapport-spinner{text-align:center;padding:2rem;color:var(--text3);font-size:14px}
+.rapport-spinner-ring{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .75rem}
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:.875rem 1rem;padding-bottom:calc(.875rem + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100}
+.btn-primary{flex:1;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer}
+.btn-primary:active{opacity:.85}
+.btn-secondary{background:var(--surface2);color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;font-size:15px;font-family:inherit;font-weight:500;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">Access<span>Norway</span></div>
+  <div style="display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.4)">
+    <span class="api-dot"></span>AI aktiv
+  </div>
+</div>
+<div class="progress-bar">
+  <div class="steps-scroll" id="steps-scroll"></div>
+</div>
+<div class="content">
+
+  <div class="page active" id="page-0">
+    <div class="page-header"><div class="page-title">Registrer sted</div><div class="page-desc">Grunnleggende informasjon om stedet du kartlegger.</div></div>
+    <div class="card">
+      <div class="card-title">📍 Informasjon</div>
+      <div class="field"><label class="field-label">Navn</label><input type="text" id="biz-name" placeholder="f.eks. Fjordhotellet AS eller Beitostølen tursti"/></div>
+      <div class="field">
+        <label class="field-label">Type</label>
+        <select id="biz-type" onchange="onTypeChange()">
+          <option value="">Velg type</option>
+          <optgroup label="A — Bygningsbaserte bedrifter">
+            <option value="hotell">Hotell</option>
+            <option value="hytte">Hytte / leilighet</option>
+            <option value="restaurant">Restaurant / servering</option>
+            <option value="aktivitet">Aktivitetsbedrift (innendørs)</option>
+            <option value="idrett">Idrettsanlegg</option>
+            <option value="camping">Camping</option>
+            <option value="annet_a">Annet (bygg)</option>
+          </optgroup>
+          <optgroup label="B — Naturbaserte aktivitetsbedrifter">
+            <option value="guidet">Guidet tur / opplevelse</option>
+            <option value="kajakkpadling">Kajakkutleie / padling</option>
+            <option value="sykling_b">Sykling og sykkelutleie</option>
+            <option value="ridning">Ridning</option>
+            <option value="tilpasset_natur">Tilpassede naturopplevelser</option>
+            <option value="annet_b">Annet (naturbasert bedrift)</option>
+          </optgroup>
+          <optgroup label="C — Fellesgoder og felles rom">
+            <option value="tursti">Tursti / natursti</option>
+            <option value="sykkelsti">Sykkelløype</option>
+            <option value="skiloype">Skiløype</option>
+            <option value="badeplass">Badeplass</option>
+            <option value="utsiktspunkt">Utsiktspunkt / attraksjon</option>
+            <option value="hc_parkering">HC-parkering / toalett i utmark</option>
+            <option value="annet_c">Annet (fellesgode)</option>
+          </optgroup>
+        </select>
+      </div>
+      <div id="custom-name-field" style="display:none" class="field">
+        <label class="field-label">Beskriv type</label>
+        <input type="text" id="biz-custom-type" placeholder="Skriv hva slags sted dette er..."/>
+      </div>
+      <div class="field"><label class="field-label">Adresse / sted</label><input type="text" id="biz-address" placeholder="Adresse, postnummer, sted eller GPS-koordinat"/></div>
+      <div class="field"><label class="field-label">Destinasjonsselskap</label><input type="text" id="biz-dest" placeholder="f.eks. Visit Valdres"/></div>
+      <div class="field"><label class="field-label">Kommune</label><input type="text" id="biz-kommune" placeholder="f.eks. Øystre Slidre"/></div>
+      <div class="field"><label class="field-label">Kontaktperson / forvalter</label><input type="text" id="biz-contact" placeholder="Navn — e-post"/></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏷️ Tagger</div>
+      <div class="field"><label class="field-label">Aktiviteter</label>
+        <div class="tag-row">
+          <button class="tag-btn" onclick="toggleTag(this)">Fiske</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Sykling</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Ski</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Vandring</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Svømming</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Ridning</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Padling</button>
+        </div>
+      </div>
+      <div class="field"><label class="field-label">Tilrettelegging</label>
+        <div class="tag-row">
+          <button class="tag-btn" onclick="toggleTag(this)">Ledsagerbevis</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Allergivennlig</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Teleslynge</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Assistansehund</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Tilpasset utstyr</button>
+          <button class="tag-btn" onclick="toggleTag(this)">Rullestolvennlig</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-1">
+    <div class="page-header">
+      <div id="group-badge-container"></div>
+      <div class="page-title" id="zones-title">Fasiliteter</div>
+      <div class="page-desc" id="zones-desc">Last opp bilder og registrer mål.</div>
+    </div>
+    <div id="gpx-section" style="display:none">
+      <div class="card">
+        <div class="card-title">🗺️ GPX-fil (valgfritt)</div>
+        <div class="notice-blue">Last opp en GPX-fil fra Garmin, Strava eller Komoot for automatisk analyse av stigning og høydeprofil.</div>
+        <div class="gpx-zone">
+          <input type="file" accept=".gpx" onchange="handleGpx(event)"/>
+          <div class="gpx-icon">📍</div>
+          <div class="gpx-title">Last opp GPX-fil</div>
+          <div class="gpx-hint">.gpx fra Garmin, Strava, Komoot, UT.no osv.</div>
+        </div>
+        <div id="gpx-result" style="display:none"></div>
+      </div>
+    </div>
+    <div id="zones-container"></div>
+    <button class="btn-add-zone" onclick="openAddZoneModal()">+ Legg til sone / område</button>
+  </div>
+
+  <div class="page" id="page-2">
+    <div class="page-header"><div class="page-title">Tilleggsspørsmål</div><div class="page-desc">Spørsmål om ting AI-en ikke kan se på bilder.</div></div>
+    <div class="card" id="questions-container"></div>
+  </div>
+
+  <div class="page" id="page-3">
+    <div class="page-header"><div class="page-title">Tilgjengelighetsprofil</div><div class="page-desc">Guide for gjester, AI-analyse og nedlasting.</div></div>
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tab-guide" onclick="switchTab('guide')">🗺️ Tilgjengelighetsguide</button>
+      <button class="tab-btn" id="tab-analyse" onclick="switchTab('analyse')">🤖 AI-analyse</button>
+    </div>
+    <div id="tab-content-guide"></div>
+    <div id="tab-content-analyse" style="display:none"></div>
+  </div>
+
+</div>
+
+<div class="bottom-bar">
+  <button class="btn-secondary" id="btn-back" onclick="goBack()" style="display:none">← Tilbake</button>
+  <button class="btn-primary" id="btn-next" onclick="goNext()">Start kartlegging →</button>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalIfBg(event)">
+  <div class="modal-sheet">
+    <div class="modal-title">Legg til sone / område</div>
+    <div class="modal-options" id="modal-options"></div>
+    <div class="modal-custom">
+      <input type="text" id="custom-zone-name" placeholder="Eget navn..."/>
+      <button onclick="addCustomZone()">Legg til</button>
+    </div>
+    <button class="modal-cancel" onclick="closeAddZoneModal()">Avbryt</button>
+  </div>
+</div>
+
+<script>
+const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
+const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null};
+
+// Bygg steg-piller
+function buildSteps() {
+  var labels = ['Sted','Fasiliteter','Spørsmål','Rapport'];
+  var html = '';
+  for (var i = 0; i < labels.length; i++) {
+    html += '<div class="step-pill ' + (i===0?'active':'') + '" id="sp' + i + '">' +
+            '<div class="step-num">' + (i+1) + '</div>' + labels[i] + '</div>';
+  }
+  document.getElementById('steps-scroll').innerHTML = html;
+}
+
+function goTo(step) {
+  if (step < 0 || step > 3) return;
+  var pages = document.querySelectorAll('.page');
+  for (var i = 0; i < pages.length; i++) pages[i].classList.remove('active');
+  document.getElementById('page-' + step).classList.add('active');
+  for (var i = 0; i < 4; i++) {
+    var el = document.getElementById('sp' + i);
+    if (el) {
+      el.classList.remove('active','done');
+      if (i < step) el.classList.add('done');
+      else if (i === step) el.classList.add('active');
+    }
+  }
+  document.getElementById('btn-back').style.display = step > 0 ? 'block' : 'none';
+  var labels = ['Start kartlegging →','Neste: Spørsmål →','Generer rapport →','Last ned data'];
+  document.getElementById('btn-next').textContent = labels[step];
+  state.step = step;
+  if (step === 1) buildZones();
+  if (step === 2) buildQuestions();
+  if (step === 3) buildRapport();
+  window.scrollTo(0, 0);
+}
+
+function goNext() {
+  if (state.step === 3) { downloadProfile(); return; }
+  goTo(state.step + 1);
+}
+function goBack() {
+  if (state.step > 0) goTo(state.step - 1);
+}
+
+function onTypeChange() {
+  var type = document.getElementById('biz-type').value;
+  var isAnnet = ['annet_a','annet_b','annet_c'].indexOf(type) >= 0;
+  document.getElementById('custom-name-field').style.display = isAnnet ? 'block' : 'none';
+}
+
+function toggleTag(btn) {
+  btn.classList.toggle('active');
+  var tag = btn.textContent.trim();
+  if (btn.classList.contains('active')) {
+    if (state.tags.indexOf(tag) < 0) state.tags.push(tag);
+  } else {
+    state.tags = state.tags.filter(function(t) { return t !== tag; });
+  }
+}
+
+// TYPE CONFIG
+var TYPE_CONFIG = {
+  hotell:{label:'Hotell',group:'A',pageTitle:'Hotellfasiliteter',pageDesc:'Last opp bilder av hotellets fasiliteter.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'resepsjon',label:'Resepsjon',icon:'🛎️',extraFields:['disk_cm'],optional:false},
+      {id:'spisesal',label:'Spisesal',icon:'🍽️',extraFields:[],optional:false},
+      {id:'hotellrom',label:'Hotellrom',icon:'🛏️',extraFields:['dor_cm','seng_cm'],optional:false},
+      {id:'bad',label:'Bad',icon:'🚿',extraFields:['bad_dor_cm','terskel_mm','snuplass_cm'],optional:false},
+      {id:'heis',label:'Heis',icon:'🛗',extraFields:['heis_bredde_cm'],optional:true},
+      {id:'bar',label:'Bar',icon:'🍷',extraFields:[],optional:true},
+      {id:'konferanse',label:'Konferanserom',icon:'📋',extraFields:[],optional:true}],
+    extraOptions:['Treningssenter','Basseng','Spa','Butikk','Frokostrom'],
+    questions:['q_allergi','q_parfyme','q_meny','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_evakuering']},
+  hytte:{label:'Hytte / leilighet',group:'A',pageTitle:'Hytte / leilighetsfasiliteter',pageDesc:'Last opp bilder. Legg til flere rom ved behov.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'stue',label:'Stue',icon:'🛋️',extraFields:[],optional:false},
+      {id:'kjokken',label:'Kjøkken',icon:'🍳',extraFields:[],optional:false},
+      {id:'bad',label:'Bad',icon:'🚿',extraFields:['bad_dor_cm','terskel_mm','snuplass_cm'],optional:false},
+      {id:'soverom',label:'Soverom',icon:'🛏️',extraFields:['seng_cm'],optional:false}],
+    extraOptions:['Bad 2','Soverom 2','Soverom 3','TVstue','Vaskerom','Terrasse'],
+    questions:['q_allergi','q_parfyme','q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
+  restaurant:{label:'Restaurant / servering',group:'A',pageTitle:'Restaurantfasiliteter',pageDesc:'Last opp bilder av restaurantens tilgjengelighet.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'mottakelse',label:'Mottakelse',icon:'🛎️',extraFields:[],optional:false},
+      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'spisebord',label:'Spisebord',icon:'🍽️',extraFields:['bord_cm'],optional:false},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
+    extraOptions:['Uteplass','Bar','Buffet','Terrasse'],
+    questions:['q_meny','q_allergi','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager']},
+  aktivitet:{label:'Aktivitetsbedrift',group:'A',pageTitle:'Aktivitetsfasiliteter',pageDesc:'Last opp bilder fra aktivitetsbedriften.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'resepsjon',label:'Mottakelse / resepsjon',icon:'🛎️',extraFields:[],optional:false},
+      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'aktivitetsomrade',label:'Aktivitetsområde',icon:'🏃',extraFields:[],optional:false}],
+    extraOptions:['Garderobe','Uteplass','Servering','Utstyr'],
+    questions:['q_allergi','q_tilpassetutstyr','q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
+  idrett:{label:'Idrettsanlegg',group:'A',pageTitle:'Idrettsanlegget',pageDesc:'Last opp bilder av idrettsanlegget.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false},
+      {id:'aktivitetsomrade',label:'Aktivitetsområde',icon:'🏅',extraFields:[],optional:false},
+      {id:'wc',label:'WC / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false}],
+    extraOptions:['Kiosk','Tribune','Svømmebasseng','Treningssenter'],
+    questions:['q_teleslynge','q_ledsager','q_opplaering','q_evakuering','q_skriftlig']},
+  camping:{label:'Camping',group:'A',pageTitle:'Campingfasiliteter',pageDesc:'Last opp bilder av campingplassens fasiliteter.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering / innkjøring',icon:'🅿️',extraFields:[],optional:false},
+      {id:'inngang',label:'Inngang / resepsjon',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'sanitaer',label:'Sanitæranlegg',icon:'🚿',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
+    extraOptions:['Kiosk','Lekeplass','Badeplass'],
+    questions:['q_allergi','q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
+  annet_a:{label:'Annet (bygg)',group:'A',pageTitle:'Fasiliteter',pageDesc:'Last opp bilder av stedet.',
+    defaultZones:[
+      {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
+    extraOptions:['Parkering','Rom','Sal','Kiosk','Fellesareal'],
+    questions:['q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
+  guidet:{label:'Guidet tur / opplevelse',group:'B',pageTitle:'Guidet tur',pageDesc:'Last opp bilder og evt. GPX-fil fra turen.',
+    defaultZones:[
+      {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'terreng',label:'Terreng / underlag',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
+      {id:'utstyr',label:'Utstyr',icon:'🎒',extraFields:[],optional:false}],
+    extraOptions:['Hvilepunkt','Serveringssted','WC underveis','Transport'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  kajakkpadling:{label:'Kajakkutleie / padling',group:'B',pageTitle:'Padleopplevelse',pageDesc:'Last opp bilder og GPX-rute.',
+    defaultZones:[
+      {id:'utleiested',label:'Utleiestedet',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'innsjosett',label:'Inn/ut av sjøen',icon:'🌊',extraFields:[],optional:false},
+      {id:'utstyr',label:'Utstyr og tilpasning',icon:'🚣',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false}],
+    extraOptions:['Rolig vann','Krevende parti','Rasteplass'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  sykling_b:{label:'Sykling og sykkelutleie',group:'B',pageTitle:'Sykkelopplevelse',pageDesc:'Last opp bilder og GPX-rute.',
+    defaultZones:[
+      {id:'utleiested',label:'Utleiestedet',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'startpunkt',label:'Startpunkt',icon:'📍',extraFields:[],optional:false},
+      {id:'terreng',label:'Terreng / underlag',icon:'🚵',extraFields:['stigningsgrad'],optional:false},
+      {id:'utstyr',label:'Sykler og utstyr',icon:'🚲',extraFields:[],optional:false}],
+    extraOptions:['Hvilepunkt','Krevende bakke','Serveringssted','WC'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  ridning:{label:'Ridning',group:'B',pageTitle:'Ridestall og tur',pageDesc:'Last opp bilder av stall og rute.',
+    defaultZones:[
+      {id:'stall',label:'Stall / ridesenter',icon:'🐴',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'terreng',label:'Rideterreng',icon:'🌿',extraFields:[],optional:false},
+      {id:'utstyr',label:'Utstyr og tilpasning',icon:'🎒',extraFields:[],optional:false}],
+    extraOptions:['WC','Hvileplass','Krevende terreng'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  tilpasset_natur:{label:'Tilpassede naturopplevelser',group:'B',pageTitle:'Tilpasset naturopplevelse',pageDesc:'Last opp bilder og beskriv opplevelsen.',
+    defaultZones:[
+      {id:'motepunkt',label:'Møtepunkt',icon:'📍',extraFields:[],optional:false},
+      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
+      {id:'utstyr',label:'Tilpasset utstyr',icon:'🎒',extraFields:[],optional:false}],
+    extraOptions:['Hvilepunkt','WC','Transport','Oversiktsbilde'],
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+  annet_b:{label:'Annet (naturbasert bedrift)',group:'B',pageTitle:'Naturbasert opplevelse',pageDesc:'Last opp bilder og evt. GPX.',
+    defaultZones:[
+      {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
+      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false}],
+    extraOptions:['Utstyr','WC','Serveringssted','Hvilepunkt','Parkering'],
+    questions:['q_tilpassetutstyr','q_skriftlig','q_opplaering','q_ledsager']},
+  tursti:{label:'Tursti / natursti',group:'C',pageTitle:'Tursti',pageDesc:'Last opp bilder og GPX-fil for stien.',
+    defaultZones:[
+      {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering ved start',icon:'🅿️',extraFields:[],optional:false},
+      {id:'underlag',label:'Underlag og sti',icon:'👟',extraFields:['sti_bredde_cm','stigningsgrad'],optional:false},
+      {id:'wc',label:'Toalett ved start',icon:'🚻',extraFields:[],optional:true}],
+    extraOptions:['Hvileplass','Bratt parti','Krevende underlag','Utsiktspunkt'],
+    questions:['q_sti_rullestol','q_sti_barnevogn','q_sti_merking','q_sti_belysning','q_hc_wc','q_ledsager']},
+  sykkelsti:{label:'Sykkelløype',group:'C',pageTitle:'Sykkelløype',pageDesc:'Last opp bilder og GPX-fil.',
+    defaultZones:[
+      {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'underlag',label:'Underlag og løype',icon:'🚲',extraFields:['stigningsgrad'],optional:false}],
+    extraOptions:['Hvileplass','Krevende parti','Serveringssted','WC'],
+    questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_ledsager']},
+  skiloype:{label:'Skiløype',group:'C',pageTitle:'Skiløype',pageDesc:'Last opp bilder og GPX-fil.',
+    defaultZones:[
+      {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'loype',label:'Løypetrase',icon:'⛷️',extraFields:['stigningsgrad'],optional:false}],
+    extraOptions:['Hvileplass','Krevende bakke','Serveringssted'],
+    questions:['q_sti_merking','q_hc_wc','q_ledsager','q_opplaering']},
+  badeplass:{label:'Badeplass',group:'C',pageTitle:'Badeplass',pageDesc:'Last opp bilder av badeplassen.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'adkomst',label:'Adkomst til vannet',icon:'🌊',extraFields:[],optional:false},
+      {id:'wc',label:'Toalett / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
+    extraOptions:['Rampe til vann','Badestol / amfistol','Hvileplass'],
+    questions:['q_hc_wc','q_badeplass_rampe','q_ledsager','q_opplaering']},
+  utsiktspunkt:{label:'Utsiktspunkt / attraksjon',group:'C',pageTitle:'Utsiktspunkt',pageDesc:'Last opp bilder av stedet og adkomsten.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:['stigningsgrad'],optional:false},
+      {id:'selve_stedet',label:'Selve utsiktspunktet',icon:'🏔️',extraFields:[],optional:false}],
+    extraOptions:['Informasjonsskilt','Sitteplasser','WC i nærheten'],
+    questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_ledsager']},
+  hc_parkering:{label:'HC-parkering / toalett i utmark',group:'C',pageTitle:'HC-parkering / toalett',pageDesc:'Last opp bilder.',
+    defaultZones:[
+      {id:'parkering',label:'HC-parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:true}],
+    extraOptions:['Rampe','Skilting','Belysning'],
+    questions:['q_hc_wc','q_sti_merking','q_ledsager']},
+  annet_c:{label:'Annet (fellesgode)',group:'C',pageTitle:'Fellesgode / felles rom',pageDesc:'Last opp bilder og evt. GPX.',
+    defaultZones:[
+      {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:[],optional:false},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
+    extraOptions:['Parkering','WC','Hvileplass','Informasjonsskilt'],
+    questions:['q_sti_rullestol','q_hc_wc','q_sti_merking','q_ledsager']}
+};
+
+var ALL_QUESTIONS = {
+  q_allergi:{text:'Er det allergivennlige alternativer tilgjengelig?',ctx:'Uten dun, parfyme, kjæledyr'},
+  q_parfyme:{text:'Kan rom bestilles med parfymefrie produkter?',ctx:''},
+  q_meny:{text:'Er menyen tilgjengelig digitalt, storskrift eller med allergenmerkinger?',ctx:''},
+  q_skriftlig:{text:'Kan gjester kommunisere skriftlig (SMS/e-post)?',ctx:'Viktig for hørselshemmede'},
+  q_opplaering:{text:'Har ansatte / guider fått opplæring i å møte gjester med ulike behov?',ctx:''},
+  q_teleslynge:{text:'Er det teleslyngeanlegg i resepsjon eller fellesarealer?',ctx:''},
+  q_ledsager:{text:'Godtas ledsagerbevis?',ctx:'Ledsager for person med funksjonsnedsettelse'},
+  q_evakuering:{text:'Finnes det evakueringsplan som ivaretar alle?',ctx:''},
+  q_tilpassetutstyr:{text:'Har dere tilpasset utstyr for personer med nedsatt funksjonsevne?',ctx:'Sit-ski, handbike, amfistol, tilpassede kajakker osv.'},
+  q_sti_rullestol:{text:'Er stien / løypen fremkommelig med rullestol eller rullator?',ctx:''},
+  q_sti_barnevogn:{text:'Er stien fremkommelig med barnevogn?',ctx:''},
+  q_sti_merking:{text:'Er stien / løypen tydelig merket?',ctx:'Skilting, stikker, kart'},
+  q_sti_belysning:{text:'Er det belysning langs stien?',ctx:''},
+  q_hc_wc:{text:'Er det tilgjengelig HC-toalett i nærheten?',ctx:''},
+  q_badeplass_rampe:{text:'Er det rampe eller tilrettelagt adkomst til vannet?',ctx:'Amfistol, rampe, fast underlag'}
+};
+
+var EXTRA_FIELDS = {
+  terskel_mm:{label:'Terskelhøyde',unit:'mm',ph:'f.eks. 15'},
+  dor_cm:{label:'Dørbredde',unit:'cm',ph:'f.eks. 90'},
+  seng_cm:{label:'Sengehøyde',unit:'cm',ph:'f.eks. 47'},
+  bad_dor_cm:{label:'Dørbredde bad/WC',unit:'cm',ph:'f.eks. 85'},
+  snuplass_cm:{label:'Snuplass diameter',unit:'cm',ph:'f.eks. 150'},
+  heis_bredde_cm:{label:'Heisbredde',unit:'cm',ph:'f.eks. 110'},
+  disk_cm:{label:'Skrankehøyde',unit:'cm',ph:'f.eks. 80'},
+  bord_cm:{label:'Bordhøyde',unit:'cm',ph:'f.eks. 72'},
+  stigningsgrad:{label:'Stigningsgrad',unit:'%',ph:'f.eks. 8'},
+  sti_bredde_cm:{label:'Sti-bredde',unit:'cm',ph:'f.eks. 120'}
+};
+
+var ZONE_PROMPTS = {
+  parkering:'Du er ekspert på universell utforming. Analyser parkeringsplassen. Se etter HC-parkering, avstand til inngang, underlag, nivåforskjeller. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  inngang:'Du er ekspert på universell utforming. Analyser inngangspartiet. Se etter terskel, dørtype, dørbredde, rampe, underlag, belysning. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]',
+  resepsjon:'Du er ekspert på universell utforming. Analyser resepsjonen. Se etter skrankehøyde (lav del for rullestol?), plass foran, teleslynge-skilt. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  spisesal:'Du er ekspert på universell utforming. Analyser spisesalen. Se etter avstand mellom bord (min 90 cm), bordtype og høyde. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  hotellrom:'Du er ekspert på universell utforming. Analyser hotellrommet. Se etter snuplass (min 150 cm), sengehøyde (ca 45-50 cm), plass ved seng, dørbredde. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]',
+  bad:'Du er ekspert på universell utforming. Analyser badet. Se etter terskel, dørbredde (min 85 cm), snuplass (min 150 cm), støttehåndtak, dusjtype. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]',
+  heis:'Du er ekspert på universell utforming. Analyser heisen. Se etter størrelse, dørbredde, knappepanel høyde (maks 120 cm). **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  wc:'Du er ekspert på universell utforming. Analyser WC/toalettet. Se etter dørbredde (min 85 cm), snuplass (min 150 cm), støttehåndtak. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]',
+  terreng:'Du er ekspert på universell utforming og friluftsliv. Analyser terrenget/underlaget. Se etter underlagstype, bratthet, hindringer, bredde, fremkommelighet for rullestol eller rullator. **Det jeg ser:** [observasjoner] **Vurdering:** [tilgjengelighet for ulike grupper]',
+  underlag:'Du er ekspert på universell utforming og friluftsliv. Analyser stien/underlaget. Se etter type underlag, bredde, jevnhet, hindringer, bratthet. **Det jeg ser:** [observasjoner] **Vurdering:** [fremkommelighet for rullestol, rullator, barnevogn]',
+  motepunkt:'Du er ekspert på universell utforming. Analyser møtepunktet/startstedet. Se etter underlag, sittemuligheter, toalett nærhet, informasjonsskilting. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  startpunkt:'Du er ekspert på universell utforming. Analyser startpunktet. Se etter parkering nærhet, underlag, informasjonsskilt, fasiliteter. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  adkomst:'Du er ekspert på universell utforming. Analyser adkomsten. Se etter underlag, bratthet, hindringer, bredde, fremkommelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  utstyr:'Du er ekspert på inkluderende reiseliv. Analyser utstyret. Se etter tilpasbarhet, spesialutstyr, tilgjengelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  oversikt:'Du er ekspert på universell utforming. Analyser oversiktsbildet. Gi generell vurdering: nivåforskjeller, underlag, hindringer. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  transport:'Du er ekspert på universell utforming. Analyser transportmiddelet. Se etter stigehøyde, rampe/lift, plass for rullestol. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  selve_stedet:'Du er ekspert på universell utforming. Analyser selve utsiktspunktet/attraksjonen. Se etter rekkverk, underlag, plass, tilgjengelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  sanitaer:'Du er ekspert på universell utforming. Analyser sanitæranlegget. Se etter dørbredde, snuplass, støttehåndtak, terskel. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  innsjosett:'Du er ekspert på universell utforming. Analyser inn/ut-stedet ved vannet. Se etter underlag, brygge, rampe, sikkerhet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  utleiested:'Du er ekspert på universell utforming. Analyser utleiestedet. Se etter adkomst, terskel, dørbredde, plass inne. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  stue:'Du er ekspert på universell utforming. Analyser stuen. Se etter bevegelsesplass, terskler, møblering. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  kjokken:'Du er ekspert på universell utforming. Analyser kjøkkenet. Se etter benkehøyde, plass under benk for rullestol. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  soverom:'Du er ekspert på universell utforming. Analyser soverommet. Se etter sengehøyde, plass på begge sider, snuplass. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  aktivitetsomrade:'Du er ekspert på universell utforming. Analyser aktivitetsområdet. Se etter underlag, terskler, plass, rullestoltilgjengelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]'
+};
+var DEFAULT_PROMPT = 'Du er ekspert på universell utforming. Analyser bildet med fokus på tilgjengelighet. Se etter terskler, dørbredder, snuplass, underlag. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]';
+
+// GPX
+function handleGpx(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    state.gpxData = parseGpx(ev.target.result);
+    renderGpxResult(state.gpxData);
+  };
+  reader.readAsText(file);
+}
+
+function parseGpx(txt) {
+  var parser = new DOMParser();
+  var doc = parser.parseFromString(txt, 'text/xml');
+  var pts = Array.from(doc.querySelectorAll('trkpt,rtept'));
+  if (pts.length < 2) return null;
+  var data = pts.map(function(p) {
+    return {lat:parseFloat(p.getAttribute('lat')),lon:parseFloat(p.getAttribute('lon')),ele:parseFloat((p.querySelector('ele')||{textContent:'0'}).textContent||0)};
+  });
+  var totalDist = 0, dists = [0];
+  for (var i = 1; i < data.length; i++) {
+    var d = haversine(data[i-1].lat,data[i-1].lon,data[i].lat,data[i].lon);
+    totalDist += d; dists.push(totalDist);
+  }
+  var eles = data.map(function(p){return p.ele;}).filter(function(e){return e>0;});
+  var minEle = Math.min.apply(null,eles), maxEle = Math.max.apply(null,eles);
+  var totalUp = 0, totalDown = 0;
+  for (var i = 1; i < eles.length; i++) {
+    var diff = eles[i]-eles[i-1];
+    if (diff > 0) totalUp += diff; else totalDown += Math.abs(diff);
+  }
+  var maxSlope = 0;
+  for (var i = 1; i < data.length; i++) {
+    var dist = dists[i]-dists[i-1];
+    if (dist > 0) {
+      var slope = (Math.abs(data[i].ele-data[i-1].ele)/dist)*100;
+      if (slope > maxSlope && slope < 50) maxSlope = slope;
+    }
+  }
+  return {totalDist:Math.round(totalDist/10)/100,totalUp:Math.round(totalUp),totalDown:Math.round(totalDown),minEle:Math.round(minEle),maxEle:Math.round(maxEle),maxSlope:Math.round(maxSlope),avgSlope:Math.round(totalDist>0?(totalUp/(totalDist/2))*100*10)/10,points:data,dists:dists.map(function(d){return Math.round(d/10)/100;})};
+}
+
+function haversine(lat1,lon1,lat2,lon2) {
+  var R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function slopeClass(s) { return s<=5?'ok':s<=8?'caution':'warning'; }
+
+function renderGpxResult(r) {
+  var el = document.getElementById('gpx-result');
+  if (!r) { el.style.display='none'; return; }
+  el.style.display = 'block';
+  var w=320,h=60,minE=r.minEle,maxE=r.maxEle,rangeE=maxE-minE||1,maxD=r.totalDist;
+  var step = Math.max(1,Math.floor(r.points.length/80));
+  var svgPts = [];
+  for (var i=0;i<r.points.length;i+=step) {
+    svgPts.push((r.dists[i]/maxD)*w+','+( h-((r.points[i].ele-minE)/rangeE)*(h-8)+4 ));
+  }
+  el.innerHTML = '<div class="gpx-stats">' +
+    '<div class="gpx-stat"><div class="gpx-stat-val">'+r.totalDist+' km</div><div class="gpx-stat-label">Distanse</div></div>' +
+    '<div class="gpx-stat"><div class="gpx-stat-val">↑'+r.totalUp+'m ↓'+r.totalDown+'m</div><div class="gpx-stat-label">Høyde</div></div>' +
+    '<div class="gpx-stat '+slopeClass(r.maxSlope)+'"><div class="gpx-stat-val">'+r.maxSlope+'%</div><div class="gpx-stat-label">Maks stigning</div></div>' +
+    '<div class="gpx-stat '+slopeClass(r.avgSlope)+'"><div class="gpx-stat-val">'+r.avgSlope+'%</div><div class="gpx-stat-label">Snitt stigning</div></div>' +
+    '</div><div style="margin-top:8px;font-size:12px;color:var(--text3)">' +
+    (r.maxSlope<=5?'✅ Egnet for rullestol':r.maxSlope<=8?'🟡 Krevende for rullestol':r.maxSlope<=12?'⚠️ For bratt for de fleste':'🔴 Ikke egnet for rullestol') +
+    '</div><svg class="gpx-profile" viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg"><rect width="'+w+'" height="'+h+'" fill="#f1efe8" rx="4"/><polyline points="'+svgPts.join(' ')+'" fill="none" stroke="#1D9E75" stroke-width="2"/></svg>';
+}
+
+// SONER
+function buildZones() {
+  var type = document.getElementById('biz-type').value;
+  var config = TYPE_CONFIG[type];
+  if (!config) {
+    document.getElementById('zones-container').innerHTML = '<div class="notice">⚠️ Velg type på forrige side først.</div>';
+    return;
+  }
+  document.getElementById('zones-title').textContent = config.pageTitle;
+  document.getElementById('zones-desc').textContent = config.pageDesc;
+  var grp = config.group;
+  var grpLabel = {A:'A — Bygningsbasert bedrift',B:'B — Naturbasert aktivitetsbedrift',C:'C — Fellesgode / felles rom'}[grp];
+  document.getElementById('group-badge-container').innerHTML = '<div class="group-badge '+grp+'">'+grpLabel+'</div>';
+  document.getElementById('gpx-section').style.display = (grp==='B'||grp==='C') ? 'block' : 'none';
+  if (state.zones.length===0 || state._builtForType!==type) {
+    state.zones = config.defaultZones.map(function(z) {
+      return {id:z.id,label:z.label,icon:z.icon,extraFields:z.extraFields,optional:z.optional,images:[],aiAnalysis:null,measures:{},note:''};
+    });
+    state._builtForType = type;
+  }
+  renderZones();
+}
+
+function renderZones() {
+  var html = '';
+  for (var i = 0; i < state.zones.length; i++) html += renderZoneCard(state.zones[i], i);
+  document.getElementById('zones-container').innerHTML = html;
+}
+
+function renderZoneCard(zone, idx) {
+  var previewHtml = '';
+  for (var i = 0; i < zone.images.length; i++) {
+    var img = zone.images[i];
+    var analyzed = img.analysis != null;
+    previewHtml += '<div class="preview-item"><img src="'+img.dataUrl+'" alt="">' +
+      '<button class="preview-remove" onclick="removeImg('+idx+','+i+')">×</button>' +
+      (analyzed ? '<div class="preview-analyzed">✓ Analysert</div>' : '<button class="preview-analyze" onclick="analyzeSpecificImage('+idx+','+i+')">🔍 Analyser</button>') +
+      '</div>';
+  }
+  var analyses = zone.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;});
+  var combinedAnalysis = analyses.join('\n\n---\n\n');
+  var extraFieldsHtml = '';
+  for (var j = 0; j < zone.extraFields.length; j++) {
+    var fid = zone.extraFields[j];
+    var f = EXTRA_FIELDS[fid];
+    if (!f) continue;
+    extraFieldsHtml += '<div class="field"><label class="field-label">'+f.label+' ('+f.unit+')</label>' +
+      '<div class="number-field"><input type="number" placeholder="'+f.ph+'" value="'+(zone.measures[fid]||'')+'" oninput="state.zones['+idx+'].measures[\''+fid+'\']=this.value"/>' +
+      '<span class="unit">'+f.unit+'</span></div></div>';
+  }
+  return '<div class="zone-card" id="zone-card-'+idx+'">' +
+    '<div class="zone-card-title">'+zone.icon+' '+zone.label+(zone.optional?'<span class="zone-optional">(valgfri)</span>':'')+'</div>' +
+    '<div class="upload-zone"><input type="file" accept="image/*" multiple onchange="handleFiles(event,'+idx+')"/>' +
+    '<div class="upload-icon">📷</div><div class="upload-title">Ta bilde eller velg fra bibliotek</div>' +
+    '<div class="upload-hint">Alle bilder kan analyseres individuelt</div></div>' +
+    (zone.images.length ? '<div class="image-preview">'+previewHtml+'</div>' : '') +
+    (combinedAnalysis ? '<div class="ai-box visible"><div class="ai-header"><span>AI-analyse ('+analyses.length+' bilde'+( analyses.length>1?'r':'')+')</span></div>' +
+      '<div class="ai-text">'+combinedAnalysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div></div>' : '') +
+    '<div class="ai-box" id="ai-loading-'+idx+'" style="display:none"><div class="ai-header"><div class="ai-spinner on"></div><span>Analyserer...</span></div></div>' +
+    (zone.extraFields.length ? '<div style="margin-top:1rem">'+extraFieldsHtml+'</div>' : '') +
+    '<div class="field" style="margin-top:.75rem"><label class="field-label">Egne notater (valgfritt)</label>' +
+    '<textarea placeholder="Ekstra observasjoner eller beskrivelse..." oninput="state.zones['+idx+'].note=this.value">'+( zone.note||'')+'</textarea></div>' +
+    '</div>';
+}
+
+function handleFiles(e, idx) {
+  Array.from(e.target.files).forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var imgObj = {dataUrl:ev.target.result,file:file,analysis:null};
+      state.zones[idx].images.push(imgObj);
+      renderZones();
+      analyzeSpecificImage(idx, state.zones[idx].images.length-1);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeImg(zi, ii) { state.zones[zi].images.splice(ii,1); renderZones(); }
+
+function compressImage(dataUrl, maxWidth, quality) {
+  maxWidth = maxWidth || 1024; quality = quality || 0.7;
+  return new Promise(function(resolve) {
+    var imgEl = new Image();
+    imgEl.onload = function() {
+      var canvas = document.createElement('canvas');
+      var w = imgEl.width, h = imgEl.height;
+      if (w > maxWidth) { h = Math.round(h*maxWidth/w); w = maxWidth; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(imgEl,0,0,w,h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    imgEl.src = dataUrl;
+  });
+}
+
+async function analyzeSpecificImage(idx, imgIdx) {
+  var zone = state.zones[idx];
+  var loadingBox = document.getElementById('ai-loading-'+idx);
+  if (loadingBox) loadingBox.style.display = 'block';
+  var compressed = await compressImage(zone.images[imgIdx].dataUrl);
+  var base64 = compressed.split(',')[1];
+  var prompt = ZONE_PROMPTS[zone.id] || DEFAULT_PROMPT;
+  try {
+    var res = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:500,messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},
+        {type:'text',text:prompt}
+      ]}]})});
+    var data = await res.json();
+    if (data.content && data.content[0] && data.content[0].text) {
+      state.zones[idx].images[imgIdx].analysis = data.content[0].text;
+    } else {
+      state.zones[idx].images[imgIdx].analysis = 'Kunne ikke analysere dette bildet.';
+    }
+  } catch(err) {
+    state.zones[idx].images[imgIdx].analysis = 'Feil: ' + err.message;
+  }
+  if (loadingBox) loadingBox.style.display = 'none';
+  renderZones();
+}
+
+// SPØRSMÅL
+function buildQuestions() {
+  var type = document.getElementById('biz-type').value;
+  var config = TYPE_CONFIG[type];
+  var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
+  var html = '';
+  for (var i = 0; i < qIds.length; i++) {
+    var id = qIds[i];
+    var q = ALL_QUESTIONS[id];
+    if (!q) continue;
+    html += '<div class="question-item"><div class="question-text">'+q.text+'</div>' +
+      (q.ctx ? '<div class="question-context">'+q.ctx+'</div>' : '') +
+      '<div class="yn-group">' +
+      '<button class="yn-btn yes '+(state.answers[id]==='ja'?'active':'')+'" onclick="setAns(\''+id+'\',\'ja\',this)">Ja</button>' +
+      '<button class="yn-btn no '+(state.answers[id]==='nei'?'active':'')+'" onclick="setAns(\''+id+'\',\'nei\',this)">Nei</button>' +
+      '<button class="yn-btn na '+(state.answers[id]==='na'?'active':'')+'" onclick="setAns(\''+id+'\',\'na\',this)">Vet ikke</button>' +
+      '</div></div>';
+  }
+  document.getElementById('questions-container').innerHTML = html;
+}
+
+function setAns(id, val, btn) {
+  state.answers[id] = val;
+  var group = btn.closest('.yn-group').querySelectorAll('.yn-btn');
+  for (var i = 0; i < group.length; i++) group[i].classList.remove('active');
+  btn.classList.add('active');
+}
+
+// RAPPORT
+function switchTab(tab) {
+  document.getElementById('tab-guide').classList.toggle('active', tab==='guide');
+  document.getElementById('tab-analyse').classList.toggle('active', tab==='analyse');
+  document.getElementById('tab-content-guide').style.display = tab==='guide' ? 'block' : 'none';
+  document.getElementById('tab-content-analyse').style.display = tab==='analyse' ? 'block' : 'none';
+}
+
+async function buildRapport() {
+  buildGuide();
+  buildAnalyse();
+}
+
+function buildGuide() {
+  var name = document.getElementById('biz-name').value || 'Ukjent sted';
+  var type = document.getElementById('biz-type').value;
+  var config = TYPE_CONFIG[type];
+  var addr = document.getElementById('biz-address').value;
+  var dest = document.getElementById('biz-dest').value;
+  var kommune = document.getElementById('biz-kommune').value;
+  var group = config ? config.group : 'A';
+  var firstImg = null;
+  for (var i = 0; i < state.zones.length; i++) {
+    if (state.zones[i].images.length > 0) { firstImg = state.zones[i].images[0]; break; }
+  }
+  var mapQuery = encodeURIComponent(addr || name);
+
+  var gpxHtml = '';
+  if (state.gpxData) {
+    var r = state.gpxData;
+    var vurdering = r.maxSlope<=5?'✅ Egnet for rullestol og rullator.':r.maxSlope<=8?'🟡 Krevende for manuell rullestol.':r.maxSlope<=12?'⚠️ For bratt for de fleste rullestoler.':'🔴 Svært bratt — kun erfarne turgåere.';
+    gpxHtml = '<div class="guide-gpx"><div class="guide-gpx-title">🗺️ Rute — GPX-analyse</div>' +
+      '<div class="guide-gpx-stats">' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.totalDist+' km</div><div class="guide-gpx-stat-label">Distanse</div></div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">↑'+r.totalUp+'m</div><div class="guide-gpx-stat-label">Stigning opp</div></div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.maxSlope+'%</div><div class="guide-gpx-stat-label">Maks stigning</div></div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.minEle+'–'+r.maxEle+'m</div><div class="guide-gpx-stat-label">Høyde over havet</div></div>' +
+      '</div><div style="margin-top:10px;font-size:13px;color:var(--text2)">'+vurdering+'</div></div>';
+  }
+
+  var sonerHtml = '';
+  for (var i = 0; i < state.zones.length; i++) {
+    var zone = state.zones[i];
+    var hasContent = zone.images.length > 0 || zone.note || Object.keys(zone.measures).some(function(k){return zone.measures[k];});
+    if (!hasContent) continue;
+    var malInfo = '';
+    for (var j = 0; j < zone.extraFields.length; j++) {
+      var fid = zone.extraFields[j];
+      var f = EXTRA_FIELDS[fid];
+      var val = zone.measures[fid];
+      if (f && val) malInfo += '<span class="guide-sone-maal-chip">'+f.label+': '+val+' '+f.unit+'</span>';
+    }
+    var bilderHtml = '';
+    for (var j = 0; j < zone.images.length; j++) {
+      bilderHtml += '<div class="guide-bilde"><img src="'+zone.images[j].dataUrl+'" alt="'+zone.label+'"/></div>';
+    }
+    sonerHtml += '<div class="guide-sone">' +
+      '<div class="guide-sone-topp"><div class="guide-sone-ikon">'+zone.icon+'</div><div class="guide-sone-navn">'+zone.label+'</div></div>' +
+      (zone.note ? '<div class="guide-sone-tekst">'+zone.note+'</div>' : '') +
+      (malInfo ? '<div class="guide-sone-maal">'+malInfo+'</div>' : '') +
+      (bilderHtml ? '<div class="guide-bilder">'+bilderHtml+'</div>' : '') +
+      '</div>';
+  }
+
+  var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
+  var jaItems = '';
+  for (var i = 0; i < qIds.length; i++) {
+    var id = qIds[i];
+    if (state.answers[id] !== 'ja') continue;
+    var q = ALL_QUESTIONS[id];
+    var ikon = '✅';
+    if (q.text.indexOf('teleslynge') >= 0 || q.text.indexOf('Teleslynge') >= 0) ikon = '🔊';
+    else if (q.text.indexOf('ledsager') >= 0 || q.text.indexOf('Ledsager') >= 0) ikon = '👥';
+    else if (q.text.indexOf('allergi') >= 0) ikon = '🌿';
+    else if (q.text.indexOf('parfyme') >= 0) ikon = '🌸';
+    else if (q.text.indexOf('meny') >= 0 || q.text.indexOf('Meny') >= 0) ikon = '📋';
+    else if (q.text.indexOf('opplæring') >= 0 || q.text.indexOf('opplaering') >= 0) ikon = '👨‍🏫';
+    else if (q.text.indexOf('evakuering') >= 0) ikon = '🚨';
+    else if (q.text.indexOf('utstyr') >= 0) ikon = '🎒';
+    jaItems += '<div class="guide-tillegg-kort"><div class="guide-tillegg-ikon">'+ikon+'</div><div class="guide-tillegg-tekst">'+q.text+'</div></div>';
+  }
+
+  var metaPills = '';
+  if (dest) metaPills += '<div class="guide-meta-pill">🗺️ '+dest+'</div>';
+  if (kommune) metaPills += '<div class="guide-meta-pill">📍 '+kommune+'</div>';
+  if (addr) metaPills += '<div class="guide-meta-pill">🏠 '+addr+'</div>';
+  for (var i = 0; i < state.tags.length; i++) metaPills += '<div class="guide-meta-pill">'+state.tags[i]+'</div>';
+
+  var mapHtml = '';
+  if (addr) {
+    mapHtml = '<div class="guide-map"><iframe src="https://maps.google.com/maps?q='+mapQuery+'&output=embed&z=15" allowfullscreen loading="lazy"></iframe></div>';
+  }
+
+  var container = document.getElementById('tab-content-guide');
+  container.innerHTML =
+    '<div class="guide-hero">' +
+    (firstImg ? '<img class="guide-hero-img" src="'+firstImg.dataUrl+'" alt="'+name+'"/>' : '') +
+    '<div class="guide-hero-body">' +
+    '<div class="guide-hero-badge">AccessNorway · Tilgjengelighetsguide</div>' +
+    '<div class="guide-hero-name">'+name+'</div>' +
+    '<div class="guide-hero-type">'+(config?config.label:'')+'</div>' +
+    '<div class="guide-hero-meta">'+metaPills+'</div>' +
+    '</div></div>' +
+    mapHtml + gpxHtml +
+    (sonerHtml ? '<div class="guide-section"><div class="guide-section-title">Fasiliteter og tilgjengelighet</div>'+sonerHtml+'</div>' : '') +
+    (jaItems ? '<div class="guide-section"><div class="guide-section-title">Tilleggstjenester</div><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
+    '<div class="guide-section"><div class="guide-section-title">Spør om tilgjengelighet</div>' +
+    '<div class="chat-card">' +
+    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">Tilgjengelighetsassistent</div><div class="chat-header-sub">AI</div></div>' +
+    '<div class="chat-messages" id="guide-chat-messages"><div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten på '+name+'. Hva lurer du på?</div></div></div>' +
+    '<div class="chat-suggestions">' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Passer det for rullestol?\')">Passer for rullestol?</button>' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Finnes det HC-parkering?\')">Finnes HC-parkering?</button>' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Hva med allergi?\')">Hva med allergi?</button>' +
+    '</div>' +
+    '<div class="chat-input-row">' +
+    '<input type="text" class="chat-input" id="guide-chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key===\'Enter\')sendGuideChatMsg()"/>' +
+    '<button class="chat-send" onclick="sendGuideChatMsg()">➤</button>' +
+    '</div></div></div>' +
+    '<div class="guide-download-bar">' +
+    '<button class="guide-btn-dl" onclick="downloadGuideHTML()">📄 Last ned guide (HTML)</button>' +
+    '<button class="guide-btn-dl primary" onclick="downloadProfile()">⬇️ Last ned rådata (JSON)</button>' +
+    '</div>' +
+    '<div style="text-align:center;font-size:11px;color:var(--text3);margin-top:1rem;padding-bottom:1rem">Tilgjengelighetsguide generert med AccessNorway · '+new Date().toLocaleDateString('nb-NO')+'</div>';
+
+  var soner = state.zones.filter(function(z){return z.images.length>0||z.note;});
+  var kontekstTekst = 'Du er tilgjengelighetsassistent for "'+name+'". Svar kort og konkret på norsk. Fasiliteter: ';
+  kontekstTekst += soner.map(function(z){return z.label+(z.note?' - '+z.note:'');}).join(', ');
+  kontekstTekst += '. Kun bruk informasjonen gitt.';
+  window._guideChatKontekst = kontekstTekst;
+  window._guideChatHistory = [];
+}
+
+async function buildAnalyse() {
+  var container = document.getElementById('tab-content-analyse');
+  var name = document.getElementById('biz-name').value || 'Ukjent sted';
+  var type = document.getElementById('biz-type').value;
+  var config = TYPE_CONFIG[type];
+  var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
+
+  container.innerHTML = '<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>Genererer AI-rapport...</div>';
+
+  var soneKorter = [];
+  for (var i = 0; i < state.zones.length; i++) {
+    var zone = state.zones[i];
+    var hasContent = zone.images.length > 0 || zone.note || Object.keys(zone.measures).some(function(k){return zone.measures[k];});
+    if (!hasContent) { soneKorter.push(null); continue; }
+    var alleAnalyser = zone.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;}).join('\n');
+    var malInfo = zone.extraFields.map(function(fid){var f=EXTRA_FIELDS[fid];var v=zone.measures[fid];return f&&v?f.label+': '+v+' '+f.unit:'';}).filter(Boolean).join(', ');
+    var gjesteTekst = '', status = 'ukjent';
+    if (alleAnalyser || malInfo || zone.note) {
+      try {
+        var kontekst = [alleAnalyser, malInfo?'Målte data: '+malInfo:'', zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
+        var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',
+            content:'Du skriver tilgjengelighetsprofil for "'+name+'" som gjester skal lese. Basert på: '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 setninger på norsk som forteller gjesten konkret hva som finnes og om det er tilgjengelig. Avslutt med én linje: STATUS:GRONN, STATUS:GUL eller STATUS:ROD'}]})});
+        var data = await res.json();
+        if (data.content && data.content[0] && data.content[0].text) {
+          var tekst = data.content[0].text;
+          var m = tekst.match(/STATUS:(GRONN|GUL|ROD)/);
+          if (m) status = m[1].toLowerCase();
+          gjesteTekst = tekst.replace(/STATUS:(GRONN|GUL|ROD)/,'').trim();
+        }
+      } catch(e) {}
+    }
+    var statusTekst = {gronn:'Tilgjengelig',gul:'Delvis tilgjengelig',rod:'Begrenset tilgjengelighet',ukjent:'Ikke vurdert'}[status];
+    var faktaRader = zone.extraFields.map(function(fid){var f=EXTRA_FIELDS[fid];var v=zone.measures[fid];return f&&v?'<div class="fakta-rad"><span class="fakta-etikett">'+f.label+':</span><span class="fakta-verdi">'+v+' '+f.unit+'</span></div>':'';}).filter(Boolean).join('');
+    soneKorter.push({zone:zone,gjesteTekst:gjesteTekst,status:status,statusTekst:statusTekst,faktaRader:faktaRader});
+  }
+
+  var gyldigeSoner = soneKorter.filter(Boolean);
+  var sonerHtml = gyldigeSoner.map(function(s) {
+    var statusIkon = s.status==='gronn'?'✅':s.status==='gul'?'🟡':s.status==='rod'?'🔴':'⬜';
+    var analyseHtml = s.zone.images.filter(function(img){return img.analysis;}).map(function(img){
+      return '<div style="margin-top:.5rem;background:var(--surface2);border-radius:8px;padding:.75rem;font-size:13px;color:var(--text2);line-height:1.6">'+
+        img.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div>';
+    }).join('');
+    return '<div class="sone-kort"><div class="sone-topp"><div class="sone-ikon">'+s.zone.icon+'</div><div class="sone-navn">'+s.zone.label+'</div>' +
+      '<div class="status-badge '+s.status+'">'+statusIkon+' '+s.statusTekst+'</div></div>' +
+      (s.gjesteTekst?'<div class="sone-tekst">'+s.gjesteTekst+'</div>':'') +
+      (s.faktaRader?'<div class="sone-fakta">'+s.faktaRader+'</div>':'') +
+      analyseHtml+'</div>';
+  }).join('');
+
+  var jaItems = '';
+  for (var i = 0; i < qIds.length; i++) {
+    var id = qIds[i];
+    if (state.answers[id] !== 'ja') continue;
+    var q = ALL_QUESTIONS[id];
+    var ikon = '✅';
+    if (q.text.indexOf('Teleslynge') >= 0 || q.text.indexOf('teleslynge') >= 0) ikon = '🔊';
+    else if (q.text.indexOf('ledsager') >= 0 || q.text.indexOf('Ledsager') >= 0) ikon = '👥';
+    else if (q.text.indexOf('allergi') >= 0) ikon = '🌿';
+    else if (q.text.indexOf('parfyme') >= 0) ikon = '🌸';
+    else if (q.text.indexOf('meny') >= 0) ikon = '📋';
+    else if (q.text.indexOf('opplaering') >= 0) ikon = '👨‍🏫';
+    else if (q.text.indexOf('evakuering') >= 0) ikon = '🚨';
+    else if (q.text.indexOf('utstyr') >= 0) ikon = '🎒';
+    jaItems += '<div class="tillegg-kort"><div class="tillegg-ikon">'+ikon+'</div><div class="tillegg-verdi">'+q.text+'</div></div>';
+  }
+
+  var soneInfo = gyldigeSoner.map(function(s){return s.zone.label+' ('+s.statusTekst+'): '+s.gjesteTekst;}).join('\n');
+  var svarInfo = qIds.map(function(id){var q=ALL_QUESTIONS[id];var v=state.answers[id];return q&&v?q.text+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('\n');
+  var gpxInfo = state.gpxData ? 'GPX: '+state.gpxData.totalDist+'km, maks stigning '+state.gpxData.maxSlope+'%, snitt '+state.gpxData.avgSlope+'%' : '';
+  window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?config.label:type)+'). Svar på norsk, vennlig og konkret.\n\n'+
+    (gpxInfo?'RUTE:\n'+gpxInfo+'\n\n':'')+'FASILITETER:\n'+(soneInfo||'Ikke registrert')+'\n\nTILLEGGSINFO:\n'+(svarInfo||'Ikke registrert')+
+    '\n\nHvis du ikke vet svaret, si det ærlig.';
+  state.chatHistory = [];
+
+  container.innerHTML =
+    '<div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">AI-analyse fullført</div><div class="success-text">Detaljert tilgjengelighetsvurdering per sone.</div></div></div>' +
+    sonerHtml +
+    (jaItems?'<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">'+jaItems+'</div></div>':'') +
+    '<div class="chat-card">' +
+    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">Spør om tilgjengelighet</div><div class="chat-header-sub">AI-assistent</div></div>' +
+    '<div class="chat-messages" id="chat-messages"><div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten her. Hva lurer du på?</div></div></div>' +
+    '<div class="chat-suggestions">' +
+    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer for rullestol?</button>' +
+    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Finnes HC-parkering?</button>' +
+    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Hva med allergi?</button>' +
+    '</div>' +
+    '<div class="chat-input-row">' +
+    '<input type="text" class="chat-input" id="chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key===\'Enter\')sendChat()"/>' +
+    '<button class="chat-send" onclick="sendChat()">➤</button>' +
+    '</div></div>';
+}
+
+async function sendChat() {
+  var input = document.getElementById('chat-input');
+  var msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  appendChatMsg(msg, 'user');
+  var loadingId = 'loading-'+Date.now();
+  appendChatMsg('<span class="chat-spinner"></span>Tenker...', 'bot', loadingId);
+  state.chatHistory.push({role:'user',content:msg});
+  try {
+    var hist = state.chatHistory.map(function(m){return (m.role==='user'?'Gjest':'Assistent')+': '+m.content;}).join('\n');
+    var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:(window._chatKontekst||'')+'\n\n'+hist}]})});
+    var data = await res.json();
+    var el = document.getElementById(loadingId); if (el) el.remove();
+    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : 'Beklager, kunne ikke svare nå.';
+    state.chatHistory.push({role:'assistant',content:svar});
+    appendChatMsg(svar, 'bot');
+  } catch(err) {
+    var el = document.getElementById(loadingId); if (el) el.remove();
+    appendChatMsg('Beklager, noe gikk galt.', 'bot');
+  }
+}
+
+function sendChatSuggestion(btn) { document.getElementById('chat-input').value = btn.textContent; sendChat(); }
+
+async function sendGuideChatMsg(msg) {
+  var input = document.getElementById('guide-chat-input');
+  var text = msg || (input ? input.value.trim() : '');
+  if (!text) return;
+  if (input) input.value = '';
+  var msgs = document.getElementById('guide-chat-messages');
+  var uDiv = document.createElement('div'); uDiv.className='chat-msg user'; uDiv.innerHTML='<div class="chat-bubble">'+text+'</div>'; msgs.appendChild(uDiv);
+  var loadId = 'gl-'+Date.now();
+  var bDiv = document.createElement('div'); bDiv.className='chat-msg bot'; bDiv.id=loadId; bDiv.innerHTML='<div class="chat-bubble"><span class="chat-spinner"></span>Tenker...</div>'; msgs.appendChild(bDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+  if (!window._guideChatHistory) window._guideChatHistory = [];
+  window._guideChatHistory.push({role:'user',content:text});
+  try {
+    var hist = window._guideChatHistory.map(function(m){return (m.role==='user'?'Gjest':'Assistent')+': '+m.content;}).join('\n');
+    var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:250,messages:[{role:'user',content:(window._guideChatKontekst||'')+'\n\n'+hist}]})});
+    var data = await res.json();
+    var el = document.getElementById(loadId); if (el) el.remove();
+    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : 'Beklager, kunne ikke svare nå.';
+    window._guideChatHistory.push({role:'assistant',content:svar});
+    var rDiv = document.createElement('div'); rDiv.className='chat-msg bot'; rDiv.innerHTML='<div class="chat-bubble">'+svar+'</div>'; msgs.appendChild(rDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  } catch(err) {
+    var el = document.getElementById(loadId); if (el) el.remove();
+    var eDiv = document.createElement('div'); eDiv.className='chat-msg bot'; eDiv.innerHTML='<div class="chat-bubble">Feil: '+err.message+'</div>'; msgs.appendChild(eDiv);
+  }
+}
+
+function appendChatMsg(text, role, id) {
+  var msgs = document.getElementById('chat-messages');
+  var div = document.createElement('div'); div.className='chat-msg '+role;
+  if (id) div.id = id;
+  div.innerHTML = '<div class="chat-bubble">'+text+'</div>';
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+}
+
+function downloadGuideHTML() {
+  var guideContent = document.getElementById('tab-content-guide').innerHTML;
+  var name = document.getElementById('biz-name').value || 'AccessNorway';
+  var styles = document.querySelector('style').textContent;
+  var blob = new Blob(['<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+' — Tilgjengelighetsguide</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f1efe8;padding:1rem;max-width:600px;margin:0 auto}img{max-width:100%}'+styles+'</style></head><body>'+guideContent+'</body></html>'], {type:'text/html'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url; a.download=name.replace(/\s+/g,'_')+'_tilgjengelighetsguide.html'; a.click(); URL.revokeObjectURL(url);
+}
+
+function downloadProfile() {
+  var json = JSON.stringify({
+    bedrift:{navn:document.getElementById('biz-name').value,type:document.getElementById('biz-type').value,adresse:document.getElementById('biz-address').value,destinasjon:document.getElementById('biz-dest').value,kommune:document.getElementById('biz-kommune').value,kontakt:document.getElementById('biz-contact').value,tagger:state.tags},
+    gpx:state.gpxData?{distanse_km:state.gpxData.totalDist,stigning_opp_m:state.gpxData.totalUp,maks_stigning_pst:state.gpxData.maxSlope,snitt_stigning_pst:state.gpxData.avgSlope}:null,
+    kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(function(z){return {id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,note:z.note||'',ai_analyser:z.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;})};}),svar:state.answers}
+  }, null, 2);
+  var blob = new Blob([json],{type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url; a.download='accessnorway_profil.json'; a.click(); URL.revokeObjectURL(url);
+}
+
+// MODAL
+function openAddZoneModal() {
+  var type = document.getElementById('biz-type').value;
+  var config = TYPE_CONFIG[type];
+  if (!config) return;
+  var html = '';
+  for (var i = 0; i < config.extraOptions.length; i++) {
+    var n = config.extraOptions[i];
+    html += '<button class="modal-option" onclick="addZoneFromModal(\''+n+'\')">'+n+'</button>';
+  }
+  document.getElementById('modal-options').innerHTML = html;
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('custom-zone-name').value = '';
+}
+function closeAddZoneModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function closeModalIfBg(e) { if (e.target===document.getElementById('modal-overlay')) closeAddZoneModal(); }
+function addZoneFromModal(name) { addZone(name); closeAddZoneModal(); }
+function addCustomZone() { var name=document.getElementById('custom-zone-name').value.trim(); if(!name)return; addZone(name); closeAddZoneModal(); }
+function addZone(name) {
+  state.zones.push({id:name.toLowerCase().replace(/\s+/g,'_'),label:name,icon:'📋',extraFields:[],optional:true,images:[],aiAnalysis:null,measures:{},note:''});
+  renderZones();
+}
+
+// Start
+buildSteps();
+</script>
+</body>
+</html>
