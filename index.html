@@ -194,6 +194,25 @@ textarea{resize:vertical;min-height:80px}
 .success-text{font-size:13px;color:var(--text2)}
 .rapport-spinner{text-align:center;padding:2rem;color:var(--text3);font-size:14px}
 .rapport-spinner-ring{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .75rem}
+
+/* REDIGERING */
+.sone-edit-btn{background:none;border:none;cursor:pointer;font-size:12px;color:var(--text3);padding:4px 8px;border-radius:6px;font-family:inherit}
+.sone-edit-btn:hover{background:var(--surface2);color:var(--text2)}
+.sone-edit-area{width:100%;border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;resize:vertical;min-height:60px;margin-top:6px}
+.status-toggle{display:flex;gap:6px;margin-top:8px}
+.status-toggle-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:4px 12px;font-size:12px;font-family:inherit;cursor:pointer;color:var(--text2)}
+.status-toggle-btn.active-gronn{background:var(--green-light);border-color:var(--green);color:var(--green-dark);font-weight:600}
+.status-toggle-btn.active-gul{background:var(--amber-light);border-color:var(--amber);color:var(--amber);font-weight:600}
+.status-toggle-btn.active-rod{background:var(--red-light);border-color:var(--red);color:var(--red);font-weight:600}
+.godkjenn-bar{background:var(--surface);border:2px solid var(--green);border-radius:var(--radius);padding:1.25rem;margin-top:1rem;margin-bottom:1rem}
+.godkjenn-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.godkjenn-desc{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.5}
+.godkjenn-fields{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+.godkjenn-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer}
+.godkjenn-btn:disabled{background:var(--text3);cursor:not-allowed}
+.godkjent-badge{background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);display:flex;align-items:center;gap:8px;margin-top:1rem}
+.edit-mode-banner{background:var(--amber-light);border:1px solid rgba(186,117,23,.3);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--amber);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:.875rem 1rem;padding-bottom:calc(.875rem + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100}
 .btn-primary{flex:1;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer}
 .btn-primary:active{opacity:.85}
@@ -274,30 +293,7 @@ textarea{resize:vertical;min-height:80px}
       <div class="field"><label class="field-label">Kommune</label><input type="text" id="biz-kommune" placeholder="f.eks. Øystre Slidre"/></div>
       <div class="field"><label class="field-label">Kontaktperson / forvalter</label><input type="text" id="biz-contact" placeholder="Navn — e-post"/></div>
     </div>
-    <div class="card">
-      <div class="card-title">🏷️ Tagger</div>
-      <div class="field"><label class="field-label">Aktiviteter</label>
-        <div class="tag-row">
-          <button class="tag-btn" onclick="toggleTag(this)">Fiske</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Sykling</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Ski</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Vandring</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Svømming</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Ridning</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Padling</button>
-        </div>
-      </div>
-      <div class="field"><label class="field-label">Tilrettelegging</label>
-        <div class="tag-row">
-          <button class="tag-btn" onclick="toggleTag(this)">Ledsagerbevis</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Allergivennlig</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Teleslynge</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Assistansehund</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Tilpasset utstyr</button>
-          <button class="tag-btn" onclick="toggleTag(this)">Rullestolvennlig</button>
-        </div>
-      </div>
-    </div>
+
   </div>
 
   <div class="page" id="page-1">
@@ -993,15 +989,33 @@ async function buildGuide() {
     for (var j = 0; j < zone.images.length; j++) {
       bilderHtml += '<div class="guide-bilde"><img src="'+zone.images[j].dataUrl+'" alt="'+zone.label+'"/></div>';
     }
+    var soneIdx = i;
+    var statusFarge = sd.status==='gronn'?'var(--green-dark)':sd.status==='gul'?'var(--amber)':'var(--red)';
+    var statusLabel = sd.status==='gronn'?'Tilgjengelig':sd.status==='gul'?'Delvis tilgjengelig':sd.status==='rod'?'Begrenset':'';
     var soneHtml = '<div class="guide-sone">' +
       '<div class="guide-sone-topp">' +
       '<div class="guide-sone-ikon">'+zone.icon+'</div>' +
       '<div class="guide-sone-navn">'+zone.label+'</div>' +
-      (sd.status !== 'ukjent' ? '<span style="font-size:13px;font-weight:700;color:'+(sd.status==='gronn'?'var(--green-dark)':sd.status==='gul'?'var(--amber)':'var(--red)')+'">'+statusIkon(sd.status)+' '+(sd.status==='gronn'?'Tilgjengelig':sd.status==='gul'?'Delvis tilgjengelig':'Begrenset')+'</span>' : '') +
+      '<div id="guide-sone-status-'+soneIdx+'">' +
+      (sd.status !== 'ukjent' ? '<span style="font-size:13px;font-weight:700;color:'+statusFarge+'">'+statusIkon(sd.status)+' '+statusLabel+'</span>' : '') +
       '</div>' +
-      (sd.gjesteTekst ? '<div class="guide-sone-tekst">'+sd.gjesteTekst+'</div>' : '') +
+      '<button class="sone-edit-btn" id="edit-btn-'+soneIdx+'" onclick="toggleEditSone('+soneIdx+')">✏️ Rediger</button>' +
+      '</div>' +
+      '<div id="guide-sone-tekst-'+soneIdx+'" class="guide-sone-tekst">'+sd.gjesteTekst+'</div>' +
       (malChips ? '<div class="guide-sone-maal">'+malChips+'</div>' : '') +
       (bilderHtml ? '<div class="guide-bilder">'+bilderHtml+'</div>' : '') +
+      // Rediger-panel (skjult)
+      '<div id="edit-sone-'+soneIdx+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Rediger tekst</div>' +
+      '<textarea class="sone-edit-area" id="edit-tekst-'+soneIdx+'" oninput="guideRedigert['+soneIdx+']=guideRedigert['+soneIdx+']||{};guideRedigert['+soneIdx+'].tekst=this.value">'+sd.gjesteTekst+'</textarea>' +
+      '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:10px;margin-bottom:6px">Status</div>' +
+      '<div class="status-toggle">' +
+      '<button class="status-toggle-btn'+(sd.status==='gronn'?' active-gronn':'')+'" id="status-btn-'+soneIdx+'-gronn" onclick="setStatusToggle('+soneIdx+','gronn')">✅ Tilgjengelig</button>' +
+      '<button class="status-toggle-btn'+(sd.status==='gul'?' active-gul':'')+'" id="status-btn-'+soneIdx+'-gul" onclick="setStatusToggle('+soneIdx+','gul')">🟡 Delvis</button>' +
+      '<button class="status-toggle-btn'+(sd.status==='rod'?' active-rod':'')+'" id="status-btn-'+soneIdx+'-rod" onclick="setStatusToggle('+soneIdx+','rod')">🔴 Begrenset</button>' +
+      '</div>' +
+      '<button style="margin-top:10px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px" onclick="saveEditSone('+soneIdx+',(document.getElementById('edit-tekst-'+soneIdx+'')||{}).value||'',(guideRedigert['+soneIdx+']||{}).status||''+sd.status+'');toggleEditSone('+soneIdx+')">Lagre endringer</button>' +
+      '</div>' +
       '</div>';
 
     if (ankomstIds.indexOf(zone.id) >= 0) ankomstHtml += soneHtml;
@@ -1081,6 +1095,18 @@ async function buildGuide() {
     '<input type="text" class="chat-input" id="guide-chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key===\'Enter\')sendGuideChatMsg()"/>' +
     '<button class="chat-send" onclick="sendGuideChatMsg()">➤</button>' +
     '</div></div></div>' +
+    '<div class="edit-mode-banner">✏️ <span>Gjennomgå og rediger teksten før du godkjenner guiden. Klikk <strong>Rediger</strong> på hver sone.</span></div>' +
+
+    '<div class="godkjenn-bar" id="godkjenn-bar">' +
+    '<div class="godkjenn-title">👤 Menneskelig gjennomgang</div>' +
+    '<div class="godkjenn-desc">Les gjennom teksten over og gjør eventuelle rettelser. Når du er fornøyd, godkjenn guiden med ditt navn.</div>' +
+    '<div class="godkjenn-fields">' +
+    '<input type="text" id="godkjenn-navn" placeholder="Ditt fulle navn..." style="width:100%;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:16px;font-family:inherit;outline:none"/>' +
+    '</div>' +
+    '<button class="godkjenn-btn" onclick="godkjennGuide()">✅ Godkjenn og lås guiden</button>' +
+    '</div>' +
+    '<div class="godkjent-badge" id="godkjent-badge" style="display:none"></div>' +
+
     '<div class="guide-download-bar">' +
     '<button class="guide-btn-dl" onclick="downloadGuideHTML()">📄 Last ned guide (HTML)</button>' +
     '<button class="guide-btn-dl primary" onclick="downloadProfile()">⬇️ Last ned rådata (JSON)</button>' +
@@ -1265,11 +1291,72 @@ function downloadProfile() {
     profilbilde: state.profilbilde ? {analysis: state.profilbilde.analysis} : null,
     bedrift:{navn:document.getElementById('biz-name').value,type:document.getElementById('biz-type').value,adresse:document.getElementById('biz-address').value,destinasjon:document.getElementById('biz-dest').value,kommune:document.getElementById('biz-kommune').value,kontakt:document.getElementById('biz-contact').value,tagger:state.tags},
     gpx:state.gpxData?{distanse_km:state.gpxData.totalDist,stigning_opp_m:state.gpxData.totalUp,maks_stigning_pst:state.gpxData.maxSlope,snitt_stigning_pst:state.gpxData.avgSlope}:null,
+    godkjenning: godkjentAv ? {godkjent_av: godkjentAv, tidspunkt: godkjentTidspunkt ? godkjentTidspunkt.toISOString() : null} : null,
+    redigeringer: guideRedigert,
     kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(function(z){return {id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,note:z.note||'',ai_analyser:z.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;})};}),svar:state.answers}
   }, null, 2);
   var blob = new Blob([json],{type:'application/json'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a'); a.href=url; a.download='accessnorway_profil.json'; a.click(); URL.revokeObjectURL(url);
+}
+
+// REDIGERING
+var guideRedigert = {}; // {idx: {tekst, status}}
+var godkjentAv = '';
+var godkjentTidspunkt = null;
+
+function toggleEditSone(idx) {
+  var editDiv = document.getElementById('edit-sone-'+idx);
+  var editBtn = document.getElementById('edit-btn-'+idx);
+  if (!editDiv) return;
+  var isOpen = editDiv.style.display !== 'none';
+  editDiv.style.display = isOpen ? 'none' : 'block';
+  editBtn.textContent = isOpen ? '✏️ Rediger' : '✓ Lukk';
+}
+
+function saveEditSone(idx, newTekst, newStatus) {
+  guideRedigert[idx] = {tekst: newTekst, status: newStatus};
+  // Oppdater visningen
+  var tekstEl = document.getElementById('guide-sone-tekst-'+idx);
+  var statusEl = document.getElementById('guide-sone-status-'+idx);
+  if (tekstEl) tekstEl.textContent = newTekst;
+  if (statusEl) {
+    var ikon = newStatus==='gronn'?'✅':newStatus==='gul'?'🟡':newStatus==='rod'?'🔴':'';
+    var label = newStatus==='gronn'?'Tilgjengelig':newStatus==='gul'?'Delvis tilgjengelig':newStatus==='rod'?'Begrenset':'';
+    var color = newStatus==='gronn'?'var(--green-dark)':newStatus==='gul'?'var(--amber)':'var(--red)';
+    statusEl.innerHTML = '<span style="font-size:13px;font-weight:700;color:'+color+'">'+ikon+' '+label+'</span>';
+  }
+}
+
+function setStatusToggle(idx, status) {
+  guideRedigert[idx] = guideRedigert[idx] || {};
+  guideRedigert[idx].status = status;
+  var tekst = document.getElementById('edit-tekst-'+idx);
+  if (tekst) saveEditSone(idx, tekst.value, status);
+  // Oppdater knapper
+  ['gronn','gul','rod'].forEach(function(s) {
+    var btn = document.getElementById('status-btn-'+idx+'-'+s);
+    if (btn) {
+      btn.className = 'status-toggle-btn' + (s===status?' active-'+s:'');
+    }
+  });
+}
+
+function godkjennGuide() {
+  var navn = document.getElementById('godkjenn-navn').value.trim();
+  if (!navn) { alert('Skriv inn ditt navn for å godkjenne.'); return; }
+  godkjentAv = navn;
+  godkjentTidspunkt = new Date();
+  // Vis godkjent-badge
+  document.getElementById('godkjenn-bar').style.display = 'none';
+  document.getElementById('godkjent-badge').style.display = 'flex';
+  document.getElementById('godkjent-badge').innerHTML =
+    '✅ <strong>Godkjent av '+navn+'</strong> · '+godkjentTidspunkt.toLocaleString('nb-NO');
+  // Skjul alle rediger-knapper
+  var editBtns = document.querySelectorAll('.sone-edit-btn');
+  editBtns.forEach(function(btn) { btn.style.display='none'; });
+  var editDivs = document.querySelectorAll('[id^="edit-sone-"]');
+  editDivs.forEach(function(d) { d.style.display='none'; });
 }
 
 // MODAL
