@@ -992,29 +992,29 @@ async function buildGuide() {
     var soneIdx = i;
     var statusFarge = sd.status==='gronn'?'var(--green-dark)':sd.status==='gul'?'var(--amber)':'var(--red)';
     var statusLabel = sd.status==='gronn'?'Tilgjengelig':sd.status==='gul'?'Delvis tilgjengelig':sd.status==='rod'?'Begrenset':'';
+    var aktStatus = sd.status;
     var soneHtml = '<div class="guide-sone">' +
       '<div class="guide-sone-topp">' +
       '<div class="guide-sone-ikon">'+zone.icon+'</div>' +
       '<div class="guide-sone-navn">'+zone.label+'</div>' +
       '<div id="guide-sone-status-'+soneIdx+'">' +
-      (sd.status !== 'ukjent' ? '<span style="font-size:13px;font-weight:700;color:'+statusFarge+'">'+statusIkon(sd.status)+' '+statusLabel+'</span>' : '') +
+      (aktStatus !== 'ukjent' ? '<span style="font-size:13px;font-weight:700;color:'+statusFarge+'">'+statusIkon(aktStatus)+' '+statusLabel+'</span>' : '') +
       '</div>' +
-      '<button class="sone-edit-btn" id="edit-btn-'+soneIdx+'" onclick="toggleEditSone('+soneIdx+')">✏️ Rediger</button>' +
+      '<button class="sone-edit-btn" id="edit-btn-'+soneIdx+'" onclick="toggleEditSone('+soneIdx+')">&#9999; Rediger</button>' +
       '</div>' +
       '<div id="guide-sone-tekst-'+soneIdx+'" class="guide-sone-tekst">'+sd.gjesteTekst+'</div>' +
       (malChips ? '<div class="guide-sone-maal">'+malChips+'</div>' : '') +
       (bilderHtml ? '<div class="guide-bilder">'+bilderHtml+'</div>' : '') +
-      // Rediger-panel (skjult)
       '<div id="edit-sone-'+soneIdx+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">' +
       '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Rediger tekst</div>' +
       '<textarea class="sone-edit-area" id="edit-tekst-'+soneIdx+'" oninput="guideRedigert['+soneIdx+']=guideRedigert['+soneIdx+']||{};guideRedigert['+soneIdx+'].tekst=this.value">'+sd.gjesteTekst+'</textarea>' +
       '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:10px;margin-bottom:6px">Status</div>' +
       '<div class="status-toggle">' +
-      '<button class="status-toggle-btn'+(sd.status==='gronn'?' active-gronn':'')+'" id="status-btn-'+soneIdx+'-gronn" onclick="setStatusToggle('+soneIdx+','gronn')">✅ Tilgjengelig</button>' +
-      '<button class="status-toggle-btn'+(sd.status==='gul'?' active-gul':'')+'" id="status-btn-'+soneIdx+'-gul" onclick="setStatusToggle('+soneIdx+','gul')">🟡 Delvis</button>' +
-      '<button class="status-toggle-btn'+(sd.status==='rod'?' active-rod':'')+'" id="status-btn-'+soneIdx+'-rod" onclick="setStatusToggle('+soneIdx+','rod')">🔴 Begrenset</button>' +
+      '<button class="status-toggle-btn'+(aktStatus==='gronn'?' active-gronn':'')+'" id="status-btn-'+soneIdx+'-gronn" onclick="setStatusToggle('+soneIdx+',&quot;gronn&quot;)">&#9989; Tilgjengelig</button>' +
+      '<button class="status-toggle-btn'+(aktStatus==='gul'?' active-gul':'')+'" id="status-btn-'+soneIdx+'-gul" onclick="setStatusToggle('+soneIdx+',&quot;gul&quot;)">&#128993; Delvis</button>' +
+      '<button class="status-toggle-btn'+(aktStatus==='rod'?' active-rod':'')+'" id="status-btn-'+soneIdx+'-rod" onclick="setStatusToggle('+soneIdx+',&quot;rod&quot;)">&#128308; Begrenset</button>' +
       '</div>' +
-      '<button style="margin-top:10px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px" onclick="saveEditSone('+soneIdx+',(document.getElementById('edit-tekst-'+soneIdx+'')||{}).value||'',(guideRedigert['+soneIdx+']||{}).status||''+sd.status+'');toggleEditSone('+soneIdx+')">Lagre endringer</button>' +
+      '<button style="margin-top:10px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px" onclick="saveAndClose('+soneIdx+')">Lagre endringer</button>' +
       '</div>' +
       '</div>';
 
@@ -1304,6 +1304,14 @@ function downloadProfile() {
 var guideRedigert = {}; // {idx: {tekst, status}}
 var godkjentAv = '';
 var godkjentTidspunkt = null;
+
+function saveAndClose(idx) {
+  var tekst = document.getElementById('edit-tekst-'+idx);
+  var status = (guideRedigert[idx]||{}).status || '';
+  if (tekst && status) saveEditSone(idx, tekst.value, status);
+  else if (tekst) { guideRedigert[idx] = guideRedigert[idx]||{}; guideRedigert[idx].tekst = tekst.value; var t = document.getElementById('guide-sone-tekst-'+idx); if(t) t.textContent = tekst.value; }
+  toggleEditSone(idx);
+}
 
 function toggleEditSone(idx) {
   var editDiv = document.getElementById('edit-sone-'+idx);
