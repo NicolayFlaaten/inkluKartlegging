@@ -217,6 +217,21 @@ textarea{resize:vertical;min-height:80px}
     <div class="page-header"><div class="page-title">Registrer sted</div><div class="page-desc">Grunnleggende informasjon om stedet du kartlegger.</div></div>
     <div class="card">
       <div class="card-title">📍 Informasjon</div>
+      <div class="field">
+        <label class="field-label">Profilbilde</label>
+        <div class="upload-zone" style="padding:1rem">
+          <input type="file" accept="image/*" onchange="handleProfilbilde(event)"/>
+          <div id="profilbilde-preview" style="display:none">
+            <img id="profilbilde-img" src="" alt="Profilbilde" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px"/>
+            <div style="font-size:12px;color:var(--green-dark)">✓ Profilbilde lastet opp</div>
+          </div>
+          <div id="profilbilde-placeholder">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-title">Last opp profilbilde</div>
+            <div class="upload-hint">Representativt bilde av stedet — brukes i guide og rapport</div>
+          </div>
+        </div>
+      </div>
       <div class="field"><label class="field-label">Navn</label><input type="text" id="biz-name" placeholder="f.eks. Fjordhotellet AS eller Beitostølen tursti"/></div>
       <div class="field">
         <label class="field-label">Type</label>
@@ -344,7 +359,7 @@ textarea{resize:vertical;min-height:80px}
 
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null};
+const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null};
 
 // Bygg steg-piller
 function buildSteps() {
@@ -402,6 +417,41 @@ function toggleTag(btn) {
   } else {
     state.tags = state.tags.filter(function(t) { return t !== tag; });
   }
+}
+
+// PROFILBILDE
+function handleProfilbilde(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    state.profilbilde = {dataUrl: ev.target.result, file: file, analysis: null};
+    document.getElementById('profilbilde-preview').style.display = 'block';
+    document.getElementById('profilbilde-placeholder').style.display = 'none';
+    document.getElementById('profilbilde-img').src = ev.target.result;
+    // Analyser profilbildet
+    analyzeProfilbilde();
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeProfilbilde() {
+  if (!state.profilbilde) return;
+  try {
+    var compressed = await compressImage(state.profilbilde.dataUrl);
+    var base64 = compressed.split(',')[1];
+    var type = document.getElementById('biz-type').value;
+    var prompt = 'Du er ekspert på universell utforming for norsk reiseliv. Dette er et profilbilde av stedet. Gi en kort helhetlig vurdering av tilgjengeligheten basert på det du kan se. **Helhetsinntrykk:** [kort beskrivelse av stedet] **Tilgjengelighet:** [generell vurdering]';
+    var res = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},
+        {type:'text',text:prompt}
+      ]}]})});
+    var data = await res.json();
+    if (data.content && data.content[0] && data.content[0].text) {
+      state.profilbilde.analysis = data.content[0].text;
+    }
+  } catch(err) {}
 }
 
 // TYPE CONFIG
@@ -863,7 +913,7 @@ async function buildRapport() {
   buildAnalyse();
 }
 
-function buildGuide() {
+async function buildGuide() {
   var name = document.getElementById('biz-name').value || 'Ukjent sted';
   var type = document.getElementById('biz-type').value;
   var config = TYPE_CONFIG[type];
@@ -890,29 +940,88 @@ function buildGuide() {
       '</div><div style="margin-top:10px;font-size:13px;color:var(--text2)">'+vurdering+'</div></div>';
   }
 
-  var sonerHtml = '';
+  // Generer AI-tekst per sone
+  var soneData = [];
   for (var i = 0; i < state.zones.length; i++) {
     var zone = state.zones[i];
     var hasContent = zone.images.length > 0 || zone.note || Object.keys(zone.measures).some(function(k){return zone.measures[k];});
-    if (!hasContent) continue;
-    var malInfo = '';
+    if (!hasContent) { soneData.push(null); continue; }
+    var alleAnalyser = zone.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;}).join('\n');
+    var malInfo = zone.extraFields.map(function(fid){var f=EXTRA_FIELDS[fid];var v=zone.measures[fid];return f&&v?f.label+': '+v+' '+f.unit:'';}).filter(Boolean).join(', ');
+    var gjesteTekst = zone.note || '';
+    var status = 'ukjent';
+    if (alleAnalyser || malInfo) {
+      try {
+        var kontekst = [alleAnalyser, malInfo?'Målte data: '+malInfo:''].filter(Boolean).join('\n');
+        var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:200,messages:[{role:'user',
+            content:'Du skriver tilgjengelighetsguide for "'+name+'" som gjester skal lese. Basert på '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte setninger på norsk om hva gjesten finner her og om det er tilgjengelig. Vær konkret og positiv. Ikke begynn med "Basert på" eller "AI". Avslutt med STATUS:GRONN, STATUS:GUL eller STATUS:ROD'}]})});
+        var data = await res.json();
+        if (data.content && data.content[0] && data.content[0].text) {
+          var tekst = data.content[0].text;
+          var m = tekst.match(/STATUS:(GRONN|GUL|ROD)/);
+          if (m) status = m[1].toLowerCase();
+          gjesteTekst = tekst.replace(/STATUS:(GRONN|GUL|ROD)/,'').trim();
+        }
+      } catch(e) {}
+    }
+    soneData.push({zone:zone, gjesteTekst:gjesteTekst, status:status});
+  }
+
+  // Grupper soner i seksjoner
+  var config2 = TYPE_CONFIG[type];
+  var grp = config2 ? config2.group : 'A';
+  var ankomstIds = ['parkering','inngang','resepsjon','mottakelse','motepunkt','startpunkt','adkomst','utleiested','stall'];
+  var oppholdIds = ['hotellrom','bad','heis','stue','kjokken','soverom','spisesal','spisebord','buffet','bar','konferanse','wc','sanitaer','aktivitetsomrade','terreng','underlag','loype','innsjosett','selve_stedet'];
+
+  var ankomstHtml = '', oppholdHtml = '', annetHtml = '';
+
+  var statusIkon = function(s) { return s==='gronn'?'✅':s==='gul'?'🟡':s==='rod'?'🔴':''; };
+
+  for (var i = 0; i < soneData.length; i++) {
+    if (!soneData[i]) continue;
+    var sd = soneData[i];
+    var zone = sd.zone;
+    var malChips = '';
     for (var j = 0; j < zone.extraFields.length; j++) {
       var fid = zone.extraFields[j];
       var f = EXTRA_FIELDS[fid];
       var val = zone.measures[fid];
-      if (f && val) malInfo += '<span class="guide-sone-maal-chip">'+f.label+': '+val+' '+f.unit+'</span>';
+      if (f && val) malChips += '<span class="guide-sone-maal-chip">'+f.label+': '+val+' '+f.unit+'</span>';
     }
     var bilderHtml = '';
     for (var j = 0; j < zone.images.length; j++) {
       bilderHtml += '<div class="guide-bilde"><img src="'+zone.images[j].dataUrl+'" alt="'+zone.label+'"/></div>';
     }
-    sonerHtml += '<div class="guide-sone">' +
-      '<div class="guide-sone-topp"><div class="guide-sone-ikon">'+zone.icon+'</div><div class="guide-sone-navn">'+zone.label+'</div></div>' +
-      (zone.note ? '<div class="guide-sone-tekst">'+zone.note+'</div>' : '') +
-      (malInfo ? '<div class="guide-sone-maal">'+malInfo+'</div>' : '') +
+    var soneHtml = '<div class="guide-sone">' +
+      '<div class="guide-sone-topp">' +
+      '<div class="guide-sone-ikon">'+zone.icon+'</div>' +
+      '<div class="guide-sone-navn">'+zone.label+'</div>' +
+      (sd.status !== 'ukjent' ? '<span style="font-size:13px;font-weight:700;color:'+(sd.status==='gronn'?'var(--green-dark)':sd.status==='gul'?'var(--amber)':'var(--red)')+'">'+statusIkon(sd.status)+' '+(sd.status==='gronn'?'Tilgjengelig':sd.status==='gul'?'Delvis tilgjengelig':'Begrenset')+'</span>' : '') +
+      '</div>' +
+      (sd.gjesteTekst ? '<div class="guide-sone-tekst">'+sd.gjesteTekst+'</div>' : '') +
+      (malChips ? '<div class="guide-sone-maal">'+malChips+'</div>' : '') +
       (bilderHtml ? '<div class="guide-bilder">'+bilderHtml+'</div>' : '') +
       '</div>';
+
+    if (ankomstIds.indexOf(zone.id) >= 0) ankomstHtml += soneHtml;
+    else if (oppholdIds.indexOf(zone.id) >= 0) oppholdHtml += soneHtml;
+    else annetHtml += soneHtml;
   }
+
+  // Profilbilde-analyse i seksjoner
+  var profilAnalyseHtml = '';
+  if (state.profilbilde && state.profilbilde.analysis) {
+    profilAnalyseHtml = '<div class="guide-sone" style="background:var(--green-light);border-color:var(--green)">' +
+      '<div class="guide-sone-topp"><div class="guide-sone-ikon">🏠</div><div class="guide-sone-navn">Helhetsinntrykk</div></div>' +
+      '<div class="guide-sone-tekst">'+state.profilbilde.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div>' +
+      '</div>';
+  }
+
+  var sonerHtml = profilAnalyseHtml +
+    (ankomstHtml ? '<div class="guide-section"><div class="guide-section-title">📍 Ved ankomst</div>'+ankomstHtml+'</div>' : '') +
+    (oppholdHtml ? '<div class="guide-section"><div class="guide-section-title">🏠 Under oppholdet</div>'+oppholdHtml+'</div>' : '') +
+    (annetHtml ? '<div class="guide-section"><div class="guide-section-title">📋 Øvrig</div>'+annetHtml+'</div>' : '');
 
   var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
   var jaItems = '';
@@ -944,9 +1053,12 @@ function buildGuide() {
   }
 
   var container = document.getElementById('tab-content-guide');
+  container.innerHTML = '<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>Genererer tilgjengelighetsguide...</div>';
+  // Gi UI tid til å vise spinner
+  await new Promise(function(r){setTimeout(r,50);});
   container.innerHTML =
     '<div class="guide-hero">' +
-    (firstImg ? '<img class="guide-hero-img" src="'+firstImg.dataUrl+'" alt="'+name+'"/>' : '') +
+    ((state.profilbilde && state.profilbilde.dataUrl) ? '<img class="guide-hero-img" src="'+state.profilbilde.dataUrl+'" alt="'+name+'"/>' : firstImg ? '<img class="guide-hero-img" src="'+firstImg.dataUrl+'" alt="'+name+'"/>' : '') +
     '<div class="guide-hero-body">' +
     '<div class="guide-hero-badge">AccessNorway · Tilgjengelighetsguide</div>' +
     '<div class="guide-hero-name">'+name+'</div>' +
@@ -1150,6 +1262,7 @@ function downloadGuideHTML() {
 
 function downloadProfile() {
   var json = JSON.stringify({
+    profilbilde: state.profilbilde ? {analysis: state.profilbilde.analysis} : null,
     bedrift:{navn:document.getElementById('biz-name').value,type:document.getElementById('biz-type').value,adresse:document.getElementById('biz-address').value,destinasjon:document.getElementById('biz-dest').value,kommune:document.getElementById('biz-kommune').value,kontakt:document.getElementById('biz-contact').value,tagger:state.tags},
     gpx:state.gpxData?{distanse_km:state.gpxData.totalDist,stigning_opp_m:state.gpxData.totalUp,maks_stigning_pst:state.gpxData.maxSlope,snitt_stigning_pst:state.gpxData.avgSlope}:null,
     kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(function(z){return {id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,note:z.note||'',ai_analyser:z.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;})};}),svar:state.answers}
