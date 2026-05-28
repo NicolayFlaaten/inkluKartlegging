@@ -909,6 +909,40 @@ async function buildRapport() {
   buildAnalyse();
 }
 
+function lagSoneHTML(sd, idx, malChips, bilderHtml) {
+  var zone = sd.zone;
+  var st = sd.status;
+  var statusFarge = st==='gronn'?'var(--green-dark)':st==='gul'?'var(--amber)':'var(--red)';
+  var statusLabel = st==='gronn'?'Tilgjengelig':st==='gul'?'Delvis tilgjengelig':st==='rod'?'Begrenset':'';
+  var statusSpan = st !== 'ukjent' ? '<span style="font-size:13px;font-weight:700;color:'+statusFarge+'">'+( st==='gronn'?'✅':st==='gul'?'🟡':'🔴')+' '+statusLabel+'</span>' : '';
+  var btnGronn = 'status-toggle-btn'+(st==='gronn'?' active-gronn':'');
+  var btnGul = 'status-toggle-btn'+(st==='gul'?' active-gul':'');
+  var btnRod = 'status-toggle-btn'+(st==='rod'?' active-rod':'');
+  var h = '<div class="guide-sone">';
+  h += '<div class="guide-sone-topp">';
+  h += '<div class="guide-sone-ikon">'+zone.icon+'</div>';
+  h += '<div class="guide-sone-navn">'+zone.label+'</div>';
+  h += '<div id="guide-sone-status-'+idx+'">'+statusSpan+'</div>';
+  h += '<button class="sone-edit-btn" id="edit-btn-'+idx+'" onclick="toggleEditSone('+idx+')">✏️ Rediger</button>';
+  h += '</div>';
+  h += '<div id="guide-sone-tekst-'+idx+'" class="guide-sone-tekst">'+sd.gjesteTekst+'</div>';
+  if (malChips) h += '<div class="guide-sone-maal">'+malChips+'</div>';
+  if (bilderHtml) h += '<div class="guide-bilder">'+bilderHtml+'</div>';
+  h += '<div id="edit-sone-'+idx+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
+  h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Rediger tekst</div>';
+  h += '<textarea class="sone-edit-area" id="edit-tekst-'+idx+'" oninput="guideRedigert['+idx+']=guideRedigert['+idx+']||{};guideRedigert['+idx+'].tekst=this.value">'+sd.gjesteTekst+'</textarea>';
+  h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:10px;margin-bottom:6px">Status</div>';
+  h += '<div class="status-toggle">';
+  h += '<button class="'+btnGronn+'" id="status-btn-'+idx+'-gronn" onclick="setStatusToggle('+idx+','gronn')">✅ Tilgjengelig</button>';
+  h += '<button class="'+btnGul+'" id="status-btn-'+idx+'-gul" onclick="setStatusToggle('+idx+','gul')">🟡 Delvis</button>';
+  h += '<button class="'+btnRod+'" id="status-btn-'+idx+'-rod" onclick="setStatusToggle('+idx+','rod')">🔴 Begrenset</button>';
+  h += '</div>';
+  h += '<button style="margin-top:10px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px" onclick="saveAndClose('+idx+')">Lagre endringer</button>';
+  h += '</div>';
+  h += '</div>';
+  return h;
+}
+
 async function buildGuide() {
   var name = document.getElementById('biz-name').value || 'Ukjent sted';
   var type = document.getElementById('biz-type').value;
@@ -990,33 +1024,7 @@ async function buildGuide() {
       bilderHtml += '<div class="guide-bilde"><img src="'+zone.images[j].dataUrl+'" alt="'+zone.label+'"/></div>';
     }
     var soneIdx = i;
-    var statusFarge = sd.status==='gronn'?'var(--green-dark)':sd.status==='gul'?'var(--amber)':'var(--red)';
-    var statusLabel = sd.status==='gronn'?'Tilgjengelig':sd.status==='gul'?'Delvis tilgjengelig':sd.status==='rod'?'Begrenset':'';
-    var aktStatus = sd.status;
-    var soneHtml = '<div class="guide-sone">' +
-      '<div class="guide-sone-topp">' +
-      '<div class="guide-sone-ikon">'+zone.icon+'</div>' +
-      '<div class="guide-sone-navn">'+zone.label+'</div>' +
-      '<div id="guide-sone-status-'+soneIdx+'">' +
-      (aktStatus !== 'ukjent' ? '<span style="font-size:13px;font-weight:700;color:'+statusFarge+'">'+statusIkon(aktStatus)+' '+statusLabel+'</span>' : '') +
-      '</div>' +
-      '<button class="sone-edit-btn" id="edit-btn-'+soneIdx+'" onclick="toggleEditSone('+soneIdx+')">&#9999; Rediger</button>' +
-      '</div>' +
-      '<div id="guide-sone-tekst-'+soneIdx+'" class="guide-sone-tekst">'+sd.gjesteTekst+'</div>' +
-      (malChips ? '<div class="guide-sone-maal">'+malChips+'</div>' : '') +
-      (bilderHtml ? '<div class="guide-bilder">'+bilderHtml+'</div>' : '') +
-      '<div id="edit-sone-'+soneIdx+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">' +
-      '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Rediger tekst</div>' +
-      '<textarea class="sone-edit-area" id="edit-tekst-'+soneIdx+'" oninput="guideRedigert['+soneIdx+']=guideRedigert['+soneIdx+']||{};guideRedigert['+soneIdx+'].tekst=this.value">'+sd.gjesteTekst+'</textarea>' +
-      '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:10px;margin-bottom:6px">Status</div>' +
-      '<div class="status-toggle">' +
-      '<button class="status-toggle-btn'+(aktStatus==='gronn'?' active-gronn':'')+'" id="status-btn-'+soneIdx+'-gronn" onclick="setStatusToggle('+soneIdx+',&quot;gronn&quot;)">&#9989; Tilgjengelig</button>' +
-      '<button class="status-toggle-btn'+(aktStatus==='gul'?' active-gul':'')+'" id="status-btn-'+soneIdx+'-gul" onclick="setStatusToggle('+soneIdx+',&quot;gul&quot;)">&#128993; Delvis</button>' +
-      '<button class="status-toggle-btn'+(aktStatus==='rod'?' active-rod':'')+'" id="status-btn-'+soneIdx+'-rod" onclick="setStatusToggle('+soneIdx+',&quot;rod&quot;)">&#128308; Begrenset</button>' +
-      '</div>' +
-      '<button style="margin-top:10px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px" onclick="saveAndClose('+soneIdx+')">Lagre endringer</button>' +
-      '</div>' +
-      '</div>';
+    var soneHtml = lagSoneHTML(sd, soneIdx, malChips, bilderHtml);
 
     if (ankomstIds.indexOf(zone.id) >= 0) ankomstHtml += soneHtml;
     else if (oppholdIds.indexOf(zone.id) >= 0) oppholdHtml += soneHtml;
@@ -1278,10 +1286,37 @@ function appendChatMsg(text, role, id) {
 }
 
 function downloadGuideHTML() {
-  var guideContent = document.getElementById('tab-content-guide').innerHTML;
+  // Lag en ren kopi av guide-innholdet uten interaktive elementer
+  var guideEl = document.getElementById('tab-content-guide');
+  var tempDiv = document.createElement('div');
+  tempDiv.innerHTML = guideEl.innerHTML;
+
+  // Fjern alt som ikke skal være med i gjeste-versjonen
+  var fjern = [
+    '.sone-edit-btn',       // rediger-knapper
+    '[id^="edit-sone-"]',   // rediger-paneler
+    '.edit-mode-banner',    // gult banner
+    '.godkjenn-bar',        // godkjenn-seksjon
+    '.godkjent-badge',      // godkjent-badge
+    '.chat-card',           // chatbot
+    '.guide-download-bar',  // last ned knapper
+    '[style*="text-align:center"][style*="font-size:11px"]' // footer-tekst med dato
+  ];
+  fjern.forEach(function(sel) {
+    var els = tempDiv.querySelectorAll(sel);
+    els.forEach(function(el) { el.remove(); });
+  });
+
+  // Legg til footer
+  var footer = document.createElement('div');
+  var godkjentTekst = godkjentAv ? 'Godkjent av '+godkjentAv+' · ' : '';
+  footer.style.cssText = 'text-align:center;font-size:11px;color:#999890;margin-top:2rem;padding:1rem 0;border-top:1px solid rgba(0,0,0,0.09)';
+  footer.innerHTML = 'AccessNorway Tilgjengelighetsguide · '+godkjentTekst+new Date().toLocaleDateString('nb-NO');
+  tempDiv.appendChild(footer);
+
   var name = document.getElementById('biz-name').value || 'AccessNorway';
   var styles = document.querySelector('style').textContent;
-  var blob = new Blob(['<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+' — Tilgjengelighetsguide</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f1efe8;padding:1rem;max-width:600px;margin:0 auto}img{max-width:100%}'+styles+'</style></head><body>'+guideContent+'</body></html>'], {type:'text/html'});
+  var blob = new Blob(['<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+' — Tilgjengelighetsguide</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f1efe8;padding:1rem;max-width:640px;margin:0 auto}img{max-width:100%}'+styles+'</style></head><body>'+tempDiv.innerHTML+'</body></html>'], {type:'text/html'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a'); a.href=url; a.download=name.replace(/\s+/g,'_')+'_tilgjengelighetsguide.html'; a.click(); URL.revokeObjectURL(url);
 }
