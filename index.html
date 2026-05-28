@@ -933,9 +933,9 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
   h += '<textarea class="sone-edit-area" id="edit-tekst-'+idx+'" oninput="guideRedigert['+idx+']=guideRedigert['+idx+']||{};guideRedigert['+idx+'].tekst=this.value">'+sd.gjesteTekst+'</textarea>';
   h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:10px;margin-bottom:6px">Status</div>';
   h += '<div class="status-toggle">';
-  h += '<button class="'+btnGronn+'" id="status-btn-'+idx+'-gronn" onclick="setStatusToggle('+idx+','gronn')">✅ Tilgjengelig</button>';
-  h += '<button class="'+btnGul+'" id="status-btn-'+idx+'-gul" onclick="setStatusToggle('+idx+','gul')">🟡 Delvis</button>';
-  h += '<button class="'+btnRod+'" id="status-btn-'+idx+'-rod" onclick="setStatusToggle('+idx+','rod')">🔴 Begrenset</button>';
+  h += '<button class="'+btnGronn+'" id="status-btn-'+idx+'-gronn" onclick="setStatusToggle('+idx+',&quot;gronn&quot;)">&#9989; Tilgjengelig</button>';
+  h += '<button class="'+btnGul+'" id="status-btn-'+idx+'-gul" onclick="setStatusToggle('+idx+',&quot;gul&quot;)">&#128993; Delvis</button>';
+  h += '<button class="'+btnRod+'" id="status-btn-'+idx+'-rod" onclick="setStatusToggle('+idx+',&quot;rod&quot;)">&#128308; Begrenset</button>';
   h += '</div>';
   h += '<button style="margin-top:10px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px" onclick="saveAndClose('+idx+')">Lagre endringer</button>';
   h += '</div>';
