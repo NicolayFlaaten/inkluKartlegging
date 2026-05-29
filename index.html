@@ -213,11 +213,17 @@ textarea{resize:vertical;min-height:80px}
 .godkjent-badge{background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);display:flex;align-items:center;gap:8px;margin-top:1rem}
 .edit-mode-banner{background:var(--amber-light);border:1px solid rgba(186,117,23,.3);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--amber);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
 
+.gpx-map{width:100%;height:220px;border-radius:var(--radius);overflow:hidden;margin-top:.75rem;border:1px solid var(--border)}
+.guide-gpx-map{width:100%;height:240px;border-radius:var(--radius);overflow:hidden;margin-top:.75rem;border:1px solid var(--border)}
+.slope-legend{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.slope-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
+.slope-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:.875rem 1rem;padding-bottom:calc(.875rem + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100}
 .btn-primary{flex:1;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer}
 .btn-primary:active{opacity:.85}
 .btn-secondary{background:var(--surface2);color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;font-size:15px;font-family:inherit;font-weight:500;cursor:pointer}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body>
 
@@ -353,6 +359,7 @@ textarea{resize:vertical;min-height:80px}
   </div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null};
@@ -726,25 +733,79 @@ function haversine(lat1,lon1,lat2,lon2) {
 
 function slopeClass(s) { return s<=5?'ok':s<=8?'caution':'warning'; }
 
+function slopeColor(s) {
+  return s<=5?'#1D9E75':s<=8?'#BA7517':'#E24B4A';
+}
+
+function renderGpxMap(containerId, r) {
+  if (!r || !window.L) return;
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  if (el._leaflet_map) { el._leaflet_map.remove(); el._leaflet_map = null; }
+  el.innerHTML = '';
+  var map = L.map(el, {zoomControl:true, scrollWheelZoom:false, attributionControl:false});
+  el._leaflet_map = map;
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18}).addTo(map);
+  var step = Math.max(1, Math.floor(r.points.length/200));
+  for (var i=step; i<r.points.length; i+=step) {
+    var prev=r.points[i-step], curr=r.points[i];
+    var dist=(r.dists[i]-r.dists[i-step])*1000;
+    var slope=dist>0?Math.abs(curr.ele-prev.ele)/dist*100:0;
+    if(slope>50) slope=0;
+    L.polyline([[prev.lat,prev.lon],[curr.lat,curr.lon]],{color:slopeColor(slope),weight:5,opacity:0.85}).addTo(map);
+  }
+  var s=r.points[0], e=r.points[r.points.length-1];
+  L.circleMarker([s.lat,s.lon],{radius:8,color:'#fff',fillColor:'#1D9E75',fillOpacity:1,weight:2}).bindTooltip('Start').addTo(map);
+  L.circleMarker([e.lat,e.lon],{radius:8,color:'#fff',fillColor:'#065A82',fillOpacity:1,weight:2}).bindTooltip('Slutt').addTo(map);
+  var lats=r.points.map(function(p){return p.lat;}), lons=r.points.map(function(p){return p.lon;});
+  map.fitBounds([[Math.min.apply(null,lats),Math.min.apply(null,lons)],[Math.max.apply(null,lats),Math.max.apply(null,lons)]],{padding:[20,20]});
+}
+
+function slopeSvg(r) {
+  var w=320,h=60,minE=r.minEle,rangeE=(r.maxEle-r.minEle)||1,maxD=r.totalDist;
+  var step=Math.max(1,Math.floor(r.points.length/80)), segs='';
+  for (var i=step; i<r.points.length; i+=step) {
+    var prev=r.points[i-step], curr=r.points[i];
+    var dist=(r.dists[i]-r.dists[i-step])*1000;
+    var slope=dist>0?Math.abs(curr.ele-prev.ele)/dist*100:0;
+    if(slope>50) slope=0;
+    var x1=(r.dists[i-step]/maxD)*w, x2=(r.dists[i]/maxD)*w;
+    var y1=h-((prev.ele-minE)/rangeE)*(h-10)+5, y2=h-((curr.ele-minE)/rangeE)*(h-10)+5;
+    segs+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+slopeColor(slope)+'" stroke-width="2.5" stroke-linecap="round"/>';
+  }
+  return '<svg class="gpx-profile" viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">'+
+    '<rect width="'+w+'" height="'+h+'" fill="#f1efe8" rx="4"/>'+segs+
+    '<text x="4" y="11" font-size="9" fill="#999">'+r.maxEle+'m</text>'+
+    '<text x="4" y="'+(h-3)+'" font-size="9" fill="#999">'+r.minEle+'m</text></svg>';
+}
+
+var _legendHtml = '<div class="slope-legend">'+
+  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#1D9E75"></div>Flatt (0&#8211;5%)</div>'+
+  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#BA7517"></div>Krevende (5&#8211;8%)</div>'+
+  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#E24B4A"></div>Bratt (&gt;8%)</div>'+
+  '</div>';
+
 function renderGpxResult(r) {
   var el = document.getElementById('gpx-result');
   if (!r) { el.style.display='none'; return; }
   el.style.display = 'block';
-  var w=320,h=60,minE=r.minEle,maxE=r.maxEle,rangeE=maxE-minE||1,maxD=r.totalDist;
-  var step = Math.max(1,Math.floor(r.points.length/80));
-  var svgPts = [];
-  for (var i=0;i<r.points.length;i+=step) {
-    svgPts.push((r.dists[i]/maxD)*w+','+( h-((r.points[i].ele-minE)/rangeE)*(h-8)+4 ));
-  }
-  el.innerHTML = '<div class="gpx-stats">' +
-    '<div class="gpx-stat"><div class="gpx-stat-val">'+r.totalDist+' km</div><div class="gpx-stat-label">Distanse</div></div>' +
-    '<div class="gpx-stat"><div class="gpx-stat-val">↑'+r.totalUp+'m ↓'+r.totalDown+'m</div><div class="gpx-stat-label">Høyde</div></div>' +
-    '<div class="gpx-stat '+slopeClass(r.maxSlope)+'"><div class="gpx-stat-val">'+r.maxSlope+'%</div><div class="gpx-stat-label">Maks stigning</div></div>' +
-    '<div class="gpx-stat '+slopeClass(r.avgSlope)+'"><div class="gpx-stat-val">'+r.avgSlope+'%</div><div class="gpx-stat-label">Snitt stigning</div></div>' +
-    '</div><div style="margin-top:8px;font-size:12px;color:var(--text3)">' +
-    (r.maxSlope<=5?'✅ Egnet for rullestol':r.maxSlope<=8?'🟡 Krevende for rullestol':r.maxSlope<=12?'⚠️ For bratt for de fleste':'🔴 Ikke egnet for rullestol') +
-    '</div><svg class="gpx-profile" viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg"><rect width="'+w+'" height="'+h+'" fill="#f1efe8" rx="4"/><polyline points="'+svgPts.join(' ')+'" fill="none" stroke="#1D9E75" stroke-width="2"/></svg>';
+  el.innerHTML =
+    '<div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">GPX-analyse</div>'+
+    '<div class="gpx-stats">'+
+    '<div class="gpx-stat"><div class="gpx-stat-val">'+r.totalDist+' km</div><div class="gpx-stat-label">Distanse</div></div>'+
+    '<div class="gpx-stat"><div class="gpx-stat-val">&#8593;'+r.totalUp+'m &#8595;'+r.totalDown+'m</div><div class="gpx-stat-label">Høyde</div></div>'+
+    '<div class="gpx-stat '+slopeClass(r.maxSlope)+'"><div class="gpx-stat-val">'+r.maxSlope+'%</div><div class="gpx-stat-label">Maks stigning</div></div>'+
+    '<div class="gpx-stat '+slopeClass(r.avgSlope)+'"><div class="gpx-stat-val">'+r.avgSlope+'%</div><div class="gpx-stat-label">Snitt stigning</div></div>'+
+    '</div>'+
+    '<div style="margin-top:8px;font-size:12px;color:var(--text3)">'+
+    (r.maxSlope<=5?'&#9989; Egnet for rullestol og rullator':r.maxSlope<=8?'&#128993; Krevende for rullestol':r.maxSlope<=12?'&#9888; For bratt for de fleste':'&#128308; Ikke egnet for rullestol')+
+    '</div>'+
+    _legendHtml+
+    '<div id="gpx-map-kart" class="gpx-map"></div>'+
+    slopeSvg(r);
+  setTimeout(function(){renderGpxMap('gpx-map-kart', r);}, 150);
 }
+
 
 // SONER
 function buildZones() {
@@ -960,84 +1021,21 @@ async function buildGuide() {
   var gpxHtml = '';
   if (state.gpxData) {
     var r = state.gpxData;
-    var vurdering = r.maxSlope<=5?'✅ Egnet for rullestol og rullator.':r.maxSlope<=8?'🟡 Krevende for manuell rullestol.':r.maxSlope<=12?'⚠️ For bratt for de fleste rullestoler.':'🔴 Svært bratt — kun erfarne turgåere.';
-    gpxHtml = '<div class="guide-gpx"><div class="guide-gpx-title">🗺️ Rute — GPX-analyse</div>' +
+    var vurdering = r.maxSlope<=5?'&#9989; Egnet for rullestol og rullator.':r.maxSlope<=8?'&#128993; Krevende for manuell rullestol.':r.maxSlope<=12?'&#9888; For bratt for de fleste rullestoler.':'&#128308; Svært bratt &mdash; kun erfarne turgåere.';
+    gpxHtml = '<div class="guide-gpx">' +
+      '<div class="guide-gpx-title">&#128507; Rute &mdash; GPX-analyse</div>' +
       '<div class="guide-gpx-stats">' +
       '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.totalDist+' km</div><div class="guide-gpx-stat-label">Distanse</div></div>' +
-      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">↑'+r.totalUp+'m</div><div class="guide-gpx-stat-label">Stigning opp</div></div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">&#8593;'+r.totalUp+'m</div><div class="guide-gpx-stat-label">Stigning opp</div></div>' +
       '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.maxSlope+'%</div><div class="guide-gpx-stat-label">Maks stigning</div></div>' +
-      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.minEle+'–'+r.maxEle+'m</div><div class="guide-gpx-stat-label">Høyde over havet</div></div>' +
-      '</div><div style="margin-top:10px;font-size:13px;color:var(--text2)">'+vurdering+'</div></div>';
-  }
-
-  // Generer AI-tekst per sone
-  var soneData = [];
-  for (var i = 0; i < state.zones.length; i++) {
-    var zone = state.zones[i];
-    var hasContent = zone.images.length > 0 || zone.note || Object.keys(zone.measures).some(function(k){return zone.measures[k];});
-    if (!hasContent) { soneData.push(null); continue; }
-    var alleAnalyser = zone.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;}).join('\n');
-    var malInfo = zone.extraFields.map(function(fid){var f=EXTRA_FIELDS[fid];var v=zone.measures[fid];return f&&v?f.label+': '+v+' '+f.unit:'';}).filter(Boolean).join(', ');
-    var gjesteTekst = zone.note || '';
-    var status = 'ukjent';
-    if (alleAnalyser || malInfo) {
-      try {
-        var kontekst = [alleAnalyser, malInfo?'Målte data: '+malInfo:''].filter(Boolean).join('\n');
-        var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:200,messages:[{role:'user',
-            content:'Du skriver tilgjengelighetsguide for "'+name+'" som gjester skal lese. Basert på '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte setninger på norsk om hva gjesten finner her og om det er tilgjengelig. Vær konkret og positiv. Ikke begynn med "Basert på" eller "AI". Avslutt med STATUS:GRONN, STATUS:GUL eller STATUS:ROD'}]})});
-        var data = await res.json();
-        if (data.content && data.content[0] && data.content[0].text) {
-          var tekst = data.content[0].text;
-          var m = tekst.match(/STATUS:(GRONN|GUL|ROD)/);
-          if (m) status = m[1].toLowerCase();
-          gjesteTekst = tekst.replace(/STATUS:(GRONN|GUL|ROD)/,'').trim();
-        }
-      } catch(e) {}
-    }
-    soneData.push({zone:zone, gjesteTekst:gjesteTekst, status:status});
-  }
-
-  // Grupper soner i seksjoner
-  var config2 = TYPE_CONFIG[type];
-  var grp = config2 ? config2.group : 'A';
-  var ankomstIds = ['parkering','inngang','resepsjon','mottakelse','motepunkt','startpunkt','adkomst','utleiested','stall'];
-  var oppholdIds = ['hotellrom','bad','heis','stue','kjokken','soverom','spisesal','spisebord','buffet','bar','konferanse','wc','sanitaer','aktivitetsomrade','terreng','underlag','loype','innsjosett','selve_stedet'];
-
-  var ankomstHtml = '', oppholdHtml = '', annetHtml = '';
-
-  var statusIkon = function(s) { return s==='gronn'?'✅':s==='gul'?'🟡':s==='rod'?'🔴':''; };
-
-  for (var i = 0; i < soneData.length; i++) {
-    if (!soneData[i]) continue;
-    var sd = soneData[i];
-    var zone = sd.zone;
-    var malChips = '';
-    for (var j = 0; j < zone.extraFields.length; j++) {
-      var fid = zone.extraFields[j];
-      var f = EXTRA_FIELDS[fid];
-      var val = zone.measures[fid];
-      if (f && val) malChips += '<span class="guide-sone-maal-chip">'+f.label+': '+val+' '+f.unit+'</span>';
-    }
-    var bilderHtml = '';
-    for (var j = 0; j < zone.images.length; j++) {
-      bilderHtml += '<div class="guide-bilde"><img src="'+zone.images[j].dataUrl+'" alt="'+zone.label+'"/></div>';
-    }
-    var soneIdx = i;
-    var soneHtml = lagSoneHTML(sd, soneIdx, malChips, bilderHtml);
-
-    if (ankomstIds.indexOf(zone.id) >= 0) ankomstHtml += soneHtml;
-    else if (oppholdIds.indexOf(zone.id) >= 0) oppholdHtml += soneHtml;
-    else annetHtml += soneHtml;
-  }
-
-  // Profilbilde-analyse i seksjoner
-  var profilAnalyseHtml = '';
-  if (state.profilbilde && state.profilbilde.analysis) {
-    profilAnalyseHtml = '<div class="guide-sone" style="background:var(--green-light);border-color:var(--green)">' +
-      '<div class="guide-sone-topp"><div class="guide-sone-ikon">🏠</div><div class="guide-sone-navn">Helhetsinntrykk</div></div>' +
-      '<div class="guide-sone-tekst">'+state.profilbilde.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.minEle+'&#8211;'+r.maxEle+'m</div><div class="guide-gpx-stat-label">Høyde over havet</div></div>' +
+      '</div>' +
+      '<div style="margin-top:10px;font-size:13px;color:var(--text2)">'+vurdering+'</div>' +
+      _legendHtml +
+      '<div id="guide-gpx-map" class="guide-gpx-map"></div>' +
+      slopeSvg(r) +
       '</div>';
+    setTimeout(function(){renderGpxMap('guide-gpx-map', state.gpxData);}, 500);
   }
 
   var sonerHtml = profilAnalyseHtml +
