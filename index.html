@@ -532,7 +532,7 @@ var TYPE_CONFIG = {
       {id:'terreng',label:'Terreng / underlag',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
       {id:'utstyr',label:'Utstyr',icon:'🎒',extraFields:[],optional:false}],
     extraOptions:['Hvilepunkt','Serveringssted','WC underveis','Transport'],
-    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
+    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_hvileplasser','q_ledsager']},
   kajakkpadling:{label:'Kajakkutleie / padling',group:'B',pageTitle:'Padleopplevelse',pageDesc:'Last opp bilder og GPX-rute.',
     defaultZones:[
       {id:'utleiested',label:'Utleiestedet',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
@@ -577,21 +577,21 @@ var TYPE_CONFIG = {
       {id:'underlag',label:'Underlag og sti',icon:'👟',extraFields:['sti_bredde_cm','stigningsgrad'],optional:false},
       {id:'wc',label:'Toalett ved start',icon:'🚻',extraFields:[],optional:true}],
     extraOptions:['Hvileplass','Bratt parti','Krevende underlag','Utsiktspunkt'],
-    questions:['q_sti_rullestol','q_sti_barnevogn','q_sti_merking','q_sti_belysning','q_hc_wc','q_ledsager']},
+    questions:['q_sti_rullestol','q_sti_barnevogn','q_sti_merking','q_sti_belysning','q_hc_wc','q_hvileplasser','q_hvileplasser_avstand','q_ledsager']},
   sykkelsti:{label:'Sykkelløype',group:'C',pageTitle:'Sykkelløype',pageDesc:'Last opp bilder og GPX-fil.',
     defaultZones:[
       {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'underlag',label:'Underlag og løype',icon:'🚲',extraFields:['stigningsgrad'],optional:false}],
     extraOptions:['Hvileplass','Krevende parti','Serveringssted','WC'],
-    questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_ledsager']},
+    questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_hvileplasser','q_ledsager']},
   skiloype:{label:'Skiløype',group:'C',pageTitle:'Skiløype',pageDesc:'Last opp bilder og GPX-fil.',
     defaultZones:[
       {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'loype',label:'Løypetrase',icon:'⛷️',extraFields:['stigningsgrad'],optional:false}],
     extraOptions:['Hvileplass','Krevende bakke','Serveringssted'],
-    questions:['q_sti_merking','q_hc_wc','q_ledsager','q_opplaering']},
+    questions:['q_sti_merking','q_hc_wc','q_hvileplasser','q_ledsager','q_opplaering']},
   badeplass:{label:'Badeplass',group:'C',pageTitle:'Badeplass',pageDesc:'Last opp bilder av badeplassen.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
@@ -606,7 +606,7 @@ var TYPE_CONFIG = {
       {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:['stigningsgrad'],optional:false},
       {id:'selve_stedet',label:'Selve utsiktspunktet',icon:'🏔️',extraFields:[],optional:false}],
     extraOptions:['Informasjonsskilt','Sitteplasser','WC i nærheten'],
-    questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_ledsager']},
+    questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_hvileplasser','q_ledsager']},
   hc_parkering:{label:'HC-parkering / toalett i utmark',group:'C',pageTitle:'HC-parkering / toalett',pageDesc:'Last opp bilder.',
     defaultZones:[
       {id:'parkering',label:'HC-parkering',icon:'🅿️',extraFields:[],optional:false},
@@ -637,7 +637,9 @@ var ALL_QUESTIONS = {
   q_sti_merking:{text:'Er stien / løypen tydelig merket?',ctx:'Skilting, stikker, kart'},
   q_sti_belysning:{text:'Er det belysning langs stien?',ctx:''},
   q_hc_wc:{text:'Er det tilgjengelig HC-toalett i nærheten?',ctx:''},
-  q_badeplass_rampe:{text:'Er det rampe eller tilrettelagt adkomst til vannet?',ctx:'Amfistol, rampe, fast underlag'}
+  q_badeplass_rampe:{text:'Er det rampe eller tilrettelagt adkomst til vannet?',ctx:'Amfistol, rampe, fast underlag'},
+  q_hvileplasser:{text:'Finnes det sittebenker eller hvileplasser underveis?',ctx:'Viktig for eldre og personer med begrenset gangevne'},
+  q_hvileplasser_avstand:{text:'Er det hvileplass for hver 500 meter eller kortere?',ctx:'Anbefalt for å gjøre ruten tilgjengelig for eldre'}
 };
 
 var EXTRA_FIELDS = {
