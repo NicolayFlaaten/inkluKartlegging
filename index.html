@@ -1062,6 +1062,12 @@ async function buildRapport() {
   document.getElementById('spinner-tekst').textContent = 'Kjører AI-analyse per sone...';
   await buildAnalyse();
   document.getElementById('generer-spinner').style.display = 'none';
+  // Render GPX Leaflet-kart etter at DOM er oppdatert
+  if (state.gpxData) {
+    requestAnimationFrame(function() {
+      setTimeout(function() { renderGpxMap('guide-gpx-map', state.gpxData); }, 150);
+    });
+  }
   document.getElementById('rapport-innhold').style.display = 'block';
 }
 
@@ -1130,7 +1136,7 @@ async function buildGuide() {
       '<div id="guide-gpx-map" class="guide-gpx-map"></div>' +
       slopeSvg(r) +
       '</div>';
-    setTimeout(function(){renderGpxMap('guide-gpx-map', state.gpxData);}, 500);
+    // NB: renderGpxMap kalles ETTER container.innerHTML er satt – se nedenfor
   }
 
   // Generer AI-tekst per sone
@@ -1181,9 +1187,85 @@ async function buildGuide() {
 
   var profilAnalyseHtml = '';
   if (state.profilbilde && state.profilbilde.analysis) {
-    profilAnalyseHtml = '<div class="guide-sone" style="background:var(--green-light);border-color:var(--green)">'+
-      '<div class="guide-sone-topp"><div class="guide-sone-ikon">🏠</div><div class="guide-sone-navn">Helhetsinntrykk</div></div>'+
-      '<div class="guide-sone-tekst">'+state.profilbilde.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div></div>';
+    var hIdx = 'helhet';
+    var hTekst = (guideRedigert[hIdx] && guideRedigert[hIdx].tekst) ? guideRedigert[hIdx].tekst : state.profilbilde.analysis;
+    var hStatus = (guideRedigert[hIdx] && guideRedigert[hIdx].status) ? guideRedigert[hIdx].status : '';
+    var hStatusColor = hStatus==='gronn'?'var(--green-dark)':hStatus==='gul'?'var(--amber)':'var(--red)';
+    var hStatusLabel = hStatus==='gronn'?'✅ Tilgjengelig':hStatus==='gul'?'🟡 Delvis tilgjengelig':hStatus==='rod'?'🔴 Begrenset':'';
+
+    var hDiv = document.createElement('div');
+    hDiv.className = 'guide-sone';
+    hDiv.style.cssText = 'background:var(--green-light);border-color:var(--green)';
+
+    // Topp-rad
+    var topp = document.createElement('div');
+    topp.className = 'guide-sone-topp';
+    topp.innerHTML = '<div class="guide-sone-ikon">🏠</div><div class="guide-sone-navn">Helhetsinntrykk</div>';
+    var editBtn = document.createElement('button');
+    editBtn.className = 'sone-edit-btn';
+    editBtn.id = 'edit-btn-' + hIdx;
+    editBtn.textContent = '✏️ Rediger';
+    editBtn.addEventListener('click', function() { toggleEditSone(hIdx); });
+    topp.appendChild(editBtn);
+    hDiv.appendChild(topp);
+
+    // Status
+    var statusDiv = document.createElement('div');
+    statusDiv.id = 'guide-sone-status-' + hIdx;
+    if (hStatus) statusDiv.innerHTML = '<span style="font-size:13px;font-weight:700;color:'+hStatusColor+'">'+hStatusLabel+'</span>';
+    statusDiv.style.marginBottom = hStatus ? '6px' : '0';
+    hDiv.appendChild(statusDiv);
+
+    // Tekst
+    var tekstDiv = document.createElement('div');
+    tekstDiv.className = 'guide-sone-tekst';
+    tekstDiv.id = 'guide-sone-tekst-' + hIdx;
+    tekstDiv.innerHTML = hTekst.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    hDiv.appendChild(tekstDiv);
+
+    // Rediger-panel
+    var editPanel = document.createElement('div');
+    editPanel.id = 'edit-sone-' + hIdx;
+    editPanel.style.display = 'none';
+    editPanel.style.marginTop = '10px';
+
+    var banner = document.createElement('div');
+    banner.className = 'edit-mode-banner';
+    banner.textContent = '✏️ Rediger helhetsinntrykket';
+    editPanel.appendChild(banner);
+
+    var toggleRow = document.createElement('div');
+    toggleRow.className = 'status-toggle';
+    [['gronn','✅ Tilgjengelig'],['gul','🟡 Delvis'],['rod','🔴 Begrenset']].forEach(function(pair) {
+      var s = pair[0], label = pair[1];
+      var b = document.createElement('button');
+      b.className = 'status-toggle-btn' + (hStatus===s ? ' active-'+s : '');
+      b.id = 'status-btn-' + hIdx + '-' + s;
+      b.textContent = label;
+      b.addEventListener('click', function() { setStatusToggle(hIdx, s); });
+      toggleRow.appendChild(b);
+    });
+    editPanel.appendChild(toggleRow);
+
+    var ta = document.createElement('textarea');
+    ta.className = 'sone-edit-area';
+    ta.id = 'edit-tekst-' + hIdx;
+    ta.rows = 6;
+    ta.value = hTekst;
+    editPanel.appendChild(ta);
+
+    var saveBtn = document.createElement('button');
+    saveBtn.textContent = 'Lagre';
+    saveBtn.style.cssText = 'background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 18px;font-size:14px;font-family:inherit;font-weight:600;cursor:pointer;margin-top:8px;width:100%';
+    saveBtn.addEventListener('click', function() { saveAndClose(hIdx); });
+    editPanel.appendChild(saveBtn);
+
+    hDiv.appendChild(editPanel);
+
+    // Serialiser til HTML-streng for å sette inn i sonerHtml
+    var tmp = document.createElement('div');
+    tmp.appendChild(hDiv);
+    profilAnalyseHtml = tmp.innerHTML;
   }
 
   var sonerHtml = profilAnalyseHtml +
@@ -1215,9 +1297,14 @@ async function buildGuide() {
   if (addr) metaPills += '<div class="guide-meta-pill">🏠 '+addr+'</div>';
   for (var i = 0; i < state.tags.length; i++) metaPills += '<div class="guide-meta-pill">'+state.tags[i]+'</div>';
 
+  // Adressekart vises alltid hvis adresse finnes, men som sekundær når GPX er tilgjengelig
   var mapHtml = '';
-  if (addr) {
+  if (addr && !state.gpxData) {
+    // Kun adressekart når ingen GPX-fil
     mapHtml = '<div class="guide-map"><iframe src="https://maps.google.com/maps?q='+mapQuery+'&output=embed&z=15" allowfullscreen loading="lazy"></iframe></div>';
+  } else if (addr && state.gpxData) {
+    // Adresse vises som kompakt lenke under GPX-kartet
+    mapHtml = '<div style="font-size:12px;color:var(--text3);margin:-8px 0 8px;padding:0 2px">&#128205; '+addr+' &mdash; <a href="https://maps.google.com/maps?q='+mapQuery+'" target="_blank" style="color:var(--blue)">Åpne i Google Maps</a></div>';
   }
 
   var container = document.getElementById('tab-content-guide');
@@ -1233,7 +1320,7 @@ async function buildGuide() {
     '<div class="guide-hero-type">'+(config?config.label:'')+'</div>' +
     '<div class="guide-hero-meta">'+metaPills+'</div>' +
     '</div></div>' +
-    mapHtml + gpxHtml +
+    (state.gpxData ? '' : mapHtml) + gpxHtml + (state.gpxData ? mapHtml : '') +
     (sonerHtml ? '<div class="guide-section"><div class="guide-section-title">Fasiliteter og tilgjengelighet</div>'+sonerHtml+'</div>' : '') +
     (jaItems ? '<div class="guide-section"><div class="guide-section-title">Tilleggstjenester</div><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
     '<div class="guide-section"><div class="guide-section-title">Spør om tilgjengelighet</div>' +
