@@ -218,6 +218,15 @@ textarea{resize:vertical;min-height:80px}
 .slope-legend{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
 .slope-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2)}
 .slope-legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.picker-btn{width:100%;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:16px;font-family:inherit;color:var(--text);background:var(--surface);text-align:left;cursor:pointer;display:flex;align-items:center;justify-content:space-between;-webkit-appearance:none}
+.picker-btn:active{border-color:var(--green)}
+.picker-arrow{font-size:20px;color:var(--text3);flex-shrink:0}
+.picker-btn.selected{color:var(--text)}
+.picker-btn:not(.selected) span:first-child{color:var(--text3)}
+.kommune-hint-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;display:none}
+.kommune-hint-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:5px 12px;font-size:13px;font-family:inherit;cursor:pointer;color:var(--text2)}
+.kommune-hint-btn:active{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
+.fylke-auto-hint{font-size:12px;color:var(--amber);background:var(--amber-light);border-radius:6px;padding:5px 9px;margin-top:5px;display:none}
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:.875rem 1rem;padding-bottom:calc(.875rem + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100}
 .btn-primary{flex:1;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer}
 .btn-primary:active{opacity:.85}
@@ -240,6 +249,7 @@ textarea{resize:vertical;min-height:80px}
 
   <div class="page active" id="page-0">
     <div class="page-header"><div class="page-title">Registrer sted</div><div class="page-desc">Grunnleggende informasjon om stedet du kartlegger.</div></div>
+    <div id="prefyll-banner" style="display:none;background:var(--green-light);border:1px solid rgba(29,158,117,.25);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);margin-bottom:1rem;line-height:1.7"></div>
     <div class="card">
       <div class="card-title">📍 Informasjon</div>
       <div class="field">
@@ -294,7 +304,42 @@ textarea{resize:vertical;min-height:80px}
       </div>
       <div class="field"><label class="field-label">Adresse / sted</label><input type="text" id="biz-address" placeholder="Adresse, postnummer, sted eller GPS-koordinat"/></div>
       <div class="field"><label class="field-label">Destinasjonsselskap</label><input type="text" id="biz-dest" placeholder="f.eks. Visit Valdres"/></div>
-      <div class="field"><label class="field-label">Kommune</label><input type="text" id="biz-kommune" placeholder="f.eks. Øystre Slidre"/></div>
+      <div class="field">
+        <label class="field-label">Geografisk tilhørighet</label>
+        <button type="button" id="gps-btn" onclick="hentPosisjon()" style="width:100%;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:13px 16px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <span id="gps-icon">📍</span> <span id="gps-label">Hent posisjon automatisk</span>
+        </button>
+        <div id="geo-resultat" style="display:none;margin-top:10px;">
+          <div id="geo-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+          <div style="font-size:12px;color:var(--text3)">Trykk på et felt for å endre manuelt</div>
+        </div>
+        <div id="geo-feil" style="display:none;font-size:13px;color:var(--amber);background:var(--amber-light);border-radius:var(--radius-sm);padding:8px 10px;margin-top:8px;"></div>
+      </div>
+      <div id="geo-manuell" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="field">
+            <label class="field-label">Kommune</label>
+            <input type="text" id="biz-kommune" placeholder="f.eks. Øystre Slidre" oninput="oppdaterRegionFraKommune(this.value);lagreStedsprofil()"/>
+          </div>
+          <div class="field">
+            <label class="field-label">Fylke</label>
+            <button type="button" class="picker-btn" id="fylke-btn" onclick="openFylkeModal()">
+              <span id="fylke-display" style="color:var(--text3)">Velg fylke</span>
+              <span class="picker-arrow">›</span>
+            </button>
+            <input type="hidden" id="biz-fylke" value=""/>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">SSB reiselivsregion</label>
+          <button type="button" class="picker-btn" id="region-btn" onclick="openRegionModal()">
+            <span id="region-display" style="color:var(--text3)">Velg region (SSB)</span>
+            <span class="picker-arrow">›</span>
+          </button>
+          <input type="hidden" id="biz-ssb-region" value=""/>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">67 offisielle reiselivsregioner (SSB KLASS 527, 2021)</div>
+        </div>
+      </div>
       <div class="field"><label class="field-label">Kontaktperson / forvalter</label><input type="text" id="biz-contact" placeholder="Navn — e-post"/></div>
     </div>
 
@@ -366,6 +411,38 @@ textarea{resize:vertical;min-height:80px}
       <button onclick="addCustomZone()">Legg til</button>
     </div>
     <button class="modal-cancel" onclick="closeAddZoneModal()">Avbryt</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="fylke-modal" onclick="if(event.target===this)closeFylkeModal()">
+  <div class="modal-sheet">
+    <div class="modal-title">Velg fylke</div>
+    <div class="modal-options">
+      <button class="modal-option" onclick="velgFylke('Oslo')">Oslo</button>
+      <button class="modal-option" onclick="velgFylke('Viken')">Viken</button>
+      <button class="modal-option" onclick="velgFylke('Innlandet')">Innlandet</button>
+      <button class="modal-option" onclick="velgFylke('Vestfold og Telemark')">Vestfold og Telemark</button>
+      <button class="modal-option" onclick="velgFylke('Agder')">Agder</button>
+      <button class="modal-option" onclick="velgFylke('Rogaland')">Rogaland</button>
+      <button class="modal-option" onclick="velgFylke('Vestland')">Vestland</button>
+      <button class="modal-option" onclick="velgFylke('Møre og Romsdal')">Møre og Romsdal</button>
+      <button class="modal-option" onclick="velgFylke('Trøndelag')">Trøndelag</button>
+      <button class="modal-option" onclick="velgFylke('Nordland')">Nordland</button>
+      <button class="modal-option" onclick="velgFylke('Troms og Finnmark')">Troms og Finnmark</button>
+    </div>
+    <button class="modal-cancel" onclick="closeFylkeModal()">Avbryt</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="region-modal" onclick="if(event.target===this)closeRegionModal()">
+  <div class="modal-sheet" style="max-height:85vh">
+    <div class="modal-title">Velg SSB reiselivsregion</div>
+    <div style="padding:0 0 10px">
+      <input type="text" id="region-search" placeholder="Søk..." oninput="filterRegionModal(this.value)"
+        style="width:100%;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;font-size:16px;font-family:inherit;outline:none;margin-bottom:8px"/>
+    </div>
+    <div class="modal-options" id="region-modal-options" style="max-height:55vh;overflow-y:auto"></div>
+    <button class="modal-cancel" onclick="closeRegionModal()">Avbryt</button>
   </div>
 </div>
 
@@ -1494,8 +1571,488 @@ function addZone(name) {
   renderZones();
 }
 
+// ---- GPS OG REVERSE GEOCODING ----
+
+// Kommune -> region lookup (reversed from REGION_KOMMUNER)
+function byggKommuneTilRegion() {
+  var map = {};
+  Object.keys(REGION_KOMMUNER).forEach(function(region) {
+    REGION_KOMMUNER[region].forEach(function(kommune) {
+      if (!map[kommune]) map[kommune] = [];
+      map[kommune].push(region);
+    });
+  });
+  return map;
+}
+
+function hentPosisjon() {
+  var btn = document.getElementById('gps-btn');
+  var label = document.getElementById('gps-label');
+  var icon = document.getElementById('gps-icon');
+  if (!navigator.geolocation) {
+    visGeoFeil('GPS er ikke tilgjengelig i denne nettleseren');
+    return;
+  }
+  label.textContent = 'Henter posisjon...';
+  icon.textContent = '⏳';
+  btn.disabled = true;
+  navigator.geolocation.getCurrentPosition(
+    function(pos) { reverseGeocode(pos.coords.latitude, pos.coords.longitude); },
+    function(err) {
+      btn.disabled = false;
+      label.textContent = 'Hent posisjon automatisk';
+      icon.textContent = '📍';
+      var msg = err.code === 1 ? 'Tilgang til posisjon ble avslått — fyll inn manuelt' :
+                err.code === 2 ? 'Kunne ikke finne posisjon — fyll inn manuelt' :
+                'Tidsavbrudd — fyll inn manuelt';
+      visGeoFeil(msg);
+      visManuelleGeoFelt();
+    },
+    { timeout: 10000, maximumAge: 60000, enableHighAccuracy: false }
+  );
+}
+
+async function reverseGeocode(lat, lon) {
+  var label = document.getElementById('gps-label');
+  var icon = document.getElementById('gps-icon');
+  var btn = document.getElementById('gps-btn');
+  try {
+    var url = 'https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat + '&lon=' + lon + '&accept-language=no&zoom=10';
+    var resp = await fetch(url, { headers: { 'User-Agent': 'AccessNorway-Kartlegging/1.0' } });
+    var data = await resp.json();
+    var addr = data.address || {};
+
+    var kommune = addr.municipality || addr.city || addr.town || addr.village || '';
+    var fylke = normaliserFylke(addr.county || addr.state || '');
+    var region = finnRegionFraKommune(kommune, fylke);
+
+    // Set hidden values
+    document.getElementById('biz-kommune').value = kommune;
+    document.getElementById('biz-fylke').value = fylke;
+    document.getElementById('biz-ssb-region').value = region;
+
+    // Update picker button displays
+    if (fylke) {
+      document.getElementById('fylke-display').textContent = fylke;
+      document.getElementById('fylke-display').style.color = '';
+      document.getElementById('fylke-btn').classList.add('selected');
+    }
+    if (region) {
+      document.getElementById('region-display').textContent = region;
+      document.getElementById('region-display').style.color = '';
+      document.getElementById('region-btn').classList.add('selected');
+    }
+
+    // Show result chips
+    visGeoResultat(kommune, fylke, region);
+    btn.disabled = false;
+    lagreStedsprofil();
+  } catch(err) {
+    btn.disabled = false;
+    label.textContent = 'Hent posisjon automatisk';
+    icon.textContent = '📍';
+    visGeoFeil('Kunne ikke hente stedsinfo — fyll inn manuelt');
+    visManuelleGeoFelt();
+  }
+}
+
+function normaliserFylke(raw) {
+  var fylker = ['Oslo','Viken','Innlandet','Vestfold og Telemark','Agder',
+    'Rogaland','Vestland','Møre og Romsdal','Trøndelag','Nordland','Troms og Finnmark'];
+  // Direct match
+  for (var i = 0; i < fylker.length; i++) {
+    if (raw.toLowerCase() === fylker[i].toLowerCase()) return fylker[i];
+  }
+  // Partial match
+  var r = raw.toLowerCase();
+  if (r.indexOf('troms') > -1 || r.indexOf('finnmark') > -1) return 'Troms og Finnmark';
+  if (r.indexOf('trøndelag') > -1 || r.indexOf('trondelag') > -1) return 'Trøndelag';
+  if (r.indexOf('nordland') > -1) return 'Nordland';
+  if (r.indexOf('vestland') > -1) return 'Vestland';
+  if (r.indexOf('rogaland') > -1) return 'Rogaland';
+  if (r.indexOf('agder') > -1) return 'Agder';
+  if (r.indexOf('innlandet') > -1) return 'Innlandet';
+  if (r.indexOf('viken') > -1) return 'Viken';
+  if (r.indexOf('vestfold') > -1 || r.indexOf('telemark') > -1) return 'Vestfold og Telemark';
+  if (r.indexOf('møre') > -1 || r.indexOf('romsdal') > -1) return 'Møre og Romsdal';
+  if (r.indexOf('oslo') > -1) return 'Oslo';
+  return raw;
+}
+
+function finnRegionFraKommune(kommune, fylke) {
+  if (!kommune) return '';
+  var kommuneTilRegion = byggKommuneTilRegion();
+  // Exact match
+  if (kommuneTilRegion[kommune]) {
+    var kandidater = kommuneTilRegion[kommune];
+    if (kandidater.length === 1) return kandidater[0];
+    // Multiple regions match — pick the one whose fylke matches
+    for (var i = 0; i < kandidater.length; i++) {
+      if (REGION_TIL_FYLKE[kandidater[i]] === fylke) return kandidater[i];
+    }
+    return kandidater[0];
+  }
+  // Fallback: use fylke to pick a likely region
+  if (fylke) {
+    var regionerIFylke = Object.keys(REGION_TIL_FYLKE).filter(function(r) {
+      return REGION_TIL_FYLKE[r] === fylke;
+    });
+    if (regionerIFylke.length === 1) return regionerIFylke[0];
+  }
+  return '';
+}
+
+function visGeoResultat(kommune, fylke, region) {
+  var resultat = document.getElementById('geo-resultat');
+  var chips = document.getElementById('geo-chips');
+  var feil = document.getElementById('geo-feil');
+  feil.style.display = 'none';
+  chips.innerHTML = '';
+
+  var items = [
+    { label: '📍 ' + (kommune || 'Ukjent kommune'), field: 'kommune', onclick: function(){ visManuelleGeoFelt('biz-kommune'); }},
+    { label: '🗺️ ' + (fylke || 'Ukjent fylke'), field: 'fylke', onclick: function(){ openFylkeModal(); visManuelleGeoFelt(); }},
+    { label: '📊 ' + (region || '— Velg region'), field: 'region', onclick: function(){ openRegionModal(); visManuelleGeoFelt(); }}
+  ];
+
+  items.forEach(function(item) {
+    var chip = document.createElement('div');
+    chip.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green-dark);border:1px solid rgba(29,158,117,.25);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:500;cursor:pointer;';
+    chip.innerHTML = item.label;
+    if (!item.label.includes('—')) {
+      chip.innerHTML += ' <span style="font-size:10px;opacity:0.6">✎</span>';
+    } else {
+      chip.style.background = 'var(--amber-light)';
+      chip.style.color = 'var(--amber)';
+      chip.style.borderColor = 'rgba(186,117,23,.25)';
+    }
+    chip.addEventListener('click', item.onclick);
+    chips.appendChild(chip);
+  });
+
+  resultat.style.display = 'block';
+  // Update GPS button to show success state
+  document.getElementById('gps-icon').textContent = '✅';
+  document.getElementById('gps-label').textContent = 'Posisjon hentet — trykk for å oppdatere';
+  document.getElementById('gps-btn').disabled = false;
+}
+
+function visGeoFeil(msg) {
+  var feil = document.getElementById('geo-feil');
+  feil.textContent = '⚠️ ' + msg;
+  feil.style.display = 'block';
+}
+
+function visManuelleGeoFelt(focusId) {
+  document.getElementById('geo-manuell').style.display = 'block';
+  if (focusId) {
+    setTimeout(function(){ var el=document.getElementById(focusId); if(el) el.focus(); }, 100);
+  }
+}
+
+function oppdaterRegionFraKommune(kommune) {
+  if (!kommune || kommune.length < 3) return;
+  var fylke = document.getElementById('biz-fylke').value;
+  var region = finnRegionFraKommune(kommune, fylke);
+  if (region) {
+    document.getElementById('biz-ssb-region').value = region;
+    document.getElementById('region-display').textContent = region;
+    document.getElementById('region-display').style.color = '';
+    document.getElementById('region-btn').classList.add('selected');
+  }
+}
+
+// ---- PICKER MODALS: Fylke og SSB-region ----
+
+var REGION_TIL_FYLKE = {
+  'Arendal/Grimstad region':'Agder','Asker & Bærum':'Viken','Bergensregionen':'Vestland',
+  'Bodø':'Nordland','Drammensregionen':'Viken','Fjordkysten':'Vestland','Follo':'Viken',
+  'Fosen':'Trøndelag','Fredrikstad og Hvaler':'Viken','Gjøvikregionen':'Innlandet',
+  'Grenland':'Vestfold og Telemark','Hadeland/Ringerike':'Viken','Haldenkanalen':'Viken',
+  'Hallingdal':'Viken','Hardangerfjord':'Vestland','Haugesund og Haugalandet':'Rogaland',
+  'Hedmark-regionen':'Innlandet','Helgeland':'Nordland','Hitra/Frøya':'Trøndelag',
+  'Horten-regionen':'Vestfold og Telemark','Innherred':'Trøndelag',
+  'Kongsberg-regionen':'Viken','Kristiansand-regionen':'Agder',
+  'Lillehammer-regionen':'Innlandet','Lindesnes/Lyngdal':'Agder','Lofoten':'Nordland',
+  'Midt-Telemark':'Vestfold og Telemark','Mosse-regionen':'Viken','Namdalen':'Trøndelag',
+  'Narvik-region':'Nordland','Nord-Gudbrandsdal':'Innlandet',
+  'Nord-Troms-region':'Troms og Finnmark','Nordfjord':'Vestland',
+  'Nordmøre og Romsdal':'Møre og Romsdal','Norefjells-regionen':'Viken','Oppdal':'Trøndelag',
+  'Orkdalsområdet':'Trøndelag','Oslo Region':'Oslo','Region Stavanger':'Rogaland',
+  'Ringsaker':'Innlandet','Risør/Tvedestrand region':'Agder','Romerike':'Viken',
+  'Ryfylke':'Rogaland','Røros-regionen':'Innlandet','Salten-region':'Nordland',
+  'Sandefjord/Larvik':'Vestfold og Telemark','Sarpsborg':'Viken','Setesdal':'Agder',
+  'Sognefjord':'Vestland','Sunnfjord':'Vestland','Sunnhordland':'Vestland',
+  'Sør-Troms/Midt-Troms/Senja-region':'Troms og Finnmark','Tromsø':'Troms og Finnmark',
+  'Trondheim':'Trøndelag','Trysil':'Innlandet','Tønsberg-regionen':'Vestfold og Telemark',
+  'Valdres':'Innlandet','Vest-Finnmark/Indre Finnmark-region':'Troms og Finnmark',
+  'Vest-Telemark':'Vestfold og Telemark','Vesterålen':'Nordland','Vestre Agder':'Agder',
+  'Voss':'Vestland','Værnes-regionen':'Trøndelag','Ålesund og Sunnmøre':'Møre og Romsdal',
+  'Øst-Finnmark-region':'Troms og Finnmark','Øst-Telemark':'Vestfold og Telemark',
+  'Østerdalen':'Innlandet'
+};
+
+// Regions that span multiple fylker — fylke is auto-set but shown as suggestion
+var REGION_MULTI_FYLKE = {
+  'Røros-regionen': ['Innlandet','Trøndelag'],
+  'Hallingdal': ['Viken','Innlandet'],
+  'Narvik-region': ['Nordland','Troms og Finnmark'],
+  'Valdres': ['Innlandet','Viken']
+};
+
+// Kommuner per reiselivsregion (utvalg av de viktigste)
+var REGION_KOMMUNER = {
+  'Valdres':['Øystre Slidre','Vågå','Nord-Fron','Sør-Fron','Ringebu','Sel','Skjåk','Lom','Vågå','Etnedal','Nord-Aurdal','Sør-Aurdal','Vestre Slidre','Øystre Slidre'],
+  'Lillehammer-regionen':['Lillehammer','Gausdal','Øyer','Ringebu'],
+  'Hallingdal':['Flå','Nes','Gol','Hemsedal','Ål','Hol'],
+  'Norefjells-regionen':['Numedal','Rollag','Nore og Uvdal','Flesberg'],
+  'Hardangerfjord':['Ullensvang','Kvam','Eidfjord','Ulvik'],
+  'Voss':['Voss'],
+  'Sognefjord':['Sogndal','Luster','Aurland','Lærdal','Årdal','Leikanger','Balestrand','Vik'],
+  'Nordfjord':['Stryn','Gloppen','Stad','Kinn','Bremanger'],
+  'Sunnfjord':['Sunnfjord','Askvoll','Fjaler'],
+  'Lofoten':['Vågan','Vestvågøy','Flakstad','Moskenes','Værøy','Røst'],
+  'Vesterålen':['Hadsel','Bø','Øksnes','Sortland','Andøy','Lødingen'],
+  'Helgeland':['Rana','Hemnes','Grane','Hattfjelldal','Vefsn','Leirfjord','Alstahaug','Dønna','Brønnøy','Sømna','Bindal','Vevelstad','Herøy','Lurøy','Træna','Rødøy'],
+  'Salten-region':['Fauske','Saltdal','Beiarn','Bodø','Gildeskål','Meløy','Hamarøy','Sørfold'],
+  'Tromsø':['Tromsø'],
+  'Trondheim':['Trondheim'],
+  'Røros-regionen':['Røros','Os','Tolga','Tynset','Alvdal','Folldal'],
+  'Trysil':['Trysil'],
+  'Østerdalen':['Åmot','Elverum','Stor-Elvdal','Rendalen','Engerdal'],
+  'Hedmark-regionen':['Hamar','Stange','Løten','Ringsaker'],
+  'Ringsaker':['Ringsaker'],
+  'Nord-Gudbrandsdal':['Lesja','Dovre','Sel','Vågå','Lom','Skjåk'],
+  'Gjøvikregionen':['Gjøvik','Østre Toten','Vestre Toten','Nordre Land','Søndre Land'],
+  'Hadeland/Ringerike':['Gran','Lunner','Jevnaker','Ringerike','Hole','Modum'],
+  'Bergensregionen':['Bergen','Alver','Askøy','Bjørnafjorden','Osterøy','Samnanger','Vaksdal','Øygarden'],
+  'Ålesund og Sunnmøre':['Ålesund','Sula','Giske','Haram','Stranda','Norddal','Ørsta','Volda','Herøy','Ulstein','Hareid','Sande'],
+  'Nordmøre og Romsdal':['Molde','Ålesund','Kristiansund','Rauma','Sunndal','Surnadal','Averøy','Aukra','Hustadvika'],
+  'Region Stavanger':['Stavanger','Sandnes','Sola','Randaberg','Klepp','Time','Gjesdal','Strand','Hjelmeland'],
+  'Haugesund og Haugalandet':['Haugesund','Karmøy','Tysvær','Bokn','Vindafjord','Etne'],
+  'Ryfylke':['Sauda','Suldal','Hjelmeland','Kvitsøy','Rennesøy'],
+  'Kristiansand-regionen':['Kristiansand','Lillesand','Birkenes','Iveland','Vennesla'],
+  'Setesdal':['Evje og Hornnes','Bygland','Valle','Bykle'],
+  'Bodø':['Bodø'],
+  'Sunnhordland':['Stord','Fitjar','Tysnes','Bømlo','Etne'],
+  'Oslo Region':['Oslo']
+};
+var ALLE_REGIONER = ['Arendal/Grimstad region','Asker & Bærum','Bergensregionen','Bodø','Drammensregionen','Fjordkysten','Follo','Fredrikstad og Hvaler','Gjøvikregionen','Grenland','Hadeland/Ringerike','Haldenkanalen','Hallingdal','Hardangerfjord','Haugesund og Haugalandet','Hedmark-regionen','Helgeland','Hitra/Frøya','Horten-regionen','Innherred','Kongsberg-regionen','Kristiansand-regionen','Lillehammer-regionen','Lindesnes/Lyngdal','Lofoten','Midt-Telemark','Mosse-regionen','Namdalen','Narvik-region','Nordfjord','Nord-Gudbrandsdal','Nordmøre og Romsdal','Nord-Troms-region','Norefjells-regionen','Oppdal','Orkdalsområdet','Oslo Region','Fosen','Region Stavanger','Ringsaker','Risør/Tvedestrand region','Romerike','Ryfylke','Røros-regionen','Salten-region','Sandefjord/Larvik','Sarpsborg','Setesdal','Sognefjord','Sunnfjord','Sunnhordland','Sør-Troms/Midt-Troms/Senja-region','Tromsø','Trondheim','Trysil','Tønsberg-regionen','Valdres','Vesterålen','Vest-Finnmark/Indre Finnmark-region','Vestre Agder','Vest-Telemark','Voss','Værnes-regionen','Østerdalen','Øst-Finnmark-region','Øst-Telemark','Ålesund og Sunnmøre'];
+
+function openFylkeModal() { document.getElementById('fylke-modal').classList.add('open'); }
+function closeFylkeModal() { document.getElementById('fylke-modal').classList.remove('open'); }
+
+function velgFylke(navn) {
+  document.getElementById('biz-fylke').value = navn;
+  var btn = document.getElementById('fylke-btn');
+  var disp = document.getElementById('fylke-display');
+  disp.textContent = navn;
+  disp.style.color = '';
+  btn.classList.add('selected');
+  closeFylkeModal();
+  lagreStedsprofil();
+}
+
+function openRegionModal() {
+  filterRegionModal('');
+  document.getElementById('region-search').value = '';
+  document.getElementById('region-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('region-search').focus(); }, 150);
+}
+function closeRegionModal() { document.getElementById('region-modal').classList.remove('open'); }
+
+function filterRegionModal(q) {
+  var filtered = q ? ALLE_REGIONER.filter(function(r){ return r.toLowerCase().indexOf(q.toLowerCase()) >= 0; }) : ALLE_REGIONER;
+  var container = document.getElementById('region-modal-options');
+  container.innerHTML = '';
+  if (filtered.length === 0) {
+    container.innerHTML = '<div style="padding:12px;color:var(--text3);font-size:14px">Ingen treff</div>';
+    return;
+  }
+  filtered.forEach(function(r) {
+    var btn = document.createElement('button');
+    btn.className = 'modal-option';
+    btn.textContent = r;
+    btn.addEventListener('click', function() { velgRegion(r); });
+    container.appendChild(btn);
+  });
+}
+
+function velgRegion(navn) {
+  document.getElementById('biz-ssb-region').value = navn;
+  var btn = document.getElementById('region-btn');
+  document.getElementById('region-display').textContent = navn;
+  btn.classList.add('selected');
+  closeRegionModal();
+
+  // Auto-fyll fylke
+  var fylke = REGION_TIL_FYLKE[navn];
+  if (fylke) {
+    velgFylke(fylke);
+    // Vis hint om multi-fylke region
+    var multi = REGION_MULTI_FYLKE[navn];
+    if (multi) {
+      var hint = document.getElementById('fylke-auto-hint');
+      if (hint) {
+        hint.textContent = '⚠️ Denne regionen strekker seg over ' + multi.join(' og ') + ' — juster fylke ved behov';
+        hint.style.display = 'block';
+      }
+    } else {
+      var hint = document.getElementById('fylke-auto-hint');
+      if (hint) hint.style.display = 'none';
+    }
+  }
+
+  // Foreslå kommuner basert på region
+  oppdaterKommuneHint(navn);
+  lagreStedsprofil();
+}
+
+// Prefyll picker-knapper fra localStorage
+function oppdaterKommuneHint(region) {
+  var el = document.getElementById('kommune-hint-list');
+  if (!el) return;
+  var kommuner = REGION_KOMMUNER[region];
+  if (!kommuner || kommuner.length === 0) { el.style.display='none'; return; }
+  el.innerHTML = '';
+  el.style.display = 'flex';
+  kommuner.forEach(function(k) {
+    var btn = document.createElement('button');
+    btn.className = 'kommune-hint-btn';
+    btn.textContent = k;
+    btn.addEventListener('click', function() { velgKommuneFraHint(k); });
+    el.appendChild(btn);
+  });
+}
+
+function velgKommuneFraHint(navn) {
+  document.getElementById('biz-kommune').value = navn;
+  lagreStedsprofil();
+}
+
+function oppdaterPickerBtns(profil) {
+  var kommune = profil['biz-kommune'] || '';
+  var fylke = profil['biz-fylke'] || '';
+  var region = profil['biz-ssb-region'] || '';
+  // Restore hidden inputs
+  if (fylke) { document.getElementById('biz-fylke').value = fylke; }
+  if (region) { document.getElementById('biz-ssb-region').value = region; }
+  // Restore button displays
+  if (fylke) {
+    document.getElementById('fylke-display').textContent = fylke;
+    document.getElementById('fylke-display').style.color = '';
+    document.getElementById('fylke-btn').classList.add('selected');
+  }
+  if (region) {
+    document.getElementById('region-display').textContent = region;
+    document.getElementById('region-display').style.color = '';
+    document.getElementById('region-btn').classList.add('selected');
+  }
+  // Show chips if we have geo data
+  if (kommune || fylke || region) {
+    visGeoResultat(kommune, fylke, region);
+    document.getElementById('gps-icon').textContent = '🔄';
+    document.getElementById('gps-label').textContent = 'Forrige sted — trykk for ny posisjon';
+  }
+}
+
+// ---- STEDSPROFIL: localStorage lagring og prefylling ----
+var ORG_FIELDS = [
+  'biz-name','biz-type','biz-dest','biz-kommune','biz-fylke','biz-ssb-region','biz-contact'
+];
+
+function lagreStedsprofil() {
+  var profil = {};
+  ORG_FIELDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) profil[id] = el.value;
+  });
+  try { localStorage.setItem('accessnorway_stedsprofil', JSON.stringify(profil)); } catch(e) {}
+}
+
+function lastStedsprofil() {
+  try {
+    var raw = localStorage.getItem('accessnorway_stedsprofil');
+    if (!raw) return;
+    var profil = JSON.parse(raw);
+    var harData = false;
+    ORG_FIELDS.forEach(function(id) {
+      if (!profil[id]) return;
+      var el = document.getElementById(id);
+      if (!el || el.value) return;
+      el.value = profil[id];
+      harData = true;
+    });
+    if (harData) {
+      visPrefyllBanner(profil);
+      oppdaterPickerBtns(profil);
+    }
+  } catch(e) {}
+}
+
+function visPrefyllBanner(profil) {
+  var banner = document.getElementById('prefyll-banner');
+  if (!banner) return;
+  var chips = [profil['biz-name'], profil['biz-ssb-region']].filter(Boolean).map(function(v) {
+    return '<span style="background:var(--green-light);color:var(--green-dark);border-radius:20px;padding:2px 9px;font-size:12px;font-weight:500;margin-right:4px">' + v + '</span>';
+  }).join('');
+  banner.innerHTML = '&#x1F504; Forhåndsutfylt fra forrige kartlegging: ' + chips +
+    ' <button onclick="nullstillProfil()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;margin-left:6px;text-decoration:underline">Nullstill</button>';
+  banner.style.display = 'block';
+}
+
+function nullstillProfil() {
+  try { localStorage.removeItem('accessnorway_stedsprofil'); } catch(e) {}
+  ORG_FIELDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  var banner = document.getElementById('prefyll-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+function setupOrgAutoSave() {
+  ORG_FIELDS.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', lagreStedsprofil);
+    el.addEventListener('blur', lagreStedsprofil);
+  });
+}
+
+// Utvid JSON-eksport med nye felt
+var _origDownload = downloadProfile;
+downloadProfile = function() {
+  var ssbRegion = (document.getElementById('biz-ssb-region')||{}).value || '';
+  var fylke = (document.getElementById('biz-fylke')||{}).value || '';
+  var json = JSON.stringify({
+    profilbilde: state.profilbilde ? {analysis: state.profilbilde.analysis} : null,
+    bedrift:{
+      navn:document.getElementById('biz-name').value,
+      type:document.getElementById('biz-type').value,
+      adresse:document.getElementById('biz-address').value,
+      destinasjon:document.getElementById('biz-dest').value,
+      kommune:document.getElementById('biz-kommune').value,
+      fylke: fylke,
+      ssb_reiselivsregion: ssbRegion,
+      kontakt:document.getElementById('biz-contact').value,
+      tagger:state.tags
+    },
+    gpx:state.gpxData?{distanse_km:state.gpxData.totalDist,stigning_opp_m:state.gpxData.totalUp,maks_stigning_pst:state.gpxData.maxSlope,snitt_stigning_pst:state.gpxData.avgSlope}:null,
+    godkjenning: godkjentAv ? {godkjent_av: godkjentAv, tidspunkt: godkjentTidspunkt ? godkjentTidspunkt.toISOString() : null} : null,
+    redigeringer: guideRedigert,
+    kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(function(z){return {id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,note:z.note||'',ai_analyser:z.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;})};}),svar:state.answers}
+  }, null, 2);
+  var blob = new Blob([json],{type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url; a.download='accessnorway_profil.json'; a.click(); URL.revokeObjectURL(url);
+  lagreStedsprofil();
+};
+
 // Start
 buildSteps();
+setupOrgAutoSave();
+lastStedsprofil();
 </script>
 </body>
 </html>
