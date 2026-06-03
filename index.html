@@ -272,12 +272,10 @@ textarea{resize:vertical;min-height:80px}
             <option value="annet_a">Annet (bygg)</option>
           </optgroup>
           <optgroup label="B — Naturbaserte aktivitetsbedrifter">
-            <option value="guidet">Guidet tur / opplevelse</option>
-            <option value="kajakkpadling">Kajakkutleie / padling</option>
-            <option value="sykling_b">Sykling og sykkelutleie</option>
-            <option value="ridning">Ridning</option>
-            <option value="tilpasset_natur">Tilpassede naturopplevelser</option>
-            <option value="annet_b">Annet (naturbasert bedrift)</option>
+            <option value="guidet_friluft">B1 — Guidet tur / friluftsliv</option>
+            <option value="vannsport">B2 — Vannsport og padling</option>
+            <option value="kjoretoy_dyr">B3 — Kjøretøy og dyr (sykkel, ridning, hundespann)</option>
+            <option value="tilpasset_natur">B4 — Tilpassede naturopplevelser</option>
           </optgroup>
           <optgroup label="C — Fellesgoder og felles rom">
             <option value="tursti">Tursti / natursti</option>
@@ -331,13 +329,25 @@ textarea{resize:vertical;min-height:80px}
   </div>
 
   <div class="page" id="page-3">
-    <div class="page-header"><div class="page-title">Tilgjengelighetsprofil</div><div class="page-desc">Guide for gjester, AI-analyse og nedlasting.</div></div>
+    <div class="page-header"><div class="page-title">Tilgjengelighetsprofil</div><div class="page-desc">Trykk "Generer rapport" når du er klar — AI analyserer bilder og lager tilgjengelighetsguide.</div></div>
+    <div id="generer-bar" style="background:var(--green-light);border:1.5px solid var(--green);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;text-align:center">
+      <div style="font-size:15px;font-weight:600;color:var(--green-dark);margin-bottom:.5rem">Klar til å generere rapport?</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">AI analyserer bildene og lager tilgjengelighetsguide. Du kan redigere og godkjenne etterpå.</div>
+      <button onclick="startGenerer()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px 32px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer">🤖 Generer rapport</button>
+    </div>
+    <div id="generer-spinner" style="display:none;text-align:center;padding:2rem">
+      <div class="rapport-spinner-ring" style="margin:0 auto .75rem"></div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:4px" id="spinner-tekst">Genererer tilgjengelighetsguide...</div>
+      <div style="font-size:12px;color:var(--text3)">Dette kan ta 15–30 sekunder</div>
+    </div>
+    <div id="rapport-innhold" style="display:none">
     <div class="tab-bar">
       <button class="tab-btn active" id="tab-guide" onclick="switchTab('guide')">🗺️ Tilgjengelighetsguide</button>
       <button class="tab-btn" id="tab-analyse" onclick="switchTab('analyse')">🤖 AI-analyse</button>
     </div>
     <div id="tab-content-guide"></div>
     <div id="tab-content-analyse" style="display:none"></div>
+    </div><!-- /rapport-innhold -->
   </div>
 
 </div>
@@ -389,12 +399,12 @@ function goTo(step) {
     }
   }
   document.getElementById('btn-back').style.display = step > 0 ? 'block' : 'none';
-  var labels = ['Start kartlegging →','Neste: Spørsmål →','Generer rapport →','Last ned data'];
+  var labels = ['Start kartlegging →','Neste: Spørsmål →','Se rapport →','⬇️ Last ned JSON'];
   document.getElementById('btn-next').textContent = labels[step];
   state.step = step;
   if (step === 1) buildZones();
   if (step === 2) buildQuestions();
-  if (step === 3) buildRapport();
+  if (step === 3) { document.getElementById('generer-bar').style.display='block'; document.getElementById('generer-spinner').style.display='none'; document.getElementById('rapport-innhold').style.display='none'; }
   window.scrollTo(0, 0);
 }
 
@@ -525,51 +535,46 @@ var TYPE_CONFIG = {
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
     extraOptions:['Parkering','Rom','Sal','Kiosk','Fellesareal'],
     questions:['q_skriftlig','q_opplaering','q_ledsager','q_evakuering']},
-  guidet:{label:'Guidet tur / opplevelse',group:'B',pageTitle:'Guidet tur',pageDesc:'Last opp bilder og evt. GPX-fil fra turen.',
+  guidet_friluft:{label:'B1 — Guidet tur / friluftsliv',group:'B',pageTitle:'Guidet tur / friluftsliv',pageDesc:'Vandring, fjelltur, ski, truger og naturguiding. Last opp bilder og evt. GPX.',
     defaultZones:[
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
-      {id:'terreng',label:'Terreng / underlag',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
-      {id:'utstyr',label:'Utstyr',icon:'🎒',extraFields:[],optional:false}],
-    extraOptions:['Hvilepunkt','Serveringssted','WC underveis','Transport'],
-    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_hvileplasser','q_ledsager']},
-  kajakkpadling:{label:'Kajakkutleie / padling',group:'B',pageTitle:'Padleopplevelse',pageDesc:'Last opp bilder og GPX-rute.',
+      {id:'terreng',label:'Terreng / underlag',icon:'🌿',extraFields:['stigningsgrad','sti_bredde_cm'],optional:false},
+      {id:'utstyr',label:'Utstyr',icon:'🎒',extraFields:[],optional:false},
+      {id:'wc',label:'Toalett underveis',icon:'🚻',extraFields:[],optional:true}],
+    extraOptions:['Hvilepunkt','Serveringssted','Transport til start','Krevende parti','Utsiktspunkt'],
+    questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_hvile_under','q_samband','q_tilpassetutstyr','q_allergi','q_hvileplasser','q_hc_wc','q_ledsager','q_guide_opplaering','q_feedback_system']},
+
+  vannsport:{label:'B2 — Vannsport og padling',group:'B',pageTitle:'Vannsport og padling',pageDesc:'Kajakkpadling, kano, båttur, fisketurer. Last opp bilder og evt. GPX-rute.',
     defaultZones:[
-      {id:'utleiested',label:'Utleiestedet',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
-      {id:'innsjosett',label:'Inn/ut av sjøen',icon:'🌊',extraFields:[],optional:false},
+      {id:'utleiested',label:'Utleiested / base',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'innsjosett',label:'Inn/ut av vannet',icon:'🌊',extraFields:[],optional:false},
       {id:'utstyr',label:'Utstyr og tilpasning',icon:'🚣',extraFields:[],optional:false},
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false}],
-    extraOptions:['Rolig vann','Krevende parti','Rasteplass'],
-    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
-  sykling_b:{label:'Sykling og sykkelutleie',group:'B',pageTitle:'Sykkelopplevelse',pageDesc:'Last opp bilder og GPX-rute.',
-    defaultZones:[
-      {id:'utleiested',label:'Utleiestedet',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
-      {id:'startpunkt',label:'Startpunkt',icon:'📍',extraFields:[],optional:false},
-      {id:'terreng',label:'Terreng / underlag',icon:'🚵',extraFields:['stigningsgrad'],optional:false},
-      {id:'utstyr',label:'Sykler og utstyr',icon:'🚲',extraFields:[],optional:false}],
-    extraOptions:['Hvilepunkt','Krevende bakke','Serveringssted','WC'],
-    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
-  ridning:{label:'Ridning',group:'B',pageTitle:'Ridestall og tur',pageDesc:'Last opp bilder av stall og rute.',
-    defaultZones:[
-      {id:'stall',label:'Stall / ridesenter',icon:'🐴',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
-      {id:'terreng',label:'Rideterreng',icon:'🌿',extraFields:[],optional:false},
-      {id:'utstyr',label:'Utstyr og tilpasning',icon:'🎒',extraFields:[],optional:false}],
-    extraOptions:['WC','Hvileplass','Krevende terreng'],
-    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
-  tilpasset_natur:{label:'Tilpassede naturopplevelser',group:'B',pageTitle:'Tilpasset naturopplevelse',pageDesc:'Last opp bilder og beskriv opplevelsen.',
+      {id:'wc',label:'Toalett',icon:'🚻',extraFields:[],optional:true}],
+    extraOptions:['Rolig vann','Krevende parti','Rasteplass på land','Rasteplass på vann'],
+    questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_tilpasset_flyte','q_ledsager_krav','q_samband','q_allergi','q_hc_wc','q_ledsager','q_guide_opplaering','q_feedback_system']},
+
+  kjoretoy_dyr:{label:'B3 — Kjøretøy og dyr',group:'B',pageTitle:'Kjøretøy og dyr',pageDesc:'Sykling, ridning, hundespann og slede. Last opp bilder og evt. GPX-rute.',
     defaultZones:[
-      {id:'motepunkt',label:'Møtepunkt',icon:'📍',extraFields:[],optional:false},
-      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
-      {id:'utstyr',label:'Tilpasset utstyr',icon:'🎒',extraFields:[],optional:false}],
-    extraOptions:['Hvilepunkt','WC','Transport','Oversiktsbilde'],
-    questions:['q_tilpassetutstyr','q_allergi','q_skriftlig','q_opplaering','q_ledsager']},
-  annet_b:{label:'Annet (naturbasert bedrift)',group:'B',pageTitle:'Naturbasert opplevelse',pageDesc:'Last opp bilder og evt. GPX.',
+      {id:'utleiested',label:'Utleiested / stall / base',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'startpunkt',label:'Startpunkt',icon:'📍',extraFields:[],optional:false},
+      {id:'terreng',label:'Terreng / løype / underlag',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
+      {id:'utstyr',label:'Utstyr og dyr',icon:'🎒',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'wc',label:'Toalett',icon:'🚻',extraFields:[],optional:true}],
+    extraOptions:['Hvilepunkt','Krevende parti','Serveringssted','Stall / dyrehold'],
+    questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_tilpasset_sykkel','q_tilpassetutstyr','q_ledsager_krav','q_allergi','q_hc_wc','q_hvileplasser','q_ledsager','q_guide_opplaering','q_feedback_system']},
+
+  tilpasset_natur:{label:'B4 — Tilpassede naturopplevelser',group:'B',pageTitle:'Tilpassede naturopplevelser',pageDesc:'Sit-ski, handbike, amfistol og spesialtilrettelagte turer. Last opp bilder.',
     defaultZones:[
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
-      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false}],
-    extraOptions:['Utstyr','WC','Serveringssted','Hvilepunkt','Parkering'],
-    questions:['q_tilpassetutstyr','q_skriftlig','q_opplaering','q_ledsager']},
+      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
+      {id:'utstyr',label:'Tilpasset spesialutstyr',icon:'♿',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'wc',label:'Tilpasset toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true}],
+    extraOptions:['Hvilepunkt','Transport til start','Serveringssted','Ekstra assistanse'],
+    questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_hvile_under','q_samband','q_hjelpemiddelsentral','q_tilpassetutstyr','q_ledsager_krav','q_allergi','q_hc_wc','q_hvileplasser','q_ledsager','q_guide_opplaering','q_feedback_system']},
   tursti:{label:'Tursti / natursti',group:'C',pageTitle:'Tursti',pageDesc:'Last opp bilder og GPX-fil for stien.',
     defaultZones:[
       {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
@@ -967,9 +972,20 @@ function switchTab(tab) {
   document.getElementById('tab-content-analyse').style.display = tab==='analyse' ? 'block' : 'none';
 }
 
+function startGenerer() {
+  document.getElementById('generer-bar').style.display = 'none';
+  document.getElementById('generer-spinner').style.display = 'block';
+  document.getElementById('rapport-innhold').style.display = 'none';
+  buildRapport();
+}
+
 async function buildRapport() {
-  buildGuide();
-  buildAnalyse();
+  document.getElementById('spinner-tekst').textContent = 'Genererer tilgjengelighetsguide...';
+  await buildGuide();
+  document.getElementById('spinner-tekst').textContent = 'Kjører AI-analyse per sone...';
+  await buildAnalyse();
+  document.getElementById('generer-spinner').style.display = 'none';
+  document.getElementById('rapport-innhold').style.display = 'block';
 }
 
 function lagSoneHTML(sd, idx, malChips, bilderHtml) {
