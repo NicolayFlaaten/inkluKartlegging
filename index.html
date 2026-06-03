@@ -746,12 +746,12 @@ var ZONE_PROMPTS = {
   bad:'Du er ekspert på universell utforming. Analyser badet. Se etter terskel, dørbredde (min 85 cm), snuplass (min 150 cm), støttehåndtak, dusjtype. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]',
   heis:'Du er ekspert på universell utforming. Analyser heisen. Se etter størrelse, dørbredde, knappepanel høyde (maks 120 cm). **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
   wc:'Du er ekspert på universell utforming. Analyser WC/toalettet. Se etter dørbredde (min 85 cm), snuplass (min 150 cm), støttehåndtak. **Det jeg ser:** [observasjoner] **Trenger mål:** [mål] **Vurdering:** [vurdering]',
-  terreng:'Du er ekspert på universell utforming og friluftsliv. Analyser terrenget/underlaget. Se etter underlagstype, bratthet, hindringer, bredde, fremkommelighet for rullestol eller rullator. **Det jeg ser:** [observasjoner] **Vurdering:** [tilgjengelighet for ulike grupper]',
+  terreng:'Du er ekspert på inkluderende reiseliv. Analyser terrenget/underlaget med tanke på hvilken aktivitet som foregår. For kjøretøybaserte aktiviteter (hest, hundespann, sykkel, slede, sit-ski): vurder fremkommelighet for kjøretøyet, ikke gåevne &mdash; deltakere sitter under hele aktiviteten. For gående aktiviteter: vurder fremkommelighet for rullestol og rullator. **Det jeg ser:** [observasjoner] **Vurdering:** [fremkommelighet for kjøretøy/deltaker]',
   underlag:'Du er ekspert på universell utforming og friluftsliv. Analyser stien/underlaget. Se etter type underlag, bredde, jevnhet, hindringer, bratthet. **Det jeg ser:** [observasjoner] **Vurdering:** [fremkommelighet for rullestol, rullator, barnevogn]',
   motepunkt:'Du er ekspert på universell utforming. Analyser møtepunktet/startstedet. Se etter underlag, sittemuligheter, toalett nærhet, informasjonsskilting. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
   startpunkt:'Du er ekspert på universell utforming. Analyser startpunktet. Se etter parkering nærhet, underlag, informasjonsskilt, fasiliteter. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
   adkomst:'Du er ekspert på universell utforming. Analyser adkomsten. Se etter underlag, bratthet, hindringer, bredde, fremkommelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
-  utstyr:'Du er ekspert på inkluderende reiseliv. Analyser utstyret. Se etter tilpasbarhet, spesialutstyr, tilgjengelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
+  utstyr:'Du er ekspert på inkluderende reiseliv. Analyser utstyret. For kjøretøybaserte aktiviteter (hest, hundespann, sykkel, slede): vurder tilgang til kjøretøyet (stigning opp i slede, hjelp til montering), sikkerhetsutstyr og tilpasning for ulike behov. Husk at deltakere sitter under hele aktiviteten &mdash; god gangfunksjon er ikke nødvendig. **Det jeg ser:** [observasjoner] **Vurdering:** [tilgjengelighet til og bruk av utstyret]',
   oversikt:'Du er ekspert på universell utforming. Analyser oversiktsbildet. Gi generell vurdering: nivåforskjeller, underlag, hindringer. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
   transport:'Du er ekspert på universell utforming. Analyser transportmiddelet. Se etter stigehøyde, rampe/lift, plass for rullestol. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
   selve_stedet:'Du er ekspert på universell utforming. Analyser selve utsiktspunktet/attraksjonen. Se etter rekkverk, underlag, plass, tilgjengelighet. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]',
@@ -869,6 +869,33 @@ var _legendHtml = '<div class="slope-legend">'+
   '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#E24B4A"></div>Bratt (&gt;8%)</div>'+
   '</div>';
 
+function gpxVurdering(maxSlope, type) {
+  // Gruppe B3 og B4 tilpasset: deltaker sitter i kjøretøy/slede/hest/sit-ski
+  // Stigningsgrad gjelder kjøretøyets fremkommelighet, ikke gåevne
+  var kjoretoyTyper = ['kjoretoy_dyr', 'tilpasset_natur'];
+  var vannsportTyper = ['vannsport'];
+
+  if (kjoretoyTyper.indexOf(type) >= 0) {
+    // Hest, hundespann, sykkel, slede, sit-ski
+    if (maxSlope <= 8)  return '&#9989; Terrenget er egnet for kjøretøy og slede. Deltakere sitter under hele turen &mdash; god gangevne er ikke nødvendig.';
+    if (maxSlope <= 15) return '&#128993; Krevende terreng for kjøretøy. Vær oppmerksom på stigninger &mdash; avklar med guide om det er egnet for din situasjon.';
+    return '&#9888; Bratt terreng. Krevende for kjøretøy og dyr &mdash; avklar med guide før bestilling.';
+  }
+
+  if (vannsportTyper.indexOf(type) >= 0) {
+    // Kajakkpadling, kano, båttur: stigningsgrad på adkomst til vannet
+    if (maxSlope <= 5)  return '&#9989; Flat adkomst til vannet. Egnet for de fleste &mdash; deltakere sitter i båt eller kajak under turen.';
+    if (maxSlope <= 10) return '&#128993; Noe stigning til/fra vannet. Avklar om assistanse er tilgjengelig ved inn- og utstigning.';
+    return '&#9888; Krevende adkomst til vannet. Avklar med arrangør om tilrettelagt utstigning finnes.';
+  }
+
+  // Standard for gående (A, B1, C-stier)
+  if (maxSlope <= 5)  return '&#9989; Egnet for rullestol og rullator.';
+  if (maxSlope <= 8)  return '&#128993; Krevende for manuell rullestol &mdash; elektrisk rullestol kan egne seg.';
+  if (maxSlope <= 12) return '&#9888; For bratt for de fleste rullestoler. Egnet for gående med god gangfunksjon.';
+  return '&#128308; Svært bratt &mdash; krevende tur. Krever god fysisk form.';
+}
+
 function renderGpxResult(r) {
   var el = document.getElementById('gpx-result');
   if (!r) { el.style.display='none'; return; }
@@ -882,7 +909,7 @@ function renderGpxResult(r) {
     '<div class="gpx-stat '+slopeClass(r.avgSlope)+'"><div class="gpx-stat-val">'+r.avgSlope+'%</div><div class="gpx-stat-label">Snitt stigning</div></div>'+
     '</div>'+
     '<div style="margin-top:8px;font-size:12px;color:var(--text3)">'+
-    (r.maxSlope<=5?'&#9989; Egnet for rullestol og rullator':r.maxSlope<=8?'&#128993; Krevende for rullestol':r.maxSlope<=12?'&#9888; For bratt for de fleste':'&#128308; Ikke egnet for rullestol')+
+    gpxVurdering(r.maxSlope, document.getElementById('biz-type') ? document.getElementById('biz-type').value : '')+
     '</div>'+
     _legendHtml+
     '<div id="gpx-map-kart" class="gpx-map"></div>'+
@@ -1122,7 +1149,8 @@ async function buildGuide() {
   var gpxHtml = '';
   if (state.gpxData) {
     var r = state.gpxData;
-    var vurdering = r.maxSlope<=5?'&#9989; Egnet for rullestol og rullator.':r.maxSlope<=8?'&#128993; Krevende for manuell rullestol.':r.maxSlope<=12?'&#9888; For bratt for de fleste rullestoler.':'&#128308; Svært bratt &mdash; kun erfarne turgåere.';
+    var bizType = document.getElementById('biz-type') ? document.getElementById('biz-type').value : '';
+    var vurdering = gpxVurdering(r.maxSlope, bizType);
     gpxHtml = '<div class="guide-gpx">' +
       '<div class="guide-gpx-title">&#128507; Rute &mdash; GPX-analyse</div>' +
       '<div class="guide-gpx-stats">' +
