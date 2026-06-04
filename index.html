@@ -227,6 +227,12 @@ textarea{resize:vertical;min-height:80px}
 .kommune-hint-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:5px 12px;font-size:13px;font-family:inherit;cursor:pointer;color:var(--text2)}
 .kommune-hint-btn:active{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
 .fylke-auto-hint{font-size:12px;color:var(--amber);background:var(--amber-light);border-radius:6px;padding:5px 9px;margin-top:5px;display:none}
+.yn-field{display:flex;gap:6px;margin-top:2px}
+.yn-field-btn{flex:1;padding:10px 4px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;font-weight:500;background:var(--surface);color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.yn-field-btn:active{transform:scale(.96)}
+.yn-ja-active{background:var(--green-light);border-color:var(--green);color:var(--green-dark);font-weight:700}
+.yn-nei-active{background:#fef2f2;border-color:#ef4444;color:#b91c1c;font-weight:700}
+.yn-uk-active{background:var(--amber-light);border-color:var(--amber);color:var(--amber);font-weight:700}
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:.875rem 1rem;padding-bottom:calc(.875rem + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100}
 .btn-primary{flex:1;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer}
 .btn-primary:active{opacity:.85}
@@ -707,31 +713,31 @@ var TYPE_CONFIG = {
 };
 
 var ALL_QUESTIONS = {
-  q_allergi:{text:'Er det allergivennlige alternativer tilgjengelig?',ctx:'Uten dun, parfyme, kjæledyr'},
-  q_parfyme:{text:'Kan rom bestilles med parfymefrie produkter?',ctx:''},
-  q_meny:{text:'Er menyen tilgjengelig digitalt, storskrift eller med allergenmerkinger?',ctx:''},
-  q_skriftlig:{text:'Kan gjester kommunisere skriftlig (SMS/e-post)?',ctx:'Viktig for hørselshemmede'},
-  q_opplaering:{text:'Har ansatte / guider fått opplæring i å møte gjester med ulike behov?',ctx:''},
-  q_teleslynge:{text:'Er det teleslyngeanlegg i resepsjon eller fellesarealer?',ctx:''},
-  q_ledsager:{text:'Godtas ledsagerbevis?',ctx:'Ledsager for person med funksjonsnedsettelse'},
-  q_evakuering:{text:'Finnes det evakueringsplan som ivaretar alle?',ctx:''},
-  q_tilpassetutstyr:{text:'Har dere tilpasset utstyr for personer med nedsatt funksjonsevne?',ctx:'Sit-ski, handbike, amfistol, tilpassede kajakker osv.'},
-  q_sti_rullestol:{text:'Er stien / løypen fremkommelig med rullestol eller rullator?',ctx:''},
-  q_sti_barnevogn:{text:'Er stien fremkommelig med barnevogn?',ctx:''},
-  q_sti_merking:{text:'Er stien / løypen tydelig merket?',ctx:'Skilting, stikker, kart'},
-  q_sti_belysning:{text:'Er det belysning langs stien?',ctx:''},
-  q_hc_wc:{text:'Er det tilgjengelig HC-toalett i nærheten?',ctx:''},
-  q_badeplass_rampe:{text:'Er det rampe eller tilrettelagt adkomst til vannet?',ctx:'Amfistol, rampe, fast underlag'},
-  q_hvileplasser:{text:'Finnes det sittebenker eller hvileplasser underveis?',ctx:'Viktig for eldre og personer med begrenset gangevne'},
-  q_hvileplasser_avstand:{text:'Er det hvileplass for hver 500 meter eller kortere?',ctx:'Anbefalt for å gjøre ruten tilgjengelig for eldre'},
-  q_luminans:{text:'Er det god luminanskontrast mellom skilt, skranker og omgivelser?',ctx:'Viktig for svaksynte — kontrast mellom tekst/flate og bakgrunn'},
-  q_taktil:{text:'Er det taktile eller visuelle markeringer ved trapper og nivåforskjeller?',ctx:'Taktile knotter, trappenesemarkering, kontrastfelt'},
-  q_taxi_buss:{text:'Er det av- og påstigningsmulighet for buss eller taxi nær inngang?',ctx:''},
-  q_regulerbar_seng:{text:'Er det regulerbar seng tilgjengelig?',ctx:'Viktig for gjester med bevegelsesutfordringer'},
-  q_lading_el:{text:'Er det mulighet for lading av elektrisk rullestol på rom om natten?',ctx:''},
-  q_visuell_brannalarm:{text:'Er det visuell brannalarm på rommene?',ctx:'Viktig for hørselshemmede'},
-  q_alarm_resepsjon:{text:'Er det alarm eller varslingssystem som kobler rommet til resepsjon?',ctx:''},
-  q_garderobe_tilrettelagt:{text:'Er det tilrettelagt garderobe eller dusj for bevegelseshemmede?',ctx:'Eget avkledningsrom, benk, snuplass, tilpasset dusj'}
+  q_allergi:{text:'Er det allergivennlige alternativer tilgjengelig?',ctx:'Uten dun, parfyme, kjæledyr',utsagn:'Allergivennlige alternativer er tilgjengelig',ikon:'🌿'},
+  q_parfyme:{text:'Kan rom bestilles med parfymefrie produkter?',ctx:'',utsagn:'Rom kan bestilles med parfymefrie produkter',ikon:'🌸'},
+  q_meny:{text:'Er menyen tilgjengelig digitalt, storskrift eller med allergenmerkinger?',ctx:'',utsagn:'Menyen er tilgjengelig digitalt, i storskrift og med allergenmerkinger',ikon:'📋'},
+  q_skriftlig:{text:'Kan gjester kommunisere skriftlig (SMS/e-post)?',ctx:'Viktig for hørselshemmede',utsagn:'Gjester kan kommunisere skriftlig via SMS eller e-post',ikon:'💬'},
+  q_opplaering:{text:'Har ansatte / guider fått opplæring i å møte gjester med ulike behov?',ctx:'',utsagn:'Ansatte og guider har fått opplæring i inkluderende service',ikon:'👨‍🏫'},
+  q_teleslynge:{text:'Er det teleslyngeanlegg i resepsjon eller fellesarealer?',ctx:'',utsagn:'Teleslyngeanlegg er installert i resepsjon og fellesarealer',ikon:'🔊'},
+  q_ledsager:{text:'Godtas ledsagerbevis?',ctx:'Ledsager for person med funksjonsnedsettelse',utsagn:'Ledsagerbevis godtas — ledsager får gratis eller redusert billett',ikon:'👥'},
+  q_evakuering:{text:'Finnes det evakueringsplan som ivaretar alle?',ctx:'',utsagn:'Det finnes evakueringsplan som ivaretar gjester med funksjonsnedsettelse',ikon:'🚨'},
+  q_tilpassetutstyr:{text:'Har dere tilpasset utstyr for personer med nedsatt funksjonsevne?',ctx:'Sit-ski, handbike, amfistol, tilpassede kajakker osv.',utsagn:'Tilpasset utstyr er tilgjengelig — spør personalet for detaljer',ikon:'🎒'},
+  q_sti_rullestol:{text:'Er stien / løypen fremkommelig med rullestol eller rullator?',ctx:'',utsagn:'Stien er fremkommelig med rullestol eller rullator',ikon:'♿'},
+  q_sti_barnevogn:{text:'Er stien fremkommelig med barnevogn?',ctx:'',utsagn:'Stien er fremkommelig med barnevogn',ikon:'🍼'},
+  q_sti_merking:{text:'Er stien / løypen tydelig merket?',ctx:'Skilting, stikker, kart',utsagn:'Stien er tydelig merket med skilt, stikker og kart',ikon:'🗺️'},
+  q_sti_belysning:{text:'Er det belysning langs stien?',ctx:'',utsagn:'Det er belysning langs stien',ikon:'💡'},
+  q_hc_wc:{text:'Er det tilgjengelig HC-toalett i nærheten?',ctx:'',utsagn:'HC-toalett er tilgjengelig i nærheten',ikon:'🚻'},
+  q_badeplass_rampe:{text:'Er det rampe eller tilrettelagt adkomst til vannet?',ctx:'Amfistol, rampe, fast underlag',utsagn:'Det er rampe eller tilrettelagt adkomst til vannet',ikon:'🏊'},
+  q_hvileplasser:{text:'Finnes det sittebenker eller hvileplasser underveis?',ctx:'Viktig for eldre og personer med begrenset gangevne',utsagn:'Det finnes sittebenker og hvileplasser underveis',ikon:'🪑'},
+  q_hvileplasser_avstand:{text:'Er det hvileplass for hver 500 meter eller kortere?',ctx:'Anbefalt for å gjøre ruten tilgjengelig for eldre',utsagn:'Hvileplass finnes for hver 500 meter eller kortere',ikon:'🪑'},
+  q_luminans:{text:'Er det god luminanskontrast mellom skilt, skranker og omgivelser?',ctx:'Viktig for svaksynte',utsagn:'God luminanskontrast på skilt og skranker — egnet for svaksynte',ikon:'👁️'},
+  q_taktil:{text:'Er det taktile eller visuelle markeringer ved trapper og nivåforskjeller?',ctx:'Taktile knotter, trappenesemarkering, kontrastfelt',utsagn:'Taktile og visuelle markeringer finnes ved trapper og nivåforskjeller',ikon:'🦯'},
+  q_taxi_buss:{text:'Er det av- og påstigningsmulighet for buss eller taxi nær inngang?',ctx:'',utsagn:'Det er av- og påstigningsmulighet for buss og taxi nær inngangen',ikon:'🚌'},
+  q_regulerbar_seng:{text:'Er det regulerbar seng tilgjengelig?',ctx:'Viktig for gjester med bevegelsesutfordringer',utsagn:'Regulerbar seng er tilgjengelig på forespørsel',ikon:'🛏️'},
+  q_lading_el:{text:'Er det mulighet for lading av elektrisk rullestol på rom om natten?',ctx:'',utsagn:'Lading av elektrisk rullestol er mulig på rommet om natten',ikon:'🔋'},
+  q_visuell_brannalarm:{text:'Er det visuell brannalarm på rommene?',ctx:'Viktig for hørselshemmede',utsagn:'Visuell brannalarm er installert på rommene',ikon:'🔔'},
+  q_alarm_resepsjon:{text:'Er det alarm eller varslingssystem som kobler rommet til resepsjon?',ctx:'',utsagn:'Rommet har alarm som kobler direkte til resepsjon',ikon:'🆘'},
+  q_garderobe_tilrettelagt:{text:'Er det tilrettelagt garderobe eller dusj for bevegelseshemmede?',ctx:'Eget avkledningsrom, benk, snuplass, tilpasset dusj',utsagn:'Tilrettelagt garderobe og dusj er tilgjengelig for bevegelseshemmede',ikon:'👕'}
 };
 
 var EXTRA_FIELDS = {
@@ -746,16 +752,16 @@ var EXTRA_FIELDS = {
   bord_cm:{label:'Bordhøyde',unit:'cm',ph:'f.eks. 72'},
   stigningsgrad:{label:'Stigningsgrad',unit:'%',ph:'f.eks. 8'},
   sti_bredde_cm:{label:'Sti-bredde',unit:'cm',ph:'f.eks. 120'},
-  handstotte_wc:{label:'Håndstøtte ved toalett',unit:'',ph:'Ja / Nei'},
-  handstotte_dusj:{label:'Håndstøtte / håndtak i dusj',unit:'',ph:'Ja / Nei'},
-  benk_dusj:{label:'Benk eller stol i dusj',unit:'',ph:'Ja / Nei / type'},
-  regulerbar_seng:{label:'Regulerbar seng',unit:'',ph:'Ja / Nei'},
-  lading_el_rullestol:{label:'Lading el-rullestol på rom',unit:'',ph:'Ja / Nei'},
-  visuell_brannalarm:{label:'Visuell brannalarm',unit:'',ph:'Ja / Nei'},
-  alarm_resepsjon:{label:'Alarm til resepsjon fra rom',unit:'',ph:'Ja / Nei'},
-  luminans_skilt:{label:'Luminanskontrast skilt/skranke',unit:'',ph:'Ja / Nei / tall'},
-  taktil_gangbane:{label:'Taktil / visuell gangbanemarkering',unit:'',ph:'Ja / Nei'},
-  taktil_trapp:{label:'Markerte trappeneser og farefelt',unit:'',ph:'Ja / Nei'}
+  handstotte_wc:{label:'Håndstøtte ved toalett',unit:'',ph:'',type:'yn'},
+  handstotte_dusj:{label:'Håndstøtte / håndtak i dusj',unit:'',ph:'',type:'yn'},
+  benk_dusj:{label:'Benk eller stol i dusj',unit:'',ph:'',type:'yn'},
+  regulerbar_seng:{label:'Regulerbar seng',unit:'',ph:'',type:'yn'},
+  lading_el_rullestol:{label:'Lading el-rullestol på rom',unit:'',ph:'',type:'yn'},
+  visuell_brannalarm:{label:'Visuell brannalarm',unit:'',ph:'',type:'yn'},
+  alarm_resepsjon:{label:'Alarm til resepsjon fra rom',unit:'',ph:'',type:'yn'},
+  luminans_skilt:{label:'God luminanskontrast (skilt/skranke)',unit:'',ph:'',type:'yn'},
+  taktil_gangbane:{label:'Taktil / visuell gangbanemarkering',unit:'',ph:'',type:'yn'},
+  taktil_trapp:{label:'Markerte trappeneser og farefelt',unit:'',ph:'',type:'yn'}
 };
 
 var ZONE_PROMPTS = {
@@ -985,9 +991,19 @@ function renderZoneCard(zone, idx) {
     var fid = zone.extraFields[j];
     var f = EXTRA_FIELDS[fid];
     if (!f) continue;
-    extraFieldsHtml += '<div class="field"><label class="field-label">'+f.label+' ('+f.unit+')</label>' +
-      '<div class="number-field"><input type="number" placeholder="'+f.ph+'" value="'+(zone.measures[fid]||'')+'" oninput="state.zones['+idx+'].measures[\''+fid+'\']=this.value"/>' +
-      '<span class="unit">'+f.unit+'</span></div></div>';
+    if (f.type === 'yn') {
+      var cur = zone.measures[fid] || '';
+      extraFieldsHtml += '<div class="field"><label class="field-label">' + f.label + '</label>'
+        + '<div class="yn-field">'
+        + '<button class="yn-field-btn' + (cur==='ja' ? ' yn-ja-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ja">Ja</button>'
+        + '<button class="yn-field-btn' + (cur==='nei' ? ' yn-nei-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="nei">Nei</button>'
+        + '<button class="yn-field-btn' + (cur==='ukjent' ? ' yn-uk-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ukjent">Vet ikke</button>'
+        + '</div></div>';
+    } else {
+      extraFieldsHtml += '<div class="field"><label class="field-label">' + f.label + (f.unit ? ' (' + f.unit + ')' : '') + '</label>'
+        + '<div class="number-field"><input type="number" placeholder="' + f.ph + '" value="' + (zone.measures[fid]||'') + '" data-zi="' + idx + '" data-fid="' + fid + '" class="measure-input"/>'
+        + (f.unit ? '<span class="unit">' + f.unit + '</span>' : '') + '</div></div>';
+    }
   }
   return '<div class="zone-card" id="zone-card-'+idx+'">' +
     '<div class="zone-card-title">'+zone.icon+' '+zone.label+(zone.optional?'<span class="zone-optional">(valgfri)</span>':'')+'</div>' +
@@ -1018,6 +1034,38 @@ function handleFiles(e, idx) {
 }
 
 function removeImg(zi, ii) { state.zones[zi].images.splice(ii,1); renderZones(); }
+
+function setMeasureYN(zi, fid, val) {
+  state.zones[zi].measures[fid] = val;
+  renderZones();
+}
+
+// Event delegation for tilleggstjenester edit buttons
+document.addEventListener('click', function(e) {
+  var tid = e.target.dataset && e.target.dataset.tjenesteId;
+  if (!tid) return;
+  if (e.target.classList.contains('tjeneste-save-btn')) { saveTjeneste(tid); }
+  else if (e.target.classList.contains('tjeneste-avbryt-btn')) { toggleEditTjeneste(tid); }
+  else if (e.target.classList.contains('sone-edit-btn') && e.target.closest('.guide-tillegg-kort')) { toggleEditTjeneste(tid); }
+});
+
+// Event delegation for yn-buttons and measure inputs (avoids inline onclick escaping)
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.yn-field-btn');
+  if (btn) {
+    var zi = parseInt(btn.dataset.zi);
+    var fid = btn.dataset.fid;
+    var val = btn.dataset.val;
+    if (!isNaN(zi) && fid && val) setMeasureYN(zi, fid, val);
+  }
+});
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('measure-input')) {
+    var zi = parseInt(e.target.dataset.zi);
+    var fid = e.target.dataset.fid;
+    if (!isNaN(zi) && fid) state.zones[zi].measures[fid] = e.target.value;
+  }
+});
 
 function compressImage(dataUrl, maxWidth, quality) {
   maxWidth = maxWidth || 1024; quality = quality || 0.7;
@@ -1328,16 +1376,20 @@ async function buildGuide() {
     var id = qIds[i];
     if (state.answers[id] !== 'ja') continue;
     var q = ALL_QUESTIONS[id];
-    var ikon = '✅';
-    if (q.text.indexOf('teleslynge') >= 0 || q.text.indexOf('Teleslynge') >= 0) ikon = '🔊';
-    else if (q.text.indexOf('ledsager') >= 0 || q.text.indexOf('Ledsager') >= 0) ikon = '👥';
-    else if (q.text.indexOf('allergi') >= 0) ikon = '🌿';
-    else if (q.text.indexOf('parfyme') >= 0) ikon = '🌸';
-    else if (q.text.indexOf('meny') >= 0 || q.text.indexOf('Meny') >= 0) ikon = '📋';
-    else if (q.text.indexOf('opplæring') >= 0 || q.text.indexOf('opplaering') >= 0) ikon = '👨‍🏫';
-    else if (q.text.indexOf('evakuering') >= 0) ikon = '🚨';
-    else if (q.text.indexOf('utstyr') >= 0) ikon = '🎒';
-    jaItems += '<div class="guide-tillegg-kort"><div class="guide-tillegg-ikon">'+ikon+'</div><div class="guide-tillegg-tekst">'+q.text+'</div></div>';
+    var ikon = q.ikon || '✅';
+    // Bruk redigert utsagn hvis det finnes, ellers standard utsagn, ellers spørsmålstekst
+    var utsagnTekst = (guideRedigert['tjeneste_'+id] && guideRedigert['tjeneste_'+id].tekst) ? guideRedigert['tjeneste_'+id].tekst : (q.utsagn || q.text);
+    var erRedigert = guideRedigert['tjeneste_'+id] && guideRedigert['tjeneste_'+id].tekst;
+    jaItems += '<div class="guide-tillegg-kort" id="tillegg-kort-'+id+'">' +
+      '<div class="guide-tillegg-ikon">'+ikon+'</div>' +
+      '<div class="guide-tillegg-tekst" id="tillegg-tekst-'+id+'">'+utsagnTekst+'</div>' +
+      '<button class="sone-edit-btn" style="margin-left:auto;flex-shrink:0" data-tjeneste-id="'+id+'">✏️</button>' +
+      '</div>' +
+      '<div id="edit-tjeneste-'+id+'" style="display:none;padding:6px 0 10px;border-bottom:1px solid var(--border)">' +
+        '<textarea class="sone-edit-area" id="edit-tjeneste-ta-'+id+'" rows="2" style="font-size:13px">'+utsagnTekst+'</textarea>' +
+        '<button class="tjeneste-save-btn" data-tjeneste-id="'+id+'" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:13px;font-family:inherit;font-weight:600;cursor:pointer;margin-top:5px">Lagre</button>' +
+        '<button class="tjeneste-avbryt-btn" data-tjeneste-id="'+id+'" style="background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;margin-left:8px">Avbryt</button>' +
+      '</div>';
   }
 
   var metaPills = '';
@@ -2045,6 +2097,22 @@ function velgRegion(navn) {
 }
 
 // Prefyll picker-knapper fra localStorage
+function toggleEditTjeneste(id) {
+  var panel = document.getElementById('edit-tjeneste-'+id);
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveTjeneste(id) {
+  var ta = document.getElementById('edit-tjeneste-ta-'+id);
+  if (!ta) return;
+  if (!guideRedigert['tjeneste_'+id]) guideRedigert['tjeneste_'+id] = {};
+  guideRedigert['tjeneste_'+id].tekst = ta.value;
+  var vis = document.getElementById('tillegg-tekst-'+id);
+  if (vis) vis.textContent = ta.value;
+  toggleEditTjeneste(id);
+}
+
 function oppdaterKommuneHint(region) {
   var el = document.getElementById('kommune-hint-list');
   if (!el) return;
