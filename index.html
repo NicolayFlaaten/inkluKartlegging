@@ -455,7 +455,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null};
+const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null};
 
 // Bygg steg-piller
 function buildSteps() {
@@ -1719,11 +1719,89 @@ function setStatusToggle(idx, status) {
   });
 }
 
+function byggKartleggingPayload(godkjentAvNavn) {
+  var type = document.getElementById('biz-type').value;
+  var config = TYPE_CONFIG[type] || {};
+  return {
+    enhet: {
+      navn: document.getElementById('biz-name').value || '',
+      gruppe: config.group || '',
+      type: type,
+      adresse: document.getElementById('biz-address').value || '',
+      kommune: document.getElementById('biz-kommune').value || '',
+      fylke: document.getElementById('biz-fylke').value || '',
+      ssb_region: document.getElementById('biz-ssb-region').value || '',
+      destinasjon: document.getElementById('biz-dest').value || '',
+      kontakt: document.getElementById('biz-contact').value || '',
+      lat: state.lat || null,
+      lng: state.lng || null
+    },
+    kartlegging: {
+      dato: new Date().toISOString(),
+      godkjent_av: godkjentAvNavn,
+      status: 'bekreftet',
+      ai_sammendrag: state.profilbilde && state.profilbilde.analysis ? state.profilbilde.analysis : null
+    },
+    soner: state.zones
+      .filter(function(z){ return z.images.length>0 || Object.keys(z.measures).some(function(k){return z.measures[k];}); })
+      .map(function(z, i) {
+        var redigert = guideRedigert[i] || {};
+        return {
+          id: z.id,
+          label: z.label,
+          status: redigert.status || 'ukjent',
+          gjeste_tekst: redigert.tekst || z.note || '',
+          datapunkter: Object.keys(z.measures)
+            .filter(function(k){ return z.measures[k]; })
+            .map(function(k){
+              var f = EXTRA_FIELDS[k] || {};
+              return { felt: k, label: f.label||k, verdi: String(z.measures[k]), enhet: f.unit||'', kilde: 'mal' };
+            }),
+          bilder: z.images.map(function(img){
+            return { kategori: z.id, ai_analyse: img.analysis||null, url: null };
+          })
+        };
+      }),
+    svar: state.answers || {},
+    gpx: state.gpxData ? {
+      lengde_km: state.gpxData.totalDist,
+      stigning_opp_m: state.gpxData.totalUp,
+      stigning_maks: state.gpxData.maxSlope,
+      stigning_snitt: state.gpxData.avgSlope,
+      gradering: null
+    } : null,
+    tagger: state.tags || []
+  };
+}
+
+async function sendTilAPI(payload) {
+  try {
+    var res = await fetch(WORKER_URL + '/api/kartlegging', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      var data = await res.json();
+      return data.kartlegging_id || null;
+    }
+  } catch(e) {
+    console.warn('API-lagring feilet (prototype-modus):', e.message);
+  }
+  return null;
+}
+
 function godkjennGuide() {
   var navn = document.getElementById('godkjenn-navn').value.trim();
   if (!navn) { alert('Skriv inn ditt navn for å godkjenne.'); return; }
   godkjentAv = navn;
   godkjentTidspunkt = new Date();
+
+  var payload = byggKartleggingPayload(navn);
+  sendTilAPI(payload).then(function(kartleggingId) {
+    if (kartleggingId) console.log('Kartlegging lagret med ID:', kartleggingId);
+  });
+
   // Vis godkjent-badge
   document.getElementById('godkjenn-bar').style.display = 'none';
   document.getElementById('godkjent-badge').style.display = 'flex';
@@ -1801,6 +1879,8 @@ function hentPosisjon() {
 }
 
 async function reverseGeocode(lat, lon) {
+  state.lat = lat;
+  state.lng = lon;
   var label = document.getElementById('gps-label');
   var icon = document.getElementById('gps-icon');
   var btn = document.getElementById('gps-btn');
