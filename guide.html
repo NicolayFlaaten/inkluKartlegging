@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tilgjengelighetsguide — AccessNorway</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
+  --amber:#BA7517;--amber-light:#FAEEDA;
+  --red:#E24B4A;--red-light:#FCEBEB;
+  --blue:#065A82;--blue-light:#E3F2FA;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#999890;
+  --surface:#fff;--surface2:#f7f6f2;--surface3:#f1efe8;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface3);color:var(--text);min-height:100vh;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+
+.topbar{background:#1a1a18;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:17px;font-weight:700;color:#fff}
+.topbar-logo span{color:var(--green)}
+
+.hero{background:#1a1a18;padding:1.5rem 1rem 1.75rem;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.25}
+.hero-content{position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(29,158,117,.15);border:1px solid rgba(29,158,117,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#4fd1a5;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em}
+.hero-name{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.4px;margin-bottom:4px}
+.hero-type{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:.625rem}
+.hero-meta{display:flex;flex-wrap:wrap;gap:6px}
+.hero-pill{background:rgba(255,255,255,.08);border-radius:20px;padding:3px 10px;font-size:12px;color:rgba(255,255,255,.5)}
+
+.bekreftet-bar{background:rgba(29,158,117,.12);border-bottom:1px solid rgba(29,158,117,.15);padding:.5rem 1rem;font-size:12px;color:var(--green-dark);text-align:center}
+
+.content{padding:1.25rem 1rem 6rem;max-width:600px;margin:0 auto}
+
+.seksjon-hd{font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin:1.5rem 0 .75rem;display:flex;align-items:center;gap:6px}
+.seksjon-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+.seksjon-hd:first-child{margin-top:0}
+
+.sone-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:.75rem}
+.sone-topp{display:flex;align-items:center;gap:10px;margin-bottom:.625rem}
+.sone-ikon{font-size:22px}
+.sone-navn{font-size:15px;font-weight:700;flex:1;color:var(--text)}
+.status-pill{display:flex;align-items:center;gap:4px;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;flex-shrink:0}
+.st-gronn{background:var(--green-light);color:var(--green-dark)}
+.st-gul{background:var(--amber-light);color:var(--amber)}
+.st-rod{background:var(--red-light);color:var(--red)}
+.sone-tekst{font-size:14px;color:var(--text2);line-height:1.6}
+.mal-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:.625rem}
+.mal-chip{background:var(--surface2);border-radius:20px;padding:3px 10px;font-size:12px;color:var(--text2)}
+.sone-bilder{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:.75rem}
+.sone-bilde{aspect-ratio:1;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+.sone-bilde img{width:100%;height:100%;object-fit:cover}
+
+.gpx-kort{background:var(--blue-light);border:1px solid rgba(6,90,130,.15);border-radius:var(--radius);padding:1.25rem;margin-bottom:.75rem}
+.gpx-title{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
+.gpx-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:.75rem}
+.gpx-stat{background:var(--surface);border-radius:8px;padding:10px 12px}
+.gpx-val{font-size:20px;font-weight:700;color:var(--text)}
+.gpx-lbl{font-size:11px;color:var(--text3)}
+.gpx-vurdering{font-size:13px;color:var(--text2);line-height:1.5;padding-top:.625rem;border-top:1px solid rgba(6,90,130,.1)}
+.gpx-map{width:100%;height:220px;border-radius:var(--radius-sm);overflow:hidden;margin-top:.75rem;border:1px solid rgba(6,90,130,.15)}
+
+.tillegg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.75rem}
+.tillegg-kort{background:var(--surface);border:1px solid var(--green-light);border-radius:var(--radius-sm);padding:.875rem;display:flex;align-items:flex-start;gap:10px}
+.tillegg-ikon{font-size:20px;flex-shrink:0}
+.tillegg-tekst{font-size:13px;color:var(--text2);line-height:1.4}
+
+.kart-wrapper{width:100%;height:200px;border-radius:var(--radius);overflow:hidden;margin-bottom:.75rem;border:1px solid var(--border);background:var(--surface2)}
+
+.erfaring-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.625rem}
+.erfaring-topp{display:flex;align-items:center;gap:8px;margin-bottom:.5rem}
+.erfaring-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--text3)}
+.erfaring-dato{font-size:11px;color:var(--text3);margin-left:auto}
+.erfaring-tekst{font-size:13px;color:var(--text2);line-height:1.5}
+.erfaring-stemmer{font-size:12px;margin-top:.5rem;display:flex;align-items:center;gap:4px;color:var(--green-dark)}
+.erfaring-stemmer.nei{color:var(--red)}
+.erfaring-tom{background:var(--surface2);border-radius:var(--radius-sm);padding:1.25rem;text-align:center;font-size:13px;color:var(--text3);line-height:1.6}
+
+.del-erfaring-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:15px;font-size:15px;font-family:inherit;font-weight:700;cursor:pointer;text-decoration:none;margin-top:.5rem;margin-bottom:.75rem}
+
+.spinner{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:14px}
+.spinner-ring{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .75rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.feil-kort{background:var(--red-light);border:1px solid rgba(226,75,74,.2);border-radius:var(--radius);padding:1.5rem;text-align:center;color:#A32D2D}
+
+.demo-note{background:var(--amber-light);border:1px solid rgba(186,117,23,.2);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:12px;color:var(--amber);margin-bottom:1rem;line-height:1.5}
+
+.footer{text-align:center;font-size:11px;color:var(--text3);padding:1rem 0 2rem;line-height:1.8}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">Access<span>Norway</span></div>
+</div>
+
+<div class="hero" id="hero">
+  <div class="hero-bg" id="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-badge">&#9855; Tilgjengelighetsguide</div>
+    <div class="hero-name" id="hero-name">Laster...</div>
+    <div class="hero-type" id="hero-type"></div>
+    <div class="hero-meta" id="hero-meta"></div>
+  </div>
+</div>
+
+<div class="bekreftet-bar" id="bekreftet-bar" style="display:none">
+  ✓ Informasjonen er bekreftet av bedriften — <span id="bekreftet-dato"></span>
+</div>
+
+<div class="content" id="main-content">
+  <div class="spinner" id="spinner">
+    <div class="spinner-ring"></div>
+    Henter tilgjengelighetsguide...
+  </div>
+</div>
+
+<script>
+var API_BASE = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
+
+var params = new URLSearchParams(window.location.search);
+var enhetId = params.get('enhet_id');
+var demoMode = !enhetId;
+
+var DEMO_DATA = {
+  enhet: {
+    id: 'demo-bhss',
+    navn: 'Beitostølen Helsesportsenter',
+    type: 'Hotell',
+    gruppe: 'A',
+    adresse: 'Beitostølen 2953',
+    kommune: 'Øystre Slidre',
+    ssb_region: 'Valdres',
+    lat: 61.022, lng: 8.905,
+    access_norway_symbol: true,
+    sist_bekreftet: '2025-01-14'
+  },
+  soner: [
+    {
+      id:'inngang', label:'Inngang og adkomst', ikon:'🚪',
+      status:'gronn',
+      gjeste_tekst:'Automatiske skyvedører uten terskel. Rampe med 4% stigning fra HC-parkeringsplassen. Godt merket med kontrast.',
+      datapunkter:[{felt:'Dørbredde',verdi:'105',enhet:'cm'},{felt:'Terskel',verdi:'0',enhet:'mm'},{felt:'Rampe stigning',verdi:'4',enhet:'%'}],
+      bilder:[]
+    },
+    {
+      id:'bad', label:'Tilpasset bad / WC', ikon:'🚿',
+      status:'gronn',
+      gjeste_tekst:'Rullestolevennlig bad med nedfellbar dusjbenk, støtterekkverk på begge sider av toaletten og fri plass under servant.',
+      datapunkter:[{felt:'Dørbredde',verdi:'90',enhet:'cm'},{felt:'Snuareal',verdi:'160×160',enhet:'cm'},{felt:'Dusjbenk',verdi:'Ja',enhet:''}],
+      bilder:[]
+    },
+    {
+      id:'hotellrom', label:'Hotellrom', ikon:'🛏️',
+      status:'gul',
+      gjeste_tekst:'Tilpassede rom tilgjengelig — bestill i forkant. Hevbar/senkbar seng på forespørsel. Noe smal passasje mellom seng og vegg på romtype Standard.',
+      datapunkter:[{felt:'Dørbredde',verdi:'85',enhet:'cm'},{felt:'Sengekant høyde',verdi:'52',enhet:'cm'}],
+      bilder:[]
+    },
+    {
+      id:'resepsjon', label:'Resepsjon og felles', ikon:'🏨',
+      status:'gronn',
+      gjeste_tekst:'Terskelfri adkomst. Teleslynge ved resepsjonen. Heisen er tilgjengelig for alle etasjer og har talefunksjon.',
+      datapunkter:[{felt:'Teleslynge',verdi:'Ja',enhet:''},{felt:'Heis',verdi:'Ja',enhet:''}],
+      bilder:[]
+    }
+  ],
+  tilleggstjenester:[
+    {ikon:'🎫', tekst:'Ledsagerbevis godtas — ledsager får gratis inngang'},
+    {ikon:'🐕', tekst:'Servicehund er velkommen i alle lokaler'},
+    {ikon:'🦺', tekst:'Personalet er opplært i tilrettelegging'},
+    {ikon:'📋', tekst:'Skriftlig informasjon tilgjengelig på forespørsel'}
+  ],
+  erfaringer:[
+    {forfatter_type:'bruker', tekst:'Fantastisk tilrettelagt — beste hotellet jeg har besøkt. Dusjen fungerte perfekt med min elektriske rullestol.', stemmer_med_info:true, dato:'2025-04-12'},
+    {forfatter_type:'ledsager', tekst:'Personalet hjalp oss med alt vi trengte uten at vi ba om det. Parkeringsplassene var ryddige.', stemmer_med_info:true, dato:'2025-03-28'},
+    {forfatter_type:'gjest', tekst:'Terskelen inn til én av fløyene var høyere enn beskrevet — bør sjekkes.', stemmer_med_info:false, dato:'2025-02-15'}
+  ],
+  gpx: null
+};
+
+async function lastData() {
+  if (demoMode) {
+    visGuide(DEMO_DATA);
+    return;
+  }
+  try {
+    var res = await fetch(API_BASE + '/api/enhet/' + enhetId + '/guide');
+    if (!res.ok) throw new Error('API feil ' + res.status);
+    var data = await res.json();
+    visGuide(data);
+  } catch(e) {
+    visFeil();
+  }
+}
+
+function visGuide(data) {
+  var enhet = data.enhet;
+  document.title = enhet.navn + ' — Tilgjengelighetsguide';
+  document.getElementById('hero-name').textContent = enhet.navn;
+  document.getElementById('hero-type').textContent = enhet.type + (enhet.gruppe ? ' · Gruppe ' + enhet.gruppe : '');
+
+  var meta = document.getElementById('hero-meta');
+  if (enhet.kommune) meta.innerHTML += '<span class="hero-pill">📍 ' + enhet.kommune + '</span>';
+  if (enhet.ssb_region) meta.innerHTML += '<span class="hero-pill">🗺️ ' + enhet.ssb_region + '</span>';
+  if (enhet.access_norway_symbol) meta.innerHTML += '<span class="hero-pill" style="background:rgba(29,158,117,.25);color:#4fd1a5">✓ Access Norway</span>';
+
+  if (enhet.sist_bekreftet) {
+    document.getElementById('bekreftet-bar').style.display = 'block';
+    document.getElementById('bekreftet-dato').textContent = formaterDato(enhet.sist_bekreftet);
+  }
+
+  var html = '';
+
+  if (demoMode) {
+    html += '<div class="demo-note">⚡ Demo-visning — data er ikke hentet fra database. Lenk med <code>?enhet_id=ID</code> for live data.</div>';
+  }
+
+  if (enhet.lat && enhet.lng) {
+    html += '<div class="kart-wrapper" id="posisjonskart"></div>';
+  }
+
+  var ankomstIds = ['parkering','inngang','adkomst','resepsjon','mottakelse'];
+  var ankomst = (data.soner||[]).filter(function(s){return ankomstIds.indexOf(s.id)>=0;});
+  var opphold = (data.soner||[]).filter(function(s){return ankomstIds.indexOf(s.id)<0;});
+
+  if (ankomst.length) {
+    html += '<div class="seksjon-hd">Ankomst og adkomst</div>';
+    ankomst.forEach(function(s){ html += lagSoneHTML(s); });
+  }
+  if (opphold.length) {
+    html += '<div class="seksjon-hd">Under oppholdet</div>';
+    opphold.forEach(function(s){ html += lagSoneHTML(s); });
+  }
+
+  if (data.gpx) {
+    html += lagGpxHTML(data.gpx);
+  }
+
+  if ((data.tilleggstjenester||[]).length) {
+    html += '<div class="seksjon-hd">Tilleggstjenester</div>';
+    html += '<div class="tillegg-grid">';
+    data.tilleggstjenester.forEach(function(t){
+      html += '<div class="tillegg-kort"><span class="tillegg-ikon">' + t.ikon + '</span><span class="tillegg-tekst">' + t.tekst + '</span></div>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="seksjon-hd">Erfaringer fra gjester</div>';
+  var erfaringer = data.erfaringer || [];
+  if (erfaringer.length === 0) {
+    html += '<div class="erfaring-tom">Ingen erfaringer registrert ennå.<br>Vær den første til å dele!</div>';
+  } else {
+    var stemmer = erfaringer.filter(function(e){return e.stemmer_med_info===true;}).length;
+    html += '<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--text2);margin-bottom:.75rem;display:flex;justify-content:space-between;align-items:center">';
+    html += '<span>' + erfaringer.length + ' erfaringer registrert</span>';
+    html += '<span style="color:var(--green-dark);font-weight:700">✓ ' + stemmer + ' av ' + erfaringer.length + ' bekrefter at info stemmer</span>';
+    html += '</div>';
+    erfaringer.forEach(function(e){ html += lagErfaringHTML(e); });
+  }
+
+  var erfaringUrl = 'erfaring.html?enhet_id=' + (enhetId || 'demo') +
+    '&navn=' + encodeURIComponent(enhet.navn) +
+    '&type=' + encodeURIComponent(enhet.type) +
+    '&sted=' + encodeURIComponent(enhet.kommune || '') +
+    (enhet.sist_bekreftet ? '&bekreftet=' + encodeURIComponent(formaterDato(enhet.sist_bekreftet)) : '');
+
+  html += '<a class="del-erfaring-btn" href="' + erfaringUrl + '">✏️ Del din erfaring</a>';
+
+  html += '<div class="footer">';
+  html += 'AccessNorway Tilgjengelighetsguide';
+  if (enhet.sist_bekreftet) html += '<br>Bekreftet av bedriften ' + formaterDato(enhet.sist_bekreftet);
+  html += '<br>accessnorway.no';
+  html += '</div>';
+
+  var el = document.getElementById('main-content');
+  el.innerHTML = html;
+
+  if (enhet.lat && enhet.lng) {
+    setTimeout(function() {
+      var kart = L.map('posisjonskart', {zoomControl:false,dragging:false,scrollWheelZoom:false});
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(kart);
+      kart.setView([enhet.lat, enhet.lng], 14);
+      L.marker([enhet.lat, enhet.lng]).addTo(kart);
+    }, 100);
+  }
+}
+
+function lagSoneHTML(s) {
+  var statusClass = s.status==='gronn'?'st-gronn':s.status==='gul'?'st-gul':'st-rod';
+  var statusLabel = s.status==='gronn'?'✅ Tilgjengelig':s.status==='gul'?'🟡 Delvis':s.status==='rod'?'🔴 Begrenset':'';
+  var h = '<div class="sone-kort">';
+  h += '<div class="sone-topp">';
+  h += '<div class="sone-ikon">' + (s.ikon||'📋') + '</div>';
+  h += '<div class="sone-navn">' + s.label + '</div>';
+  if (s.status && s.status !== 'ukjent') h += '<span class="status-pill ' + statusClass + '">' + statusLabel + '</span>';
+  h += '</div>';
+  h += '<div class="sone-tekst">' + (s.gjeste_tekst||'') + '</div>';
+  if ((s.datapunkter||[]).length) {
+    h += '<div class="mal-chips">';
+    s.datapunkter.forEach(function(dp){
+      if (dp.verdi && dp.verdi !== 'Nei') h += '<span class="mal-chip">' + dp.felt + ': ' + dp.verdi + (dp.enhet?' '+dp.enhet:'') + '</span>';
+    });
+    h += '</div>';
+  }
+  if ((s.bilder||[]).length) {
+    h += '<div class="sone-bilder">';
+    s.bilder.forEach(function(b){
+      h += '<div class="sone-bilde"><img src="' + b.url + '" alt="' + s.label + '" loading="lazy"/></div>';
+    });
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function lagGpxHTML(gpx) {
+  var h = '<div class="seksjon-hd">Ruteinformasjon</div>';
+  h += '<div class="gpx-kort">';
+  h += '<div class="gpx-title">🗺️ GPX-analyse</div>';
+  h += '<div class="gpx-stats">';
+  h += '<div class="gpx-stat"><div class="gpx-val">' + gpx.lengde_km + ' km</div><div class="gpx-lbl">Distanse</div></div>';
+  h += '<div class="gpx-stat"><div class="gpx-val">↑' + gpx.stigning_opp_m + ' m</div><div class="gpx-lbl">Stigning opp</div></div>';
+  h += '<div class="gpx-stat"><div class="gpx-val">' + gpx.stigning_maks + '%</div><div class="gpx-lbl">Maks stigning</div></div>';
+  if (gpx.gradering) h += '<div class="gpx-stat"><div class="gpx-val">' + gpx.gradering.charAt(0).toUpperCase()+gpx.gradering.slice(1) + '</div><div class="gpx-lbl">Gradering (NS 11005)</div></div>';
+  h += '</div>';
+  if (gpx.vurdering) h += '<div class="gpx-vurdering">' + gpx.vurdering + '</div>';
+  h += '</div>';
+  return h;
+}
+
+function lagErfaringHTML(e) {
+  var tag = e.forfatter_type==='bruker'?'♿ Bruker':e.forfatter_type==='ledsager'?'🤝 Ledsager':'🧳 Gjest';
+  var h = '<div class="erfaring-kort">';
+  h += '<div class="erfaring-topp"><span class="erfaring-tag">' + tag + '</span><span class="erfaring-dato">' + formaterDato(e.dato) + '</span></div>';
+  if (e.tekst) h += '<div class="erfaring-tekst">' + escHtml(e.tekst) + '</div>';
+  if (e.stemmer_med_info === true) h += '<div class="erfaring-stemmer">✓ Bekrefter at info stemmer</div>';
+  if (e.stemmer_med_info === false) h += '<div class="erfaring-stemmer nei">⚠ Rapporterer avvik fra beskrivelsen</div>';
+  h += '</div>';
+  return h;
+}
+
+function formaterDato(str) {
+  if (!str) return '';
+  var d = new Date(str);
+  if (isNaN(d)) return str;
+  return d.toLocaleDateString('nb-NO',{year:'numeric',month:'long',day:'numeric'});
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function visFeil() {
+  document.getElementById('main-content').innerHTML = '<div class="feil-kort">Kunne ikke hente tilgjengelighetsguide. Sjekk at enhet_id er korrekt.</div>';
+}
+
+lastData();
+</script>
+</body>
+</html>

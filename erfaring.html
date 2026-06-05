@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Del din erfaring — AccessNorway</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
+  --amber:#BA7517;--amber-light:#FAEEDA;
+  --red:#E24B4A;--red-light:#FCEBEB;
+  --blue:#065A82;--blue-light:#E3F2FA;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#999890;
+  --surface:#fff;--surface2:#f7f6f2;--surface3:#f1efe8;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface3);color:var(--text);min-height:100vh;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+
+.topbar{background:#1a1a18;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:17px;font-weight:700;color:#fff}
+.topbar-logo span{color:var(--green)}
+
+.hero{background:#1a1a18;padding:1.25rem 1rem 1.5rem}
+.hero-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(29,158,117,.15);border:1px solid rgba(29,158,117,.3);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#4fd1a5;margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.06em}
+.hero-name{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px;margin-bottom:4px}
+.hero-type{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:.5rem}
+.hero-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:.5rem}
+.hero-pill{background:rgba(255,255,255,.08);border-radius:20px;padding:3px 10px;font-size:12px;color:rgba(255,255,255,.5)}
+
+.content{padding:1.25rem 1rem 6rem;max-width:600px;margin:0 auto}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:.875rem}
+.card-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.card-desc{font-size:13px;color:var(--text3);margin-bottom:1rem;line-height:1.5}
+
+.yn-group{display:flex;gap:8px;margin-top:4px}
+.yn-btn{flex:1;border:1.5px solid var(--border2);background:var(--surface2);border-radius:var(--radius-sm);padding:12px 8px;font-size:15px;font-family:inherit;font-weight:500;cursor:pointer;color:var(--text2);text-align:center;transition:all .12s}
+.yn-btn.active-yes{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
+.yn-btn.active-no{background:var(--red-light);border-color:var(--red);color:#A32D2D}
+.yn-btn.active-na{background:var(--surface2);border-color:var(--border2);color:var(--text3)}
+
+.forf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.forf-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:var(--radius-sm);padding:12px 8px;font-size:13px;font-family:inherit;cursor:pointer;color:var(--text2);text-align:center;line-height:1.4;transition:all .12s}
+.forf-btn .forf-ikon{font-size:22px;display:block;margin-bottom:4px}
+.forf-btn.active{background:var(--blue-light);border-color:var(--blue);color:var(--blue)}
+
+textarea{width:100%;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:15px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;resize:none;min-height:100px;transition:border-color .15s;line-height:1.6}
+textarea:focus{border-color:var(--green)}
+.char-count{font-size:11px;color:var(--text3);text-align:right;margin-top:5px}
+
+.notice{background:var(--surface2);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--text3);margin-bottom:.875rem;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+.notice-icon{flex-shrink:0;font-size:16px;margin-top:1px}
+
+.submit-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:16px;font-size:16px;font-family:inherit;font-weight:700;cursor:pointer;transition:opacity .15s;letter-spacing:-.2px}
+.submit-btn:disabled{opacity:.4;cursor:not-allowed}
+.submit-btn:not(:disabled):active{opacity:.85}
+
+.required-note{font-size:12px;color:var(--text3);text-align:center;margin-top:.75rem}
+
+/* Takk-visning */
+.takk{display:none;text-align:center;padding:3rem 1rem}
+.takk-ikon{font-size:56px;margin-bottom:1rem}
+.takk-title{font-size:24px;font-weight:800;color:var(--text);margin-bottom:.5rem;letter-spacing:-.3px}
+.takk-desc{font-size:15px;color:var(--text2);line-height:1.6;max-width:320px;margin:0 auto 1.5rem}
+.takk-link{display:inline-block;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;text-decoration:none}
+
+/* Feil-visning */
+.feil-banner{background:var(--red-light);border:1px solid rgba(226,75,74,.3);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:#A32D2D;margin-bottom:.875rem;display:none}
+
+/* Loader */
+.loader{display:none;text-align:center;padding:2rem}
+.loader-ring{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .75rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Seksjonstittel */
+.seksjon-hd{font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin:1.25rem 0 .625rem;display:flex;align-items:center;gap:6px}
+.seksjon-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">Access<span>Norway</span></div>
+</div>
+
+<div class="hero" id="hero">
+  <div class="hero-badge">&#128172; Del din erfaring</div>
+  <div class="hero-name" id="hero-name">Laster...</div>
+  <div class="hero-type" id="hero-type"></div>
+  <div class="hero-meta" id="hero-meta"></div>
+</div>
+
+<div class="content">
+
+  <div id="feil-banner" class="feil-banner">Noe gikk galt. Prøv igjen eller kontakt oss.</div>
+
+  <div id="form-body">
+
+    <div class="seksjon-hd">Ditt besøk</div>
+
+    <div class="card">
+      <div class="card-title">Stemmer tilgjengelighetsbeskrivelsen med det du opplevde? <span style="color:var(--red);font-size:13px">*</span></div>
+      <div class="card-desc">Ikke hva du forventet — hva du faktisk fant på stedet.</div>
+      <div class="yn-group">
+        <button class="yn-btn" id="stemmer-ja" onclick="velg('stemmer','ja')">✅ Ja, stemmer</button>
+        <button class="yn-btn" id="stemmer-nei" onclick="velg('stemmer','nei')">❌ Nei, avviker</button>
+        <button class="yn-btn" id="stemmer-vk" onclick="velg('stemmer','vet_ikke')">— Vet ikke</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Vil du anbefale stedet til andre med lignende behov? <span style="color:var(--red);font-size:13px">*</span></div>
+      <div class="yn-group">
+        <button class="yn-btn" id="anbefaler-ja" onclick="velg('anbefaler','ja')">👍 Ja</button>
+        <button class="yn-btn" id="anbefaler-nei" onclick="velg('anbefaler','nei')">👎 Nei</button>
+      </div>
+    </div>
+
+    <div class="seksjon-hd">Valgfritt</div>
+
+    <div class="card">
+      <div class="card-title">Fortell gjerne mer</div>
+      <div class="card-desc">Hva fungerte bra? Hva kunne vært bedre? Konkrete detaljer hjelper andre å planlegge.</div>
+      <textarea id="erfaring-tekst" maxlength="500" placeholder="F.eks.: Badet var godt tilrettelagt, men terskelen inn var høyere enn beskrevet..." oninput="oppdaterChar()"></textarea>
+      <div class="char-count"><span id="char-count">0</span> / 500</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Hvem er du?</div>
+      <div class="card-desc">Hjelper oss å forstå erfaringen bedre. Ingen persondata lagres — du er alltid anonym.</div>
+      <div class="forf-grid">
+        <button class="forf-btn" id="f-gjest" onclick="velgForf('gjest')">
+          <span class="forf-ikon">🧳</span>Gjest
+        </button>
+        <button class="forf-btn" id="f-bruker" onclick="velgForf('bruker')">
+          <span class="forf-ikon">♿</span>Bruker
+        </button>
+        <button class="forf-btn" id="f-ledsager" onclick="velgForf('ledsager')">
+          <span class="forf-ikon">🤝</span>Ledsager
+        </button>
+      </div>
+    </div>
+
+    <div class="notice">
+      <span class="notice-icon">🔒</span>
+      <span>Ingen persondata lagres. Tilbakemeldingen modereres av bedriften før publisering og kan ikke spores tilbake til deg.</span>
+    </div>
+
+    <button class="submit-btn" id="submit-btn" disabled onclick="sendInn()">Send inn erfaring</button>
+    <div class="required-note">* Obligatoriske felt</div>
+
+  </div>
+
+  <div class="loader" id="loader">
+    <div class="loader-ring"></div>
+    <div style="font-size:14px;color:var(--text3)">Sender inn...</div>
+  </div>
+
+  <div class="takk" id="takk">
+    <div class="takk-ikon">✅</div>
+    <div class="takk-title">Tusen takk!</div>
+    <div class="takk-desc">Din erfaring hjelper andre med å planlegge besøket. Tilbakemeldingen sendes til bedriften for gjennomgang.</div>
+    <a class="takk-link" id="takk-link" href="#">&#8592; Tilbake til tilgjengelighetsguiden</a>
+  </div>
+
+</div>
+
+<script>
+var API_BASE = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
+
+var svar = { stemmer: null, anbefaler: null, forf: null };
+var enhetId = null;
+var enhetNavn = null;
+
+function hentParams() {
+  var params = new URLSearchParams(window.location.search);
+  enhetId = params.get('enhet_id');
+  enhetNavn = params.get('navn');
+  var type = params.get('type') || '';
+  var sted = params.get('sted') || '';
+  var bekreftet = params.get('bekreftet') || '';
+
+  if (enhetNavn) {
+    document.getElementById('hero-name').textContent = decodeURIComponent(enhetNavn);
+    document.title = decodeURIComponent(enhetNavn) + ' — Del din erfaring';
+  } else {
+    document.getElementById('hero-name').textContent = 'Del din erfaring';
+  }
+  if (type) document.getElementById('hero-type').textContent = decodeURIComponent(type);
+  var meta = document.getElementById('hero-meta');
+  if (sted) meta.innerHTML += '<span class="hero-pill">📍 ' + decodeURIComponent(sted) + '</span>';
+  if (bekreftet) meta.innerHTML += '<span class="hero-pill">✓ Sist bekreftet ' + decodeURIComponent(bekreftet) + '</span>';
+
+  if (enhetId) {
+    document.getElementById('takk-link').href = 'guide.html?enhet_id=' + enhetId;
+  }
+}
+
+function velg(felt, val) {
+  svar[felt] = val;
+  var grupper = {
+    stemmer: ['ja','nei','vk'],
+    anbefaler: ['ja','nei']
+  };
+  grupper[felt].forEach(function(v) {
+    var el = document.getElementById(felt + '-' + v);
+    if (el) el.classList.remove('active-yes','active-no','active-na');
+  });
+  var el = document.getElementById(felt + '-' + val);
+  if (el) {
+    if (val === 'ja') el.classList.add('active-yes');
+    else if (val === 'nei') el.classList.add('active-no');
+    else el.classList.add('active-na');
+  }
+  sjekkSubmit();
+}
+
+function velgForf(val) {
+  svar.forf = val;
+  ['gjest','bruker','ledsager'].forEach(function(v) {
+    document.getElementById('f-' + v).classList.remove('active');
+  });
+  document.getElementById('f-' + val).classList.add('active');
+}
+
+function oppdaterChar() {
+  var n = document.getElementById('erfaring-tekst').value.length;
+  document.getElementById('char-count').textContent = n;
+}
+
+function sjekkSubmit() {
+  var ok = svar.stemmer !== null && svar.anbefaler !== null;
+  document.getElementById('submit-btn').disabled = !ok;
+}
+
+async function sendInn() {
+  document.getElementById('form-body').style.display = 'none';
+  document.getElementById('feil-banner').style.display = 'none';
+  document.getElementById('loader').style.display = 'block';
+
+  var body = {
+    enhet_id: enhetId,
+    stemmer_med_info: svar.stemmer === 'ja' ? true : svar.stemmer === 'nei' ? false : null,
+    anbefaler: svar.anbefaler === 'ja',
+    erfaring_tekst: document.getElementById('erfaring-tekst').value.trim() || null,
+    forfatter_type: svar.forf,
+    offentlig: false
+  };
+
+  try {
+    var url = API_BASE + '/api/enhet/' + (enhetId || 'ukjent') + '/erfaring';
+    var res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    document.getElementById('loader').style.display = 'none';
+
+    if (res.ok || res.status === 201) {
+      document.getElementById('takk').style.display = 'block';
+    } else {
+      visFeil();
+    }
+  } catch (e) {
+    document.getElementById('loader').style.display = 'none';
+    visFeil();
+  }
+}
+
+function visFeil() {
+  document.getElementById('form-body').style.display = 'block';
+  document.getElementById('feil-banner').style.display = 'block';
+  window.scrollTo(0,0);
+}
+
+hentParams();
+</script>
+</body>
+</html>

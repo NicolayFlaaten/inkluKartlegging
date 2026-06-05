@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dashboard — AccessNorway</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;
+  --amber:#BA7517;--amber-light:#FAEEDA;
+  --red:#E24B4A;--red-light:#FCEBEB;
+  --blue:#065A82;--blue-light:#E3F2FA;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#999890;
+  --surface:#fff;--surface2:#f7f6f2;--surface3:#f1efe8;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --radius:16px;--radius-sm:10px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface3);color:var(--text);min-height:100vh;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
+
+.topbar{background:#1a1a18;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:17px;font-weight:700;color:#fff}
+.topbar-logo span{color:var(--green)}
+.topbar-org{font-size:12px;color:rgba(255,255,255,.4);margin-top:1px}
+
+.content{padding:1.25rem 1rem 6rem;max-width:600px;margin:0 auto}
+
+.seksjon-hd{font-size:11px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin:1.5rem 0 .75rem;display:flex;align-items:center;gap:6px}
+.seksjon-hd::after{content:'';flex:1;height:1px;background:var(--border)}
+.seksjon-hd:first-child{margin-top:0}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+.stat-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;text-align:center}
+.stat-val{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-.5px}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.3}
+
+.alert{border-radius:var(--radius-sm);padding:.875rem 1rem;margin-bottom:.75rem;display:flex;gap:10px;align-items:flex-start}
+.alert-amber{background:var(--amber-light);border:1px solid rgba(186,117,23,.2)}
+.alert-red{background:var(--red-light);border:1px solid rgba(226,75,74,.15)}
+.alert-green{background:var(--green-light);border:1px solid rgba(29,158,117,.2)}
+.alert-ikon{font-size:18px;flex-shrink:0;margin-top:1px}
+.alert-title{font-size:13px;font-weight:700;margin-bottom:2px}
+.alert-amber .alert-title{color:var(--amber)}
+.alert-red .alert-title{color:var(--red)}
+.alert-green .alert-title{color:var(--green-dark)}
+.alert-desc{font-size:12px;line-height:1.5}
+.alert-amber .alert-desc{color:#7a5010}
+.alert-red .alert-desc{color:#A32D2D}
+.alert-green .alert-desc{color:var(--green-dark)}
+
+.enhet-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:.75rem;overflow:hidden}
+.enhet-topp{display:flex;align-items:center;gap:12px;padding:1rem 1.25rem;cursor:pointer}
+.enhet-ikon{width:42px;height:42px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.enhet-info{flex:1;min-width:0}
+.enhet-navn{font-size:15px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.enhet-meta{font-size:12px;color:var(--text3);margin-top:1px}
+.status-pill{display:flex;align-items:center;gap:4px;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;flex-shrink:0;white-space:nowrap}
+.sp-gronn{background:var(--green-light);color:var(--green-dark)}
+.sp-amber{background:var(--amber-light);color:var(--amber)}
+.sp-rod{background:var(--red-light);color:var(--red)}
+.sp-graa{background:var(--surface2);color:var(--text3)}
+.chevron{font-size:18px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+
+.enhet-detalj{display:none;border-top:1px solid var(--border);padding:1rem 1.25rem}
+.enhet-kort.open .enhet-detalj{display:block}
+.enhet-kort.open .chevron{transform:rotate(180deg)}
+
+.detalj-rad{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2)}
+.detalj-rad:last-of-type{border-bottom:none}
+.detalj-lbl{display:flex;align-items:center;gap:8px}
+.detalj-val{font-size:13px;font-weight:700;color:var(--text)}
+.mini-bar{height:4px;border-radius:2px;background:var(--border2);width:80px;overflow:hidden}
+.mini-fill{height:100%;border-radius:2px;background:var(--green)}
+.mini-fill-amber{background:var(--amber)}
+.mini-fill-red{background:var(--red)}
+
+.handlinger{display:flex;flex-direction:column;gap:6px;margin-top:.875rem}
+.hndl-btn{display:flex;align-items:center;gap:10px;width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:11px 14px;font-size:13px;font-family:inherit;font-weight:600;cursor:pointer;color:var(--text2);text-align:left;text-decoration:none;transition:background .1s}
+.hndl-btn:hover{background:var(--surface3)}
+.hndl-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
+.hndl-btn.primary:hover{opacity:.9}
+.hndl-btn-ikon{font-size:18px;flex-shrink:0}
+
+.erfaring-rad{padding:.875rem 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.erfaring-rad:last-child{border-bottom:none}
+.erfaring-topp{display:flex;align-items:center;gap:8px}
+.erfaring-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--text3)}
+.erfaring-enhet{font-size:11px;color:var(--blue);background:var(--blue-light);padding:2px 8px;border-radius:20px;font-weight:700}
+.erfaring-dato{font-size:11px;color:var(--text3);margin-left:auto}
+.erfaring-tekst{font-size:13px;color:var(--text2);line-height:1.5}
+.erfaring-stemmer{font-size:12px;display:flex;align-items:center;gap:4px;color:var(--green-dark)}
+.erfaring-stemmer.nei{color:var(--red)}
+
+.ny-enhet-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:var(--green-light);color:var(--green-dark);border:1.5px dashed var(--green);border-radius:var(--radius-sm);padding:14px;font-size:14px;font-family:inherit;font-weight:700;cursor:pointer;margin-top:.25rem;text-decoration:none}
+
+.demo-note{background:var(--amber-light);border:1px solid rgba(186,117,23,.2);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:12px;color:var(--amber);margin-bottom:1rem;line-height:1.5}
+
+.spinner{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:14px}
+.spinner-ring{width:28px;height:28px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .625rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-logo">Access<span>Norway</span></div>
+    <div class="topbar-org" id="topbar-org">Dashboard</div>
+  </div>
+  <span style="font-size:13px;color:rgba(255,255,255,.35);cursor:pointer">Logg ut</span>
+</div>
+
+<div class="content">
+  <div class="spinner" id="spinner">
+    <div class="spinner-ring"></div>
+    Henter dine enheter...
+  </div>
+  <div id="dashboard-innhold" style="display:none"></div>
+</div>
+
+<script>
+var API_BASE = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
+var params = new URLSearchParams(window.location.search);
+var orgId = params.get('org_id');
+var demoMode = !orgId;
+
+var DEMO = {
+  org: {
+    id: 'demo-inklu',
+    navn: 'Beitostølen Helsesportsenter',
+    destinasjon: 'Visit Valdres',
+    ssb_region: 'Valdres'
+  },
+  enheter: [
+    {
+      id:'bhss-hotell', navn:'Hotellet — hovedbygg', type:'Hotell', gruppe:'A',
+      kartlegging_status:'bekreftet',
+      antall_kartlegginger:2,
+      sist_kartlagt:'2024-01-20',
+      sist_bekreftet:null,
+      antall_bilder:11, antall_datapunkter:24,
+      antall_erfaringer:8, stemmer_antall:5,
+      advarsel:'Utdatert — 17 måneder siden sist kartlegging. 3 gjester rapporterer avvik.'
+    },
+    {
+      id:'bhss-aktivitet', navn:'Aktivitetssenter', type:'Aktivitetsbedrift', gruppe:'A',
+      kartlegging_status:'bekreftet',
+      antall_kartlegginger:1,
+      sist_kartlagt:'2025-03-10',
+      sist_bekreftet:'2025-03-10',
+      antall_bilder:9, antall_datapunkter:18,
+      antall_erfaringer:4, stemmer_antall:4,
+      advarsel:null
+    },
+    {
+      id:'bhss-sti', navn:'Tursti — Beitostølen rundtur', type:'Tursti', gruppe:'C',
+      kartlegging_status:'bekreftet',
+      antall_kartlegginger:1,
+      sist_kartlagt:'2024-12-05',
+      sist_bekreftet:'2024-12-05',
+      antall_bilder:5, antall_datapunkter:8,
+      antall_erfaringer:0, stemmer_antall:0,
+      advarsel:null
+    }
+  ],
+  erfaringer:[
+    {enhet_id:'bhss-hotell', enhet_navn:'Hotellet', forfatter_type:'bruker', tekst:'Badet var bra tilrettelagt, men terskelen inn til hotelldøren var høyere enn beskrevet.', stemmer_med_info:false, dato:'2025-05-30'},
+    {enhet_id:'bhss-hotell', enhet_navn:'Hotellet', forfatter_type:'ledsager', tekst:'Veldig hyggelig personale. HC-parkeringsplassene var ryddige og godt merket.', stemmer_med_info:true, dato:'2025-05-15'},
+    {enhet_id:'bhss-aktivitet', enhet_navn:'Aktivitetssenter', forfatter_type:'bruker', tekst:'Aktivitetstilbudet er fantastisk tilrettelagt. Vil absolutt anbefale!', stemmer_med_info:true, dato:'2025-04-28'}
+  ]
+};
+
+async function lastData() {
+  if (demoMode) {
+    visDashboard(DEMO);
+    return;
+  }
+  try {
+    var res = await fetch(API_BASE + '/api/org/' + orgId + '/dashboard');
+    if (!res.ok) throw new Error('Feil ' + res.status);
+    var data = await res.json();
+    visDashboard(data);
+  } catch(e) {
+    visDashboard(DEMO);
+  }
+}
+
+function visDashboard(data) {
+  var org = data.org;
+  document.title = org.navn + ' — Dashboard';
+  document.getElementById('topbar-org').textContent = org.navn;
+
+  var totErfaringer = data.erfaringer.length;
+  var avvik = data.erfaringer.filter(function(e){return e.stemmer_med_info===false;}).length;
+  var advarsler = data.enheter.filter(function(e){return e.advarsel;}).length;
+
+  var html = '';
+
+  if (demoMode) {
+    html += '<div class="demo-note">⚡ Demo-visning. Lenk med <code>?org_id=ID</code> for live data fra databasen.</div>';
+  }
+
+  html += '<div class="stats-grid">';
+  html += statKort(data.enheter.length, 'Kartlagte enheter');
+  html += statKort(totErfaringer, 'Brukererfaringer');
+  html += statKort(advarsler, advarsler > 0 ? '⚠ Trenger oppfølging' : 'Trenger oppfølging', advarsler > 0 ? 'color:var(--red)' : '');
+  html += '</div>';
+
+  data.enheter.forEach(function(e) {
+    if (e.advarsel) html += '<div class="alert alert-amber"><div class="alert-ikon">⏰</div><div><div class="alert-title">' + e.navn + '</div><div class="alert-desc">' + e.advarsel + '</div></div></div>';
+  });
+
+  html += '<div class="seksjon-hd">Dine enheter</div>';
+  data.enheter.forEach(function(e){ html += lagEnhetHTML(e); });
+  html += '<a class="ny-enhet-btn" href="index.html">＋ Kartlegg ny enhet</a>';
+
+  if (data.erfaringer.length > 0) {
+    html += '<div class="seksjon-hd" style="margin-top:1.5rem">Siste brukererfaringer</div>';
+    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.25rem 1.25rem">';
+    data.erfaringer.slice(0,5).forEach(function(e){ html += lagErfaringHTML(e); });
+    html += '</div>';
+    if (data.erfaringer.length > 5) {
+      html += '<div style="text-align:center;font-size:13px;color:var(--text3);margin-top:.75rem">+ ' + (data.erfaringer.length-5) + ' eldre erfaringer</div>';
+    }
+  }
+
+  document.getElementById('spinner').style.display = 'none';
+  var innhold = document.getElementById('dashboard-innhold');
+  innhold.style.display = 'block';
+  innhold.innerHTML = html;
+
+  innhold.querySelectorAll('.enhet-kort').forEach(function(kort) {
+    kort.querySelector('.enhet-topp').addEventListener('click', function() {
+      var aapen = kort.classList.contains('open');
+      innhold.querySelectorAll('.enhet-kort').forEach(function(k){ k.classList.remove('open'); });
+      if (!aapen) kort.classList.add('open');
+    });
+  });
+}
+
+function statKort(val, lbl, stil) {
+  return '<div class="stat-kort"><div class="stat-val" ' + (stil?'style="'+stil+'"':'') + '>' + val + '</div><div class="stat-lbl">' + lbl + '</div></div>';
+}
+
+function lagEnhetHTML(e) {
+  var statusClass, statusLabel;
+  if (e.advarsel) { statusClass='sp-amber'; statusLabel='⏰ Utdatert'; }
+  else if (e.kartlegging_status==='bekreftet') { statusClass='sp-gronn'; statusLabel='✅ Godkjent'; }
+  else if (e.kartlegging_status==='paabegynt') { statusClass='sp-amber'; statusLabel='🔄 Påbegynt'; }
+  else { statusClass='sp-graa'; statusLabel='— Ikke kartlagt'; }
+
+  var ikon = e.gruppe==='C'?'🌲':e.type==='Hotell'?'🏨':e.type==='Restaurant'?'🍽️':'🏃';
+  var stemmerPst = e.antall_erfaringer > 0 ? Math.round(e.stemmer_antall/e.antall_erfaringer*100) : null;
+  var barFarge = stemmerPst===null?'':stemmerPst>=75?'mini-fill':stemmerPst>=50?'mini-fill-amber':'mini-fill-red';
+
+  var guideUrl = 'guide.html?enhet_id=' + e.id;
+  var erfaringUrl = 'erfaring.html?enhet_id=' + e.id + '&navn=' + encodeURIComponent(e.navn) + '&type=' + encodeURIComponent(e.type);
+
+  var h = '<div class="enhet-kort" data-id="' + e.id + '">';
+  h += '<div class="enhet-topp">';
+  h += '<div class="enhet-ikon">' + ikon + '</div>';
+  h += '<div class="enhet-info"><div class="enhet-navn">' + e.navn + '</div>';
+  h += '<div class="enhet-meta">Gruppe ' + e.gruppe + ' · ' + e.type;
+  if (e.sist_kartlagt) h += ' · ' + formaterDato(e.sist_kartlagt);
+  h += '</div></div>';
+  h += '<span class="status-pill ' + statusClass + '">' + statusLabel + '</span>';
+  h += '<span class="chevron">⌄</span>';
+  h += '</div>';
+
+  h += '<div class="enhet-detalj">';
+  h += '<div class="detalj-rad"><span class="detalj-lbl">📸 Bilder registrert</span><span class="detalj-val">' + e.antall_bilder + '</span></div>';
+  h += '<div class="detalj-rad"><span class="detalj-lbl">📏 Datapunkter</span><span class="detalj-val">' + e.antall_datapunkter + '</span></div>';
+  h += '<div class="detalj-rad"><span class="detalj-lbl">💬 Brukererfaringer</span><span class="detalj-val">' + e.antall_erfaringer + '</span></div>';
+  if (stemmerPst !== null) {
+    h += '<div class="detalj-rad" style="flex-direction:column;align-items:flex-start;gap:6px">';
+    h += '<div style="display:flex;justify-content:space-between;width:100%"><span class="detalj-lbl">✓ Bekrefter at info stemmer</span><span class="detalj-val">' + e.stemmer_antall + ' / ' + e.antall_erfaringer + '</span></div>';
+    h += '<div class="mini-bar" style="width:100%"><div class="' + barFarge + '" style="width:' + stemmerPst + '%"></div></div>';
+    h += '</div>';
+  }
+
+  h += '<div class="handlinger">';
+  if (e.advarsel || e.kartlegging_status !== 'bekreftet') {
+    h += '<a class="hndl-btn primary" href="index.html">📋 Start ny kartlegging</a>';
+  }
+  if (e.sist_bekreftet) {
+    h += '<button class="hndl-btn" onclick="bekreft(\'' + e.id + '\',this)">✅ Bekreft at info fortsatt stemmer</button>';
+  }
+  h += '<a class="hndl-btn" href="' + guideUrl + '" target="_blank">👁 Se offentlig guide</a>';
+  h += '</div>';
+  h += '</div>';
+  h += '</div>';
+  return h;
+}
+
+function lagErfaringHTML(e) {
+  var tag = e.forfatter_type==='bruker'?'♿ Bruker':e.forfatter_type==='ledsager'?'🤝 Ledsager':'🧳 Gjest';
+  var h = '<div class="erfaring-rad">';
+  h += '<div class="erfaring-topp">';
+  h += '<span class="erfaring-tag">' + tag + '</span>';
+  h += '<span class="erfaring-enhet">' + escHtml(e.enhet_navn) + '</span>';
+  h += '<span class="erfaring-dato">' + formaterDato(e.dato) + '</span>';
+  h += '</div>';
+  if (e.tekst) h += '<div class="erfaring-tekst">' + escHtml(e.tekst) + '</div>';
+  if (e.stemmer_med_info===true) h += '<div class="erfaring-stemmer">✓ Bekrefter at info stemmer</div>';
+  if (e.stemmer_med_info===false) h += '<div class="erfaring-stemmer nei">⚠ Rapporterer avvik</div>';
+  h += '</div>';
+  return h;
+}
+
+async function bekreft(enhetId, btn) {
+  btn.disabled = true;
+  btn.textContent = '⏳ Bekrefter...';
+  try {
+    await fetch(API_BASE + '/api/enhet/' + enhetId + '/bekreft', {method:'PUT'});
+    btn.textContent = '✅ Bekreftet!';
+    btn.style.background = 'var(--green-light)';
+    btn.style.color = 'var(--green-dark)';
+    btn.style.borderColor = 'var(--green)';
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '✅ Bekreft at info fortsatt stemmer';
+  }
+}
+
+function formaterDato(str) {
+  if (!str) return '';
+  var d = new Date(str);
+  if (isNaN(d)) return str;
+  return d.toLocaleDateString('nb-NO',{year:'numeric',month:'short',day:'numeric'});
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+lastData();
+</script>
+</body>
+</html>
