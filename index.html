@@ -244,6 +244,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.0</div>
   <div style="display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.4)">
     <span class="api-dot"></span>AI aktiv
   </div>
@@ -455,6 +456,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
+const APP_VERSION = 'v0.4.0';
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null};
 
 // Bygg steg-piller
@@ -793,190 +795,17 @@ var ZONE_PROMPTS = {
 var DEFAULT_PROMPT = 'Du er ekspert på universell utforming. Analyser bildet med fokus på tilgjengelighet. Se etter terskler, dørbredder, snuplass, underlag. **Det jeg ser:** [observasjoner] **Vurdering:** [vurdering]';
 
 // GPX
-// Fallback-kjede for terrengmodell-høyder:
-// 1. EU-DEM 25m via Open Topo Data (beste for Norge)
-// 2. SRTM 30m via Open Topo Data (annet dataset, hjelper ved kvote-treff)
-// 3. Open-Elevation SRTM 90m (helt separat server — hjelper ved nedetid)
-// 4. GPS-høyder med smoothing (alltid tilgjengelig)
-var DEM_SOURCES = [
-  {
-    name: 'EU-DEM 25m',
-    buildUrl: function(locs) {
-      return 'https://api.opentopodata.org/v1/eudem25m?locations=' + locs + '&interpolation=bilinear';
-    },
-    parseResults: function(data) {
-      return data.status === 'OK' ? data.results.map(function(r) { return r.elevation; }) : null;
-    }
-  },
-  {
-    name: 'SRTM 30m',
-    buildUrl: function(locs) {
-      return 'https://api.opentopodata.org/v1/srtm30m?locations=' + locs + '&interpolation=bilinear';
-    },
-    parseResults: function(data) {
-      return data.status === 'OK' ? data.results.map(function(r) { return r.elevation; }) : null;
-    }
-  },
-  {
-    name: 'Open-Elevation SRTM 90m',
-    buildUrl: function(locs) {
-      // Open-Elevation bruker annet format: POST med JSON-body
-      return null; // bruker POST
-    },
-    fetchFn: async function(sample) {
-      var body = { locations: sample.map(function(s) {
-        var p = s.split(',');
-        return { latitude: parseFloat(p[0]), longitude: parseFloat(p[1]) };
-      })};
-      var res = await fetch('https://api.open-elevation.com/api/v1/lookup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) return null;
-      var data = await res.json();
-      return data.results ? data.results.map(function(r) { return r.elevation; }) : null;
-    },
-    parseResults: null // ikke i bruk, bruker fetchFn
-  }
-];
-
 function handleGpx(e) {
   var file = e.target.files[0];
   if (!file) return;
   var reader = new FileReader();
-  reader.onload = async function(ev) {
-    var parsed = parseGpx(ev.target.result);
-    if (!parsed) return;
-    state.gpxData = parsed;
+  reader.onload = function(ev) {
+    state.gpxData = parseGpx(ev.target.result);
     renderGpxResult(state.gpxData);
-    // Forsøk å berike med terrengmodell-høyder i bakgrunnen
-    try {
-      var berika = await berikMedTerrengmodell(parsed);
-      if (berika) {
-        state.gpxData = berika;
-        renderGpxResult(state.gpxData);
-      }
-    } catch(err) {
-      console.warn('Terrengmodell utilgjengelig, bruker GPS-høyder:', err.message);
-    }
   };
   reader.readAsText(file);
 }
 
-async function hentDemElevations(sample) {
-  // Prøv kildene i rekkefølge — returner første som lykkes
-  for (var si = 0; si < DEM_SOURCES.length; si++) {
-    var kilde = DEM_SOURCES[si];
-    try {
-      var eles;
-      if (kilde.fetchFn) {
-        // Kilde med custom POST-funksjon (Open-Elevation)
-        eles = await kilde.fetchFn(sample);
-      } else {
-        var url = kilde.buildUrl(sample.join('|'));
-        var res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        var data = await res.json();
-        eles = kilde.parseResults(data);
-      }
-      // Valider at vi fikk meningsfulle høyder:
-      // - Ikke null/undefined
-      // - Ikke alle 0 (tyder på at koordinatene er utenfor datasettets dekningsområde)
-      // - Standardavvik > 0.1m (alle identiske verdier er sannsynligvis feil)
-      var gyldig = eles && eles.length === sample.length &&
-        eles.every(function(e) { return e !== null && e !== undefined && e !== 0; }) &&
-        (function() {
-          var snitt = eles.reduce(function(a,b){return a+b;},0) / eles.length;
-          var varians = eles.reduce(function(a,e){return a+Math.pow(e-snitt,2);},0) / eles.length;
-          return Math.sqrt(varians) > 0.1;
-        })();
-      if (!gyldig && eles) {
-        console.warn('DEM-kilde (' + kilde.name + ') returnerte ugyldige verdier — prøver neste. Eksempel:', eles.slice(0,3));
-      }
-      if (gyldig) {
-        console.log('DEM-kilde brukt:', kilde.name, '| min:', Math.min.apply(null,eles).toFixed(1), 'm | maks:', Math.max.apply(null,eles).toFixed(1), 'm');
-        return { eles: eles, kilde: kilde.name };
-      }
-    } catch(err) {
-      console.warn('DEM-kilde feilet (' + kilde.name + '):', err.message);
-    }
-  }
-  return null; // Alle kilder feilet
-}
-
-async function berikMedTerrengmodell(parsed) {
-  // Velg inntil 100 jevnt fordelte punkter fra GPX-sporet
-  var pts = parsed.points;
-  var MAX_PTS = 100;
-  var step = Math.max(1, Math.floor(pts.length / MAX_PTS));
-  var sample = [];
-  var sampleIdx = [];
-  for (var i = 0; i < pts.length; i += step) {
-    sample.push(pts[i].lat.toFixed(6) + ',' + pts[i].lon.toFixed(6));
-    sampleIdx.push(i);
-    if (sample.length >= MAX_PTS) break;
-  }
-
-  // Prøv alle DEM-kilder i rekkefølge
-  var demResultat = await hentDemElevations(sample);
-  if (!demResultat) return null;
-  var demElesRaw = demResultat.eles;
-  var demKildeNavn = demResultat.kilde;
-
-  // Bygg ny høydearray ved å interpolere mellom sample-punktene
-  var demEles = new Array(pts.length);
-  for (var si = 0; si < sampleIdx.length; si++) {
-    var fromIdx = sampleIdx[si];
-    var toIdx = si + 1 < sampleIdx.length ? sampleIdx[si + 1] : pts.length;
-    var eleA = demElesRaw[si];
-    var eleB = si + 1 < demElesRaw.length ? demElesRaw[si + 1] : eleA;
-    if (eleA === null || eleA === undefined) eleA = parsed.points[fromIdx].ele;
-    if (eleB === null || eleB === undefined) eleB = eleA;
-    for (var k = fromIdx; k < toIdx; k++) {
-      var t = toIdx > fromIdx ? (k - fromIdx) / (toIdx - fromIdx) : 0;
-      demEles[k] = eleA + t * (eleB - eleA);
-    }
-  }
-
-  // Bygg nytt parseGpx-resultat med DEM-høyder
-  var totalDist = parsed.totalDist * 1000; // tilbake til meter
-  var smoothed = smoothElevation(demEles, 3);
-  var minEle = Math.min.apply(null, smoothed), maxEle = Math.max.apply(null, smoothed);
-  var totalUp = 0, totalDown = 0;
-  for (var i = 1; i < smoothed.length; i++) {
-    var diff = smoothed[i] - smoothed[i-1];
-    if (diff > 0.3) totalUp += diff;
-    else if (diff < -0.3) totalDown += Math.abs(diff);
-  }
-
-  var dists = parsed.dists.map(function(d){return d * 1000;});
-  var MIN_DIST_M = 20;
-  var maxSlope = 0;
-  for (var i = 0; i < pts.length; i++) {
-    for (var j = i + 1; j < pts.length; j++) {
-      var segDist = dists[j] - dists[i];
-      if (segDist < MIN_DIST_M) continue;
-      if (segDist > 100) break;
-      var eleDiff = Math.abs(smoothed[j] - smoothed[i]);
-      var slope = (eleDiff / segDist) * 100;
-      if (slope > maxSlope) maxSlope = slope;
-    }
-  }
-
-  var avgSlope = totalDist > 0 ? Math.round((totalUp / totalDist) * 100 * 10) / 10 : 0;
-
-  return Object.assign({}, parsed, {
-    totalUp: Math.round(totalUp),
-    totalDown: Math.round(totalDown),
-    minEle: Math.round(minEle),
-    maxEle: Math.round(maxEle),
-    maxSlope: Math.round(maxSlope * 10) / 10,
-    avgSlope: avgSlope,
-    smoothedEles: smoothed,
-    demKilde: demKildeNavn
-  });
-}
 
 function smoothElevation(eles, windowSize) {
   // Median-basert smoothing over et vindu av punkter — fjerner GPS-støy i høydedata
@@ -1121,22 +950,24 @@ function gpxVurdering(maxSlope, type) {
 
   if (kjoretoyTyper.indexOf(type) >= 0) {
     // Hest, hundespann, sykkel, slede, sit-ski
-    if (maxSlope <= 8)  return '&#9989; Terrenget er egnet for kjøretøy og slede. Deltakere sitter under hele turen &mdash; god gangevne er ikke nødvendig.';
-    if (maxSlope <= 15) return '&#128993; Krevende terreng for kjøretøy. Vær oppmerksom på stigninger &mdash; avklar med guide om det er egnet for din situasjon.';
+    if (maxSlope <= 12) return '&#9989; Terrenget er egnet for kjøretøy og slede. Deltakere sitter under hele turen &mdash; god gangevne er ikke nødvendig.';
+    if (maxSlope <= 20) return '&#128993; Krevende terreng for kjøretøy. Vær oppmerksom på stigninger &mdash; avklar med guide om det er egnet for din situasjon.';
     return '&#9888; Bratt terreng. Krevende for kjøretøy og dyr &mdash; avklar med guide før bestilling.';
   }
 
   if (vannsportTyper.indexOf(type) >= 0) {
     // Kajakkpadling, kano, båttur: stigningsgrad på adkomst til vannet
-    if (maxSlope <= 5)  return '&#9989; Flat adkomst til vannet. Egnet for de fleste &mdash; deltakere sitter i båt eller kajak under turen.';
-    if (maxSlope <= 10) return '&#128993; Noe stigning til/fra vannet. Avklar om assistanse er tilgjengelig ved inn- og utstigning.';
+    if (maxSlope <= 9)  return '&#9989; Flat adkomst til vannet. Egnet for de fleste &mdash; deltakere sitter i båt eller kajak under turen.';
+    if (maxSlope <= 15) return '&#128993; Noe stigning til/fra vannet. Avklar om assistanse er tilgjengelig ved inn- og utstigning.';
     return '&#9888; Krevende adkomst til vannet. Avklar med arrangør om tilrettelagt utstigning finnes.';
   }
 
   // Standard for gående (A, B1, C-stier)
-  if (maxSlope <= 5)  return '&#9989; Egnet for rullestol og rullator.';
-  if (maxSlope <= 8)  return '&#128993; Krevende for manuell rullestol &mdash; elektrisk rullestol kan egne seg.';
-  if (maxSlope <= 12) return '&#9888; For bratt for de fleste rullestoler. Egnet for gående med god gangfunksjon.';
+  // Grenseverdier er justert opp ~4% for å kompensere for at GPS-høyder
+  // typisk gir noe høyere maks-stigning enn faktisk terreng.
+  if (maxSlope <= 9)  return '&#9989; Egnet for rullestol og rullator.';
+  if (maxSlope <= 13) return '&#128993; Krevende for manuell rullestol &mdash; elektrisk rullestol kan egne seg.';
+  if (maxSlope <= 18) return '&#9888; For bratt for de fleste rullestoler. Egnet for gående med god gangfunksjon.';
   return '&#128308; Svært bratt &mdash; krevende tur. Krever god fysisk form.';
 }
 
@@ -1156,10 +987,7 @@ function renderGpxResult(r) {
     gpxVurdering(r.maxSlope, document.getElementById('biz-type') ? document.getElementById('biz-type').value : '')+
     '</div>'+
     '<div style="margin-top:8px;background:var(--surface2);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--text3);line-height:1.5">'+
-    (r.demKilde ?
-      '✅ Høyder hentet fra terrengmodell (' + r.demKilde + ') — nøyaktigere enn rå GPS-høyder.</div>' :
-      'ℹ️ Stigningsdata er beregnet fra GPS-høyder og kan avvike noe fra faktisk terreng. Maks stigning kan være opptil 5–8 prosentpoeng høyere enn reell verdi. Terrengmodell utilgjengelig.</div>'
-    )+
+    'ℹ️ Stigningsdata er beregnet fra GPS-høyder. Grenseverdiene er justert for å ta høyde for GPS-unøyaktighet.</div>'+
     _legendHtml+
     '<div id="gpx-map-kart" class="gpx-map"></div>'+
     slopeSvg(r);
