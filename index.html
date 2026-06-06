@@ -195,7 +195,7 @@ textarea{resize:vertical;min-height:80px}
 .rapport-spinner{text-align:center;padding:2rem;color:var(--text3);font-size:14px}
 .rapport-spinner-ring{width:32px;height:32px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto .75rem}
 
-/* REDIGERINGER */
+/* REDIGERING */
 .sone-edit-btn{background:none;border:none;cursor:pointer;font-size:12px;color:var(--text3);padding:4px 8px;border-radius:6px;font-family:inherit}
 .sone-edit-btn:hover{background:var(--surface2);color:var(--text2)}
 .sone-edit-area{width:100%;border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;resize:vertical;min-height:60px;margin-top:6px}
@@ -804,6 +804,21 @@ function handleGpx(e) {
   reader.readAsText(file);
 }
 
+function smoothElevation(eles, windowSize) {
+  // Median-basert smoothing over et vindu av punkter — fjerner GPS-støy i høydedata
+  var smoothed = [];
+  var half = Math.floor(windowSize / 2);
+  for (var i = 0; i < eles.length; i++) {
+    var slice = [];
+    for (var j = Math.max(0, i - half); j <= Math.min(eles.length - 1, i + half); j++) {
+      slice.push(eles[j]);
+    }
+    slice.sort(function(a, b) { return a - b; });
+    smoothed.push(slice[Math.floor(slice.length / 2)]);
+  }
+  return smoothed;
+}
+
 function parseGpx(txt) {
   var parser = new DOMParser();
   var doc = parser.parseFromString(txt, 'text/xml');
@@ -812,28 +827,56 @@ function parseGpx(txt) {
   var data = pts.map(function(p) {
     return {lat:parseFloat(p.getAttribute('lat')),lon:parseFloat(p.getAttribute('lon')),ele:parseFloat((p.querySelector('ele')||{textContent:'0'}).textContent||0)};
   });
+
+  // Bygg avstandsarray
   var totalDist = 0, dists = [0];
   for (var i = 1; i < data.length; i++) {
     var d = haversine(data[i-1].lat,data[i-1].lon,data[i].lat,data[i].lon);
     totalDist += d; dists.push(totalDist);
   }
-  var eles = data.map(function(p){return p.ele;}).filter(function(e){return e>0;});
-  var minEle = Math.min.apply(null,eles), maxEle = Math.max.apply(null,eles);
+
+  // Glatt høydedataene med medianfilter (vindu 5 punkter) for å fjerne GPS-støy
+  var rawEles = data.map(function(p){return p.ele;});
+  var smoothed = smoothElevation(rawEles, 5);
+
+  // Beregn høydestigning/fall fra glattede verdier med terskel på 0.5m (ignorerer mikrosvingninger)
+  var minEle = Math.min.apply(null, smoothed), maxEle = Math.max.apply(null, smoothed);
   var totalUp = 0, totalDown = 0;
-  for (var i = 1; i < eles.length; i++) {
-    var diff = eles[i]-eles[i-1];
-    if (diff > 0) totalUp += diff; else totalDown += Math.abs(diff);
+  for (var i = 1; i < smoothed.length; i++) {
+    var diff = smoothed[i] - smoothed[i-1];
+    if (diff > 0.5) totalUp += diff;
+    else if (diff < -0.5) totalDown += Math.abs(diff);
   }
+
+  // Beregn maks stigning over minimum 20 meter distanse — unngår punkt-til-punkt GPS-feil
+  var MIN_DIST_M = 20;
   var maxSlope = 0;
-  for (var i = 1; i < data.length; i++) {
-    var dist = dists[i]-dists[i-1];
-    if (dist > 0) {
-      var slope = (Math.abs(data[i].ele-data[i-1].ele)/dist)*100;
-      if (slope > maxSlope && slope < 50) maxSlope = slope;
+  for (var i = 0; i < data.length; i++) {
+    for (var j = i + 1; j < data.length; j++) {
+      var segDist = dists[j] - dists[i]; // i meter
+      if (segDist < MIN_DIST_M) continue;
+      if (segDist > 100) break; // ikke se lenger enn 100m frem
+      var eleDiff = Math.abs(smoothed[j] - smoothed[i]);
+      var slope = (eleDiff / segDist) * 100;
+      if (slope > maxSlope) maxSlope = slope;
     }
   }
-  var avgSlope = totalDist > 0 ? Math.round((totalUp / (totalDist / 2)) * 100 * 10) / 10 : 0;
-  return {totalDist:Math.round(totalDist/10)/100,totalUp:Math.round(totalUp),totalDown:Math.round(totalDown),minEle:Math.round(minEle),maxEle:Math.round(maxEle),maxSlope:Math.round(maxSlope),avgSlope:avgSlope,points:data,dists:dists.map(function(d){return Math.round(d/10)/100;})};
+
+  // avgSlope: total stigning delt på total distanse (korrekt formel)
+  var avgSlope = totalDist > 0 ? Math.round((totalUp / totalDist) * 100 * 10) / 10 : 0;
+
+  return {
+    totalDist: Math.round(totalDist/10)/100,
+    totalUp: Math.round(totalUp),
+    totalDown: Math.round(totalDown),
+    minEle: Math.round(minEle),
+    maxEle: Math.round(maxEle),
+    maxSlope: Math.round(maxSlope * 10) / 10,
+    avgSlope: avgSlope,
+    points: data,
+    smoothedEles: smoothed,
+    dists: dists.map(function(d){return Math.round(d/10)/100;})
+  };
 }
 
 function haversine(lat1,lon1,lat2,lon2) {
@@ -857,12 +900,12 @@ function renderGpxMap(containerId, r) {
   var map = L.map(el, {zoomControl:true, scrollWheelZoom:false, attributionControl:false});
   el._leaflet_map = map;
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:18}).addTo(map);
+  var eles = r.smoothedEles || r.points.map(function(p){return p.ele;});
   var step = Math.max(1, Math.floor(r.points.length/200));
   for (var i=step; i<r.points.length; i+=step) {
     var prev=r.points[i-step], curr=r.points[i];
     var dist=(r.dists[i]-r.dists[i-step])*1000;
-    var slope=dist>0?Math.abs(curr.ele-prev.ele)/dist*100:0;
-    if(slope>50) slope=0;
+    var slope=dist>0?Math.abs(eles[i]-eles[i-step])/dist*100:0;
     L.polyline([[prev.lat,prev.lon],[curr.lat,curr.lon]],{color:slopeColor(slope),weight:5,opacity:0.85}).addTo(map);
   }
   var s=r.points[0], e=r.points[r.points.length-1];
@@ -874,14 +917,14 @@ function renderGpxMap(containerId, r) {
 
 function slopeSvg(r) {
   var w=320,h=60,minE=r.minEle,rangeE=(r.maxEle-r.minEle)||1,maxD=r.totalDist;
+  var eles = r.smoothedEles || r.points.map(function(p){return p.ele;});
   var step=Math.max(1,Math.floor(r.points.length/80)), segs='';
   for (var i=step; i<r.points.length; i+=step) {
-    var prev=r.points[i-step], curr=r.points[i];
+    var prevEle=eles[i-step], currEle=eles[i];
     var dist=(r.dists[i]-r.dists[i-step])*1000;
-    var slope=dist>0?Math.abs(curr.ele-prev.ele)/dist*100:0;
-    if(slope>50) slope=0;
+    var slope=dist>0?Math.abs(currEle-prevEle)/dist*100:0;
     var x1=(r.dists[i-step]/maxD)*w, x2=(r.dists[i]/maxD)*w;
-    var y1=h-((prev.ele-minE)/rangeE)*(h-10)+5, y2=h-((curr.ele-minE)/rangeE)*(h-10)+5;
+    var y1=h-((prevEle-minE)/rangeE)*(h-10)+5, y2=h-((currEle-minE)/rangeE)*(h-10)+5;
     segs+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+slopeColor(slope)+'" stroke-width="2.5" stroke-linecap="round"/>';
   }
   return '<svg class="gpx-profile" viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">'+
