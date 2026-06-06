@@ -5,6 +5,22 @@ Format: `MAJOR.MINOR.PATCH` — prototype-fase bruker `0.x.x`.
 
 ---
 
+## [v0.4.1] — 2026-06-07
+
+### Endret
+- **AI-prompts revidert — nøytral beskrivende tone** — alle 24 sone-prompts, DEFAULT_PROMPT, profilbilde-prompt og guide-generering er omskrevet. Fjernet "Du er ekspert på universell utforming" som rolle, og eksplisitt "Unngå karakterer og dommer — la gjesten vurdere om det passer for dem". Natursti-kontekst skilles nå fra bygg-standarder.
+- **Guide-generering** — lagt til instruksjon om å unngå ord som "dessverre", "mangelfull", "ikke egnet". STATUS-forklaringene presisert: GRONN = fungerer for de fleste, GUL = avhenger av behov, RØD = begrenset — beskriv hva.
+- **Versjonsnummer i appen** — `v0.4.1` vises i topbaren og som `APP_VERSION`-konstant i JS
+
+### Lagt til
+- `README.md` — prosjektdokumentasjon for GitHub-repoet; dekker filstruktur, teknisk stack, versjoneringsflyt, opplastingsinstruks, API-endepunkter og payload-format; tilpasset både Nicolay og Ole
+- `CHANGELOG.md` oppdateres nå automatisk ved hver versjon — ikke manuelt
+
+### Fjernet
+- Terrengmodell-integrasjon (Open Topo Data / Open-Elevation) — CORS-problemer og ustabile resultater (0-verdier for Norge). GPX-analyse kjører nå utelukkende på GPS-høyder med smoothing og justerte grenseverdier.
+
+---
+
 ## [v0.4.0] — 2026-06-06
 
 ### Ny funksjonalitet
