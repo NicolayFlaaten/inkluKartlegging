@@ -880,8 +880,22 @@ async function hentDemElevations(sample) {
         var data = await res.json();
         eles = kilde.parseResults(data);
       }
-      if (eles && eles.length === sample.length && eles.every(function(e) { return e !== null && e !== undefined; })) {
-        console.log('DEM-kilde brukt:', kilde.name);
+      // Valider at vi fikk meningsfulle høyder:
+      // - Ikke null/undefined
+      // - Ikke alle 0 (tyder på at koordinatene er utenfor datasettets dekningsområde)
+      // - Standardavvik > 0.1m (alle identiske verdier er sannsynligvis feil)
+      var gyldig = eles && eles.length === sample.length &&
+        eles.every(function(e) { return e !== null && e !== undefined && e !== 0; }) &&
+        (function() {
+          var snitt = eles.reduce(function(a,b){return a+b;},0) / eles.length;
+          var varians = eles.reduce(function(a,e){return a+Math.pow(e-snitt,2);},0) / eles.length;
+          return Math.sqrt(varians) > 0.1;
+        })();
+      if (!gyldig && eles) {
+        console.warn('DEM-kilde (' + kilde.name + ') returnerte ugyldige verdier — prøver neste. Eksempel:', eles.slice(0,3));
+      }
+      if (gyldig) {
+        console.log('DEM-kilde brukt:', kilde.name, '| min:', Math.min.apply(null,eles).toFixed(1), 'm | maks:', Math.max.apply(null,eles).toFixed(1), 'm');
         return { eles: eles, kilde: kilde.name };
       }
     } catch(err) {
