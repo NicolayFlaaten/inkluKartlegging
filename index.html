@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.10</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.11</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -464,7 +464,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.10';
+const APP_VERSION = 'v0.4.11';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -630,6 +630,7 @@ const TEKST = {
     gruppe_c: 'C — Fellesgode / felles rom',
     pageDesc_default: 'Last opp bilder og registrer mål.',
     gpx_analyse_tittel: 'GPX-ANALYSE',
+    gpx_rute_tittel: 'Rute — GPX-analyse',
     gpx_distanse_label: 'Distanse',
     gpx_stigning_opp: 'Stigning opp',
     gpx_maks_label: 'Maks stigning',
@@ -825,6 +826,7 @@ const TEKST = {
     gruppe_c: 'C — Public asset / shared space',
     pageDesc_default: 'Upload images and record measurements.',
     gpx_analyse_tittel: 'GPX ANALYSIS',
+    gpx_rute_tittel: 'Route — GPX analysis',
     gpx_distanse_label: 'Distance',
     gpx_stigning_opp: 'Elevation gain',
     gpx_maks_label: 'Max slope',
@@ -1046,6 +1048,7 @@ const TEKST = {
     gruppe_c: 'C — Bien público / espacio compartido',
     pageDesc_default: 'Suba imágenes y registre medidas.',
     gpx_analyse_tittel: 'ANÁLISIS GPX',
+    gpx_rute_tittel: 'Ruta — Análisis GPX',
     gpx_distanse_label: 'Distancia',
     gpx_stigning_opp: 'Desnivel positivo',
     gpx_maks_label: 'Pendiente máx.',
@@ -1306,7 +1309,7 @@ function goTo(step) {
     T('steg_neste_start') || 'Start kartlegging →',
     T('steg_neste_sporsmal') || 'Neste: Spørsmål →',
     T('steg_neste_rapport') || 'Se rapport →',
-    '⬇️ Last ned JSON'
+    T('last_ned_json_btn')
   ];
   document.getElementById('btn-next').textContent = labels[step];
   state.step = step;
@@ -1626,6 +1629,63 @@ var Q_CTX = {
     q_regulerbar_seng: 'Importante para huéspedes con dificultades de movilidad',
     q_ledsager: 'Acompañante para persona con discapacidad',
     q_visuell_brannalarm: 'Importante para personas con discapacidad auditiva',
+  }
+};
+
+var Q_UTSAGN = {
+  en: {
+    q_allergi:'Allergy-friendly alternatives are available',
+    q_parfyme:'Rooms can be booked with fragrance-free products',
+    q_meny:'Menu available digitally, in large print and with allergen labelling',
+    q_skriftlig:'Guests can communicate in writing via SMS or email',
+    q_opplaering:'Staff and guides have received inclusive service training',
+    q_teleslynge:'Hearing loop installed in reception and common areas',
+    q_ledsager:'Companion card accepted — companion gets free or reduced ticket',
+    q_evakuering:'Evacuation plan in place covering guests with disabilities',
+    q_tilpassetutstyr:'Adapted equipment available — ask staff for details',
+    q_sti_rullestol:'Trail is passable by wheelchair or walker',
+    q_sti_barnevogn:'Trail is passable by pram',
+    q_sti_merking:'Trail is clearly marked with signs, poles and map',
+    q_sti_belysning:'Lighting available along the trail',
+    q_hc_wc:'Accessible toilet available nearby',
+    q_badeplass_rampe:'Ramp or adapted water access available',
+    q_hvileplasser:'Benches and rest areas available along the route',
+    q_hvileplasser_avstand:'Rest area available every 500 metres or less',
+    q_luminans:'Good luminance contrast on signs and counters — suitable for visually impaired',
+    q_taktil:'Tactile and visual markings at stairs and level changes',
+    q_taxi_buss:'Drop-off/pick-up point for bus and taxi near entrance',
+    q_regulerbar_seng:'Adjustable bed available on request',
+    q_lading_el:'Electric wheelchair charging possible in room overnight',
+    q_visuell_brannalarm:'Visual fire alarm installed in rooms',
+    q_alarm_resepsjon:'Room alarm connects directly to reception',
+    q_garderobe_tilrettelagt:'Accessible changing room and shower available for people with reduced mobility',
+  },
+  es: {
+    q_allergi:'Hay alternativas aptas para alérgicos disponibles',
+    q_parfyme:'Las habitaciones se pueden reservar con productos sin fragancia',
+    q_meny:'Menú disponible en formato digital, letra grande y con etiquetado de alérgenos',
+    q_skriftlig:'Los huéspedes pueden comunicarse por escrito mediante SMS o correo',
+    q_opplaering:'El personal y los guías han recibido formación en servicios inclusivos',
+    q_teleslynge:'Bucle de inducción instalado en recepción y zonas comunes',
+    q_ledsager:'Se acepta tarjeta de acompañante — el acompañante obtiene entrada gratuita o reducida',
+    q_evakuering:'Plan de evacuación que contempla a huéspedes con discapacidad',
+    q_tilpassetutstyr:'Equipamiento adaptado disponible — consulte al personal para más detalles',
+    q_sti_rullestol:'El sendero es transitable en silla de ruedas o andador',
+    q_sti_barnevogn:'El sendero es transitable con cochecito',
+    q_sti_merking:'El sendero está claramente señalizado con señales, balizas y mapa',
+    q_sti_belysning:'Iluminación disponible a lo largo del sendero',
+    q_hc_wc:'Aseo accesible disponible cerca',
+    q_badeplass_rampe:'Rampa o acceso adaptado al agua disponible',
+    q_hvileplasser:'Bancos y áreas de descanso disponibles a lo largo del recorrido',
+    q_hvileplasser_avstand:'Área de descanso disponible cada 500 metros o menos',
+    q_luminans:'Buen contraste de luminancia en señales y mostradores — apto para personas con baja visión',
+    q_taktil:'Marcaciones táctiles y visuales en escaleras y cambios de nivel',
+    q_taxi_buss:'Zona de embarque/desembarque para autobús y taxi cerca de la entrada',
+    q_regulerbar_seng:'Cama ajustable disponible bajo petición',
+    q_lading_el:'Carga de silla de ruedas eléctrica posible en la habitación por la noche',
+    q_visuell_brannalarm:'Alarma de incendio visual instalada en las habitaciones',
+    q_alarm_resepsjon:'La alarma de la habitación conecta directamente con recepción',
+    q_garderobe_tilrettelagt:'Vestuario y ducha accesibles disponibles para personas con movilidad reducida',
   }
 };
 
@@ -2227,7 +2287,7 @@ async function buildGuide() {
     var bizType = document.getElementById('biz-type') ? document.getElementById('biz-type').value : '';
     var vurdering = gpxVurdering(r.maxSlope, bizType);
     gpxHtml = '<div class="guide-gpx">' +
-      '<div class="guide-gpx-title">&#128507; Rute &mdash; GPX-analyse</div>' +
+      '<div class="guide-gpx-title">&#128507; '+T('gpx_rute_tittel')+'</div>' +
       '<div class="guide-gpx-stats">' +
       '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.totalDist+' km</div><div class="guide-gpx-stat-label">'+T('gpx_distanse_label')+'</div></div>' +
       '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">&#8593;'+r.totalUp+'m</div><div class="guide-gpx-stat-label">'+T('gpx_stigning_opp')+'</div></div>' +
@@ -2307,7 +2367,7 @@ async function buildGuide() {
     var editBtn = document.createElement('button');
     editBtn.className = 'sone-edit-btn';
     editBtn.id = 'edit-btn-' + hIdx;
-    editBtn.textContent = '✏️ Rediger';
+    editBtn.textContent = T('sone_rediger');
     editBtn.addEventListener('click', function() { toggleEditSone(hIdx); });
     topp.appendChild(editBtn);
     hDiv.appendChild(topp);
@@ -2384,7 +2444,9 @@ async function buildGuide() {
     var q = ALL_QUESTIONS[id];
     var ikon = q.ikon || '✅';
     // Bruk redigert utsagn hvis det finnes, ellers standard utsagn, ellers spørsmålstekst
-    var utsagnTekst = (guideRedigert['tjeneste_'+id] && guideRedigert['tjeneste_'+id].tekst) ? guideRedigert['tjeneste_'+id].tekst : (q.utsagn || q.text);
+    var _lang = state.lang || 'no';
+    var _utsagnBase = (Q_UTSAGN[_lang] && Q_UTSAGN[_lang][id]) ? Q_UTSAGN[_lang][id] : (q.utsagn || q.text);
+    var utsagnTekst = (guideRedigert['tjeneste_'+id] && guideRedigert['tjeneste_'+id].tekst) ? guideRedigert['tjeneste_'+id].tekst : _utsagnBase;
     var erRedigert = guideRedigert['tjeneste_'+id] && guideRedigert['tjeneste_'+id].tekst;
     jaItems += '<div class="guide-tillegg-kort" id="tillegg-kort-'+id+'">' +
       '<div class="guide-tillegg-ikon">'+ikon+'</div>' +
