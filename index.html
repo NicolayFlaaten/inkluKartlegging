@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.0</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.10</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -464,7 +464,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.0';
+const APP_VERSION = 'v0.4.10';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -618,6 +618,13 @@ const TEKST = {
     last_ned_json: '⬇️ Last ned rådata (JSON)',
     last_ned_json_btn: '⬇️ Last ned JSON',
     guide_footer: 'Tilgjengelighetsguide generert med AccessNorway',
+    guide_fasiliteter: 'Fasiliteter og tilgjengelighet',
+    guide_tilleggstjenester: 'Tilleggstjenester',
+    guide_spor_om: 'Spør om tilgjengelighet',
+    guide_under_oppholdet: '🏠 Under oppholdet',
+    chat_hei: 'Hei! Jeg kan svare på spørsmål om tilgjengeligheten på',
+    chat_hva_lurer: 'Hva lurer du på?',
+    chat_hei_generell: T('chat_hei_generell'),
     gruppe_a: 'A — Bygningsbasert bedrift',
     gruppe_b: 'B — Naturbasert aktivitetsbedrift',
     gruppe_c: 'C — Fellesgode / felles rom',
@@ -806,6 +813,13 @@ const TEKST = {
     last_ned_json: '⬇️ Download raw data (JSON)',
     last_ned_json_btn: '⬇️ Download JSON',
     guide_footer: 'Accessibility guide generated with AccessNorway',
+    guide_fasiliteter: 'Facilities and accessibility',
+    guide_tilleggstjenester: 'Additional services',
+    guide_spor_om: 'Ask about accessibility',
+    guide_under_oppholdet: '🏠 During the stay',
+    chat_hei: 'Hello! I can answer questions about accessibility at',
+    chat_hva_lurer: 'What would you like to know?',
+    chat_hei_generell: 'Hello! I can answer questions about accessibility here. What would you like to know?',
     gruppe_a: 'A — Building-based business',
     gruppe_b: 'B — Nature-based activity provider',
     gruppe_c: 'C — Public asset / shared space',
@@ -1020,6 +1034,13 @@ const TEKST = {
     last_ned_json: '⬇️ Descargar datos brutos (JSON)',
     last_ned_json_btn: '⬇️ Descargar JSON',
     guide_footer: 'Guía de accesibilidad generada con AccessNorway',
+    guide_fasiliteter: 'Instalaciones y accesibilidad',
+    guide_tilleggstjenester: 'Servicios adicionales',
+    guide_spor_om: 'Preguntar sobre accesibilidad',
+    guide_under_oppholdet: '🏠 Durante la estancia',
+    chat_hei: '¡Hola! Puedo responder preguntas sobre la accesibilidad en',
+    chat_hva_lurer: '¿En qué puedo ayudarle?',
+    chat_hei_generell: '¡Hola! Puedo responder preguntas sobre la accesibilidad aquí. ¿En qué puedo ayudarle?',
     gruppe_a: 'A — Negocio en edificio',
     gruppe_b: 'B — Proveedor de actividades en la naturaleza',
     gruppe_c: 'C — Bien público / espacio compartido',
@@ -1075,6 +1096,17 @@ function oppdaterI18n() {
     var norsk = el.getAttribute('data-i18n-label-val');
     el.textContent = TL(norsk);
   });
+  // Oversett f.eks. i placeholders til e.g. (en) eller p.ej. (es)
+  var lang = state.lang || 'no';
+  if (lang !== 'no') {
+    var feksMap = {en: 'e.g.', es: 'p.ej.'};
+    var feks = feksMap[lang] || 'f.eks.';
+    document.querySelectorAll('input[placeholder]').forEach(function(el) {
+      if (el.placeholder.startsWith('f.eks.')) {
+        el.placeholder = el.placeholder.replace('f.eks.', feks);
+      }
+    });
+  }
 }
 
 // Sett aktivt språk og re-render gjeldende steg
@@ -1964,8 +1996,8 @@ function renderZoneCard(zone, idx) {
       var cur = zone.measures[fid] || '';
       extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + '</label>'
         + '<div class="yn-field">'
-        + '<button class="yn-field-btn' + (cur==='ja' ? ' yn-ja-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ja">Ja</button>'
-        + '<button class="yn-field-btn' + (cur==='nei' ? ' yn-nei-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="nei">Nei</button>'
+        + '<button class="yn-field-btn' + (cur==='ja' ? ' yn-ja-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ja">'+T('ja')+'</button>'
+        + '<button class="yn-field-btn' + (cur==='nei' ? ' yn-nei-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="nei">'+T('nei')+'</button>'
         + '<button class="yn-field-btn' + (cur==='ukjent' ? ' yn-uk-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ukjent">'+T('vet_ikke_btn')+'</button>'
         + '</div></div>';
     } else {
@@ -2095,8 +2127,8 @@ function buildQuestions() {
     html += '<div class="question-item"><div class="question-text">'+qText+'</div>' +
       (q.ctx ? '<div class="question-context">'+qCtx+'</div>' : '') +
       '<div class="yn-group">' +
-      '<button class="yn-btn yes '+(state.answers[id]==='ja'?'active':'')+'" onclick="setAns(\''+id+'\',\'ja\',this)">Ja</button>' +
-      '<button class="yn-btn no '+(state.answers[id]==='nei'?'active':'')+'" onclick="setAns(\''+id+'\',\'nei\',this)">Nei</button>' +
+      '<button class="yn-btn yes '+(state.answers[id]==='ja'?'active':'')+'" onclick="setAns(\''+id+'\',\'ja\',this)">'+T('ja')+'</button>' +
+      '<button class="yn-btn no '+(state.answers[id]==='nei'?'active':'')+'" onclick="setAns(\''+id+'\',\'nei\',this)">'+T('nei')+'</button>' +
       '<button class="yn-btn na '+(state.answers[id]==='na'?'active':'')+'" onclick="setAns(\''+id+'\',\'na\',this)">'+T('vet_ikke_btn')+'</button>' +
       '</div></div>';
   }
@@ -2341,7 +2373,7 @@ async function buildGuide() {
 
   var sonerHtml = profilAnalyseHtml +
     (ankomstHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('ved_ankomst')+'</div>'+ankomstHtml+'</div>' : '') +
-    (oppholdHtml ? '<div class="guide-section"><div class="guide-section-title">🏠 Under oppholdet</div>'+oppholdHtml+'</div>' : '') +
+    (oppholdHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('guide_under_oppholdet')+'</div>'+oppholdHtml+'</div>' : '') +
     (annetHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('ovrig')+'</div>'+annetHtml+'</div>' : '');
 
   var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
@@ -2392,16 +2424,16 @@ async function buildGuide() {
     '<div class="guide-hero-body">' +
     '<div class="guide-hero-badge">'+T('guide_badge')+'</div>' +
     '<div class="guide-hero-name">'+name+'</div>' +
-    '<div class="guide-hero-type">'+(config?config.label:'')+'</div>' +
+    '<div class="guide-hero-type">'+(config?TL(config.label):'')+'</div>' +
     '<div class="guide-hero-meta">'+metaPills+'</div>' +
     '</div></div>' +
     (state.gpxData ? '' : mapHtml) + gpxHtml + (state.gpxData ? mapHtml : '') +
-    (sonerHtml ? '<div class="guide-section"><div class="guide-section-title">Fasiliteter og tilgjengelighet</div>'+sonerHtml+'</div>' : '') +
-    (jaItems ? '<div class="guide-section"><div class="guide-section-title">Tilleggstjenester</div><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
-    '<div class="guide-section"><div class="guide-section-title">Spør om tilgjengelighet</div>' +
+    (sonerHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('guide_fasiliteter')+'</div>'+sonerHtml+'</div>' : '') +
+    (jaItems ? '<div class="guide-section"><div class="guide-section-title">'+T('guide_tilleggstjenester')+'</div><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
+    '<div class="guide-section"><div class="guide-section-title">'+T('guide_spor_om')+'</div>' +
     '<div class="chat-card">' +
     '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_tittel')+'</div><div class="chat-header-sub">AI</div></div>' +
-    '<div class="chat-messages" id="guide-chat-messages"><div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten på '+name+'. Hva lurer du på?</div></div></div>' +
+    '<div class="chat-messages" id="guide-chat-messages"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei')+' '+name+'. '+T('chat_hva_lurer')+'</div></div></div>' +
     '<div class="chat-suggestions">' +
     '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Passer det for rullestol?\')">'+T('chat_passer_rullestol')+'</button>' +
     '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Finnes det HC-parkering?\')">'+T('chat_hc_parkering')+'</button>' +
@@ -2520,7 +2552,7 @@ async function buildAnalyse() {
     (jaItems?'<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">'+jaItems+'</div></div>':'') +
     '<div class="chat-card">' +
     '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_spor_om')+'</div><div class="chat-header-sub">'+T('chat_ai_assistent')+'</div></div>' +
-    '<div class="chat-messages" id="chat-messages"><div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten her. Hva lurer du på?</div></div></div>' +
+    '<div class="chat-messages" id="chat-messages"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei_generell')+'</div></div></div>' +
     '<div class="chat-suggestions">' +
     '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_passer_rullestol')+'</button>' +
     '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_hc_parkering')+'</button>' +
