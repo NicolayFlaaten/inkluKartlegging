@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.9</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.0</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -464,7 +464,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.9';
+const APP_VERSION = 'v0.5.0';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -622,6 +622,14 @@ const TEKST = {
     gruppe_b: 'B — Naturbasert aktivitetsbedrift',
     gruppe_c: 'C — Fellesgode / felles rom',
     pageDesc_default: 'Last opp bilder og registrer mål.',
+    gpx_analyse_tittel: 'GPX-ANALYSE',
+    gpx_distanse_label: 'Distanse',
+    gpx_stigning_opp: 'Stigning opp',
+    gpx_maks_label: 'Maks stigning',
+    gpx_snitt_label: 'Snitt stigning',
+    legend_flatt: 'Flatt (0–5%)',
+    legend_krevende: 'Krevende (5–8%)',
+    legend_bratt: 'Bratt (>8%)',
     // Navigasjonsknapper steg
     steg_neste_start: 'Start kartlegging →',
     steg_neste_sporsmal: 'Neste: Spørsmål →',
@@ -802,6 +810,14 @@ const TEKST = {
     gruppe_b: 'B — Nature-based activity provider',
     gruppe_c: 'C — Public asset / shared space',
     pageDesc_default: 'Upload images and record measurements.',
+    gpx_analyse_tittel: 'GPX ANALYSIS',
+    gpx_distanse_label: 'Distance',
+    gpx_stigning_opp: 'Elevation gain',
+    gpx_maks_label: 'Max slope',
+    gpx_snitt_label: 'Avg slope',
+    legend_flatt: 'Flat (0–5%)',
+    legend_krevende: 'Demanding (5–8%)',
+    legend_bratt: 'Steep (>8%)',
     // Navigation step buttons
     steg_neste_start: 'Start mapping →',
     steg_neste_sporsmal: 'Next: Questions →',
@@ -1008,6 +1024,14 @@ const TEKST = {
     gruppe_b: 'B — Proveedor de actividades en la naturaleza',
     gruppe_c: 'C — Bien público / espacio compartido',
     pageDesc_default: 'Suba imágenes y registre medidas.',
+    gpx_analyse_tittel: 'ANÁLISIS GPX',
+    gpx_distanse_label: 'Distancia',
+    gpx_stigning_opp: 'Desnivel positivo',
+    gpx_maks_label: 'Pendiente máx.',
+    gpx_snitt_label: 'Pendiente media',
+    legend_flatt: 'Llano (0–5%)',
+    legend_krevende: 'Exigente (5–8%)',
+    legend_bratt: 'Empinado (>8%)',
     // Navegación de pasos
     steg_neste_start: 'Iniciar inspección →',
     steg_neste_sporsmal: 'Siguiente: Preguntas →',
@@ -1118,6 +1142,23 @@ var LABEL_MAP = {
     'Badeplass':'Swimming area','Utsiktspunkt':'Viewpoint',
     'HC-parkering / toalett':'Accessible parking / toilet',
     'Fellesgode / felles rom':'Public asset / shared space',
+    'Last opp bilder av hotellets fasiliteter.':'Upload images of the hotel facilities.',
+    'Last opp bilder. Legg til flere rom ved behov.':'Upload images. Add more rooms as needed.',
+    'Last opp bilder av restaurantens tilgjengelighet.':'Upload images of the restaurant accessibility.',
+    'Last opp bilder fra aktivitetsbedriften.':'Upload images from the activity provider.',
+    'Last opp bilder av idrettsanlegget.':'Upload images of the sports facility.',
+    'Last opp bilder av campingplassens fasiliteter.':'Upload images of the camping facilities.',
+    'Last opp bilder av stedet.':'Upload images of the location.',
+    'Vandring, fjelltur, ski, truger og naturguiding. Last opp bilder og evt. GPX.':'Hiking, mountain trips, skiing, snowshoeing and nature guiding. Upload images and GPX if available.',
+    'Kajakkpadling, kano, båttur, fisketurer. Last opp bilder og evt. GPX-rute.':'Kayaking, canoeing, boat trips, fishing. Upload images and GPX route if available.',
+    'Sykling, ridning, hundespann og slede. Last opp bilder og evt. GPX-rute.':'Cycling, horse riding, dog sledding and sled. Upload images and GPX route if available.',
+    'Sit-ski, handbike, amfistol og spesialtilrettelagte turer. Last opp bilder.':'Sit-ski, handbike, amfistol and specially adapted tours. Upload images.',
+    'Last opp bilder og GPX-fil for stien.':'Upload images and GPX file for the trail.',
+    'Last opp bilder og GPX-fil.':'Upload images and GPX file.',
+    'Last opp bilder og evt. GPX.':'Upload images and GPX if available.',
+    'Last opp bilder av badeplassen.':'Upload images of the swimming area.',
+    'Last opp bilder av stedet og adkomsten.':'Upload images of the location and access.',
+    'Last opp bilder.':'Upload images.',
     'Svømmebasseng':'Swimming pool','Transport til start':'Transport to start',
     'Rasteplass på vann':'Rest area on water','Serveringssted':'Refreshment area',
     'Rampe til vann':'Water ramp','WC i nærheten':'Nearby WC / toilet',
@@ -1173,6 +1214,23 @@ var LABEL_MAP = {
     'Badeplass':'Zona de baño','Utsiktspunkt':'Mirador',
     'HC-parkering / toalett':'Aparcamiento accesible / aseo',
     'Fellesgode / felles rom':'Bien público / espacio compartido',
+    'Last opp bilder av hotellets fasiliteter.':'Suba imágenes de las instalaciones del hotel.',
+    'Last opp bilder. Legg til flere rom ved behov.':'Suba imágenes. Añada más habitaciones si es necesario.',
+    'Last opp bilder av restaurantens tilgjengelighet.':'Suba imágenes de la accesibilidad del restaurante.',
+    'Last opp bilder fra aktivitetsbedriften.':'Suba imágenes del proveedor de actividades.',
+    'Last opp bilder av idrettsanlegget.':'Suba imágenes de la instalación deportiva.',
+    'Last opp bilder av campingplassens fasiliteter.':'Suba imágenes de las instalaciones del camping.',
+    'Last opp bilder av stedet.':'Suba imágenes del lugar.',
+    'Vandring, fjelltur, ski, truger og naturguiding. Last opp bilder og evt. GPX.':'Senderismo, excursiones de montaña, esquí y guía de naturaleza. Suba imágenes y GPX si dispone.',
+    'Kajakkpadling, kano, båttur, fisketurer. Last opp bilder og evt. GPX-rute.':'Kayak, canoa, paseos en bote, pesca. Suba imágenes y ruta GPX si dispone.',
+    'Sykling, ridning, hundespann og slede. Last opp bilder og evt. GPX-rute.':'Ciclismo, equitación, trineo con perros y trineo. Suba imágenes y ruta GPX si dispone.',
+    'Sit-ski, handbike, amfistol og spesialtilrettelagte turer. Last opp bilder.':'Sit-ski, handbike, amfistol y tours adaptados. Suba imágenes.',
+    'Last opp bilder og GPX-fil for stien.':'Suba imágenes y archivo GPX del sendero.',
+    'Last opp bilder og GPX-fil.':'Suba imágenes y archivo GPX.',
+    'Last opp bilder og evt. GPX.':'Suba imágenes y GPX si dispone.',
+    'Last opp bilder av badeplassen.':'Suba imágenes de la zona de baño.',
+    'Last opp bilder av stedet og adkomsten.':'Suba imágenes del lugar y el acceso.',
+    'Last opp bilder.':'Suba imágenes.',
     'Svømmebasseng':'Piscina','Transport til start':'Transporte al inicio',
     'Rasteplass på vann':'Área de descanso en agua','Serveringssted':'Área de refrigerios',
     'Rampe til vann':'Rampa al agua','WC i nærheten':'Aseo cercano',
@@ -1539,6 +1597,40 @@ var Q_CTX = {
   }
 };
 
+// Oversettelse av målefelt-labels
+var EF_LABEL = {
+  en: {
+    terskel_mm:'Threshold height',dor_cm:'Door width',seng_cm:'Bed height',
+    bad_dor_cm:'Bathroom door width',snuplass_cm:'Turning space diameter',
+    snuplass_rekt:'Turning space rectangle (W × D)',heis_bredde_cm:'Lift width',
+    disk_cm:'Counter height',bord_cm:'Table height',stigningsgrad:'Slope gradient',
+    sti_bredde_cm:'Trail width',handstotte_wc:'Handrail at toilet',
+    handstotte_dusj:'Handrail / handle in shower',benk_dusj:'Bench or chair in shower',
+    regulerbar_seng:'Adjustable bed',lading_el_rullestol:'Electric wheelchair charging in room',
+    visuell_brannalarm:'Visual fire alarm',alarm_resepsjon:'Room alarm to reception',
+    luminans_skilt:'Good luminance contrast (signs/counter)',
+    taktil_gangbane:'Tactile / visual path marking',taktil_trapp:'Marked stair edges and hazard zones'
+  },
+  es: {
+    terskel_mm:'Altura del umbral',dor_cm:'Anchura de puerta',seng_cm:'Altura de cama',
+    bad_dor_cm:'Anchura puerta baño/aseo',snuplass_cm:'Diámetro zona de giro',
+    snuplass_rekt:'Zona de giro rectangular (A × F)',heis_bredde_cm:'Anchura ascensor',
+    disk_cm:'Altura mostrador',bord_cm:'Altura mesa',stigningsgrad:'Pendiente',
+    sti_bredde_cm:'Anchura sendero',handstotte_wc:'Barandilla en el aseo',
+    handstotte_dusj:'Barandilla / asa en la ducha',benk_dusj:'Banco o silla en la ducha',
+    regulerbar_seng:'Cama ajustable',lading_el_rullestol:'Carga silla de ruedas eléctrica en habitación',
+    visuell_brannalarm:'Alarma de incendio visual',alarm_resepsjon:'Alarma habitación a recepción',
+    luminans_skilt:'Buen contraste de luminancia (señales/mostrador)',
+    taktil_gangbane:'Marcación táctil / visual de recorrido',taktil_trapp:'Bordes de escalón y zonas de peligro marcadas'
+  }
+};
+
+// Oversett EXTRA_FIELDS label basert på aktivt språk
+function TEF(fieldId) {
+  var lang = state.lang || 'no';
+  return (EF_LABEL[lang] && EF_LABEL[lang][fieldId]) || null;
+}
+
 var ALL_QUESTIONS = {
   q_allergi:{text:'Er det allergivennlige alternativer tilgjengelig?',ctx:'Uten dun, parfyme, kjæledyr',utsagn:'Allergivennlige alternativer er tilgjengelig',ikon:'🌿'},
   q_parfyme:{text:'Kan rom bestilles med parfymefrie produkter?',ctx:'',utsagn:'Rom kan bestilles med parfymefrie produkter',ikon:'🌸'},
@@ -1761,11 +1853,13 @@ function slopeSvg(r) {
     '<text x="4" y="'+(h-3)+'" font-size="9" fill="#999">'+r.minEle+'m</text></svg>';
 }
 
-var _legendHtml = '<div class="slope-legend">'+
-  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#1D9E75"></div>Flatt (0&#8211;5%)</div>'+
-  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#BA7517"></div>Krevende (5&#8211;8%)</div>'+
-  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#E24B4A"></div>Bratt (&gt;8%)</div>'+
+function getLegendHtml() {
+  return '<div class="slope-legend">'+
+  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#1D9E75"></div>'+T('legend_flatt')+'</div>'+
+  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#BA7517"></div>'+T('legend_krevende')+'</div>'+
+  '<div class="slope-legend-item"><div class="slope-legend-dot" style="background:#E24B4A"></div>'+T('legend_bratt')+'</div>'+
   '</div>';
+}
 
 function gpxVurdering(maxSlope, type) {
   // Gruppe B3 og B4 tilpasset: deltaker sitter i kjøretøy/slede/hest/sit-ski
@@ -1803,17 +1897,17 @@ function renderGpxResult(r) {
   el.innerHTML =
     '<div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">GPX-analyse</div>'+
     '<div class="gpx-stats">'+
-    '<div class="gpx-stat"><div class="gpx-stat-val">'+r.totalDist+' km</div><div class="gpx-stat-label">Distanse</div></div>'+
+    '<div class="gpx-stat"><div class="gpx-stat-val">'+r.totalDist+' km</div><div class="gpx-stat-label">'+T('gpx_distanse_label')+'</div></div>'+
     '<div class="gpx-stat"><div class="gpx-stat-val">&#8593;'+r.totalUp+'m &#8595;'+r.totalDown+'m</div><div class="gpx-stat-label">'+T('gpx_hoyde')+'</div></div>'+
-    '<div class="gpx-stat '+slopeClass(r.maxSlope)+'"><div class="gpx-stat-val">'+r.maxSlope+'%</div><div class="gpx-stat-label">Maks stigning</div></div>'+
-    '<div class="gpx-stat '+slopeClass(r.avgSlope)+'"><div class="gpx-stat-val">'+r.avgSlope+'%</div><div class="gpx-stat-label">Snitt stigning</div></div>'+
+    '<div class="gpx-stat '+slopeClass(r.maxSlope)+'"><div class="gpx-stat-val">'+r.maxSlope+'%</div><div class="gpx-stat-label">'+T('gpx_maks_label')+'</div></div>'+
+    '<div class="gpx-stat '+slopeClass(r.avgSlope)+'"><div class="gpx-stat-val">'+r.avgSlope+'%</div><div class="gpx-stat-label">'+T('gpx_snitt_label')+'</div></div>'+
     '</div>'+
     '<div style="margin-top:8px;font-size:12px;color:var(--text3)">'+
     gpxVurdering(r.maxSlope, document.getElementById('biz-type') ? document.getElementById('biz-type').value : '')+
     '</div>'+
     '<div style="margin-top:8px;background:var(--surface2);border-radius:8px;padding:8px 10px;font-size:11px;color:var(--text3);line-height:1.5">'+
     'ℹ️ Stigningsdata er beregnet fra GPS-høyder. Grenseverdiene er justert for å ta høyde for GPS-unøyaktighet.</div>'+
-    _legendHtml+
+    getLegendHtml()+
     '<div id="gpx-map-kart" class="gpx-map"></div>'+
     slopeSvg(r);
   setTimeout(function(){renderGpxMap('gpx-map-kart', r);}, 150);
@@ -1868,14 +1962,14 @@ function renderZoneCard(zone, idx) {
     if (!f) continue;
     if (f.type === 'yn') {
       var cur = zone.measures[fid] || '';
-      extraFieldsHtml += '<div class="field"><label class="field-label">' + f.label + '</label>'
+      extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + '</label>'
         + '<div class="yn-field">'
         + '<button class="yn-field-btn' + (cur==='ja' ? ' yn-ja-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ja">Ja</button>'
         + '<button class="yn-field-btn' + (cur==='nei' ? ' yn-nei-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="nei">Nei</button>'
         + '<button class="yn-field-btn' + (cur==='ukjent' ? ' yn-uk-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ukjent">'+T('vet_ikke_btn')+'</button>'
         + '</div></div>';
     } else {
-      extraFieldsHtml += '<div class="field"><label class="field-label">' + f.label + (f.unit ? ' (' + f.unit + ')' : '') + '</label>'
+      extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + (f.unit ? ' (' + f.unit + ')' : '') + '</label>'
         + '<div class="number-field"><input type="number" placeholder="' + f.ph + '" value="' + (zone.measures[fid]||'') + '" data-zi="' + idx + '" data-fid="' + fid + '" class="measure-input"/>'
         + (f.unit ? '<span class="unit">' + f.unit + '</span>' : '') + '</div></div>';
     }
@@ -2103,13 +2197,13 @@ async function buildGuide() {
     gpxHtml = '<div class="guide-gpx">' +
       '<div class="guide-gpx-title">&#128507; Rute &mdash; GPX-analyse</div>' +
       '<div class="guide-gpx-stats">' +
-      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.totalDist+' km</div><div class="guide-gpx-stat-label">Distanse</div></div>' +
-      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">&#8593;'+r.totalUp+'m</div><div class="guide-gpx-stat-label">Stigning opp</div></div>' +
-      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.maxSlope+'%</div><div class="guide-gpx-stat-label">Maks stigning</div></div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.totalDist+' km</div><div class="guide-gpx-stat-label">'+T('gpx_distanse_label')+'</div></div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">&#8593;'+r.totalUp+'m</div><div class="guide-gpx-stat-label">'+T('gpx_stigning_opp')+'</div></div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.maxSlope+'%</div><div class="guide-gpx-stat-label">'+T('gpx_maks_label')+'</div></div>' +
       '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.minEle+'&#8211;'+r.maxEle+'m</div><div class="guide-gpx-stat-label">'+T('gpx_hoyde')+'</div></div>' +
       '</div>' +
       '<div style="margin-top:10px;font-size:13px;color:var(--text2)">'+vurdering+'</div>' +
-      _legendHtml +
+      getLegendHtml() +
       '<div id="guide-gpx-map" class="guide-gpx-map"></div>' +
       slopeSvg(r) +
       '</div>';
@@ -2545,7 +2639,7 @@ function downloadProfile() {
     redigeringer: guideRedigert,
     kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(function(z){return {id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,note:z.note||'',ai_analyser:z.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;})};}),svar:state.answers}
   }, null, 2);
-  var blob = new Blob([json],{type:'application/json'});
+  var blob = new Blob([json],{type:'application/json;charset=utf-8'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a'); a.href=url; a.download='accessnorway_profil.json'; a.click(); URL.revokeObjectURL(url);
 }
@@ -3209,7 +3303,7 @@ downloadProfile = function() {
     redigeringer: guideRedigert,
     kartlegging:{dato:new Date().toISOString(),fasiliteter:state.zones.map(function(z){return {id:z.id,label:z.label,antall_bilder:z.images.length,mal:z.measures,note:z.note||'',ai_analyser:z.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;})};}),svar:state.answers}
   }, null, 2);
-  var blob = new Blob([json],{type:'application/json'});
+  var blob = new Blob([json],{type:'application/json;charset=utf-8'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a'); a.href=url; a.download='accessnorway_profil.json'; a.click(); URL.revokeObjectURL(url);
   lagreStedsprofil();
