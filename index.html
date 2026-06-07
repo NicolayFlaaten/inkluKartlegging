@@ -505,6 +505,10 @@ const TEKST = {
     rapport_rediger: '✏️ Rediger',
     rapport_lagre: 'Lagre',
     rapport_avbryt: 'Avbryt',
+    // Navigasjonsknapper steg
+    steg_neste_start: 'Start kartlegging →',
+    steg_neste_sporsmal: 'Neste: Spørsmål →',
+    steg_neste_rapport: 'Se rapport →',
     // Status
     ai_aktiv: 'AI aktiv',
     status_gronn: 'Tilgjengelig',
@@ -547,6 +551,10 @@ const TEKST = {
     rapport_rediger: '✏️ Edit',
     rapport_lagre: 'Save',
     rapport_avbryt: 'Cancel',
+    // Navigation step buttons
+    steg_neste_start: 'Start mapping →',
+    steg_neste_sporsmal: 'Next: Questions →',
+    steg_neste_rapport: 'View report →',
     // Status
     ai_aktiv: 'AI active',
     status_gronn: 'Accessible',
@@ -570,13 +578,13 @@ function byttSpraak(lang) {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
   // Re-render gjeldende steg
-  if (typeof buildCurrentStep === 'function') buildCurrentStep();
+  goTo(state.step);
 }
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
 
 // Bygg steg-piller
 function buildSteps() {
-  var labels = ['Sted','Fasiliteter','Spørsmål','Rapport'];
+  var labels = [T('steg_sted'), T('steg_fasiliteter'), T('steg_sporsmal'), T('steg_rapport')];
   var html = '';
   for (var i = 0; i < labels.length; i++) {
     html += '<div class="step-pill ' + (i===0?'active':'') + '" id="sp' + i + '">' +
@@ -599,13 +607,22 @@ function goTo(step) {
     }
   }
   document.getElementById('btn-back').style.display = step > 0 ? 'block' : 'none';
-  var labels = ['Start kartlegging →','Neste: Spørsmål →','Se rapport →','⬇️ Last ned JSON'];
+  var labels = [
+    T('steg_neste_start') || 'Start kartlegging →',
+    T('steg_neste_sporsmal') || 'Neste: Spørsmål →',
+    T('steg_neste_rapport') || 'Se rapport →',
+    '⬇️ Last ned JSON'
+  ];
   document.getElementById('btn-next').textContent = labels[step];
   state.step = step;
   if (step === 1) buildZones();
   if (step === 2) buildQuestions();
   if (step === 3) { document.getElementById('generer-bar').style.display='block'; document.getElementById('generer-spinner').style.display='none'; document.getElementById('rapport-innhold').style.display='none'; }
   window.scrollTo(0, 0);
+  // Oppdater steg-piller og AI-status med riktig språk
+  buildSteps();
+  var aiTxt = document.getElementById('ai-status-txt');
+  if (aiTxt) aiTxt.textContent = T('ai_aktiv');
 }
 
 function goNext() {
