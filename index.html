@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.5</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.8</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -397,7 +397,7 @@ textarea{resize:vertical;min-height:80px}
     </div>
     <div id="generer-spinner" style="display:none;text-align:center;padding:2rem">
       <div class="rapport-spinner-ring" style="margin:0 auto .75rem"></div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:4px" id="spinner-tekst">Genererer tilgjengelighetsguide...</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:4px" id="spinner-tekst" data-i18n="rapport_genererer">Genererer tilgjengelighetsguide...</div>
       <div style="font-size:12px;color:var(--text3)" data-i18n="generer_spinner_desc">Dette kan ta 15–30 sekunder</div>
     </div>
     <div id="rapport-innhold" style="display:none">
@@ -464,7 +464,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.5';
+const APP_VERSION = 'v0.4.8';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -495,6 +495,8 @@ const TEKST = {
     gpx_last_opp: 'Last opp GPX-fil', gpx_analyserer: 'Analyserer GPX…',
     gpx_distanse: 'Distanse', gpx_hoyde: 'Høyde',
     gpx_maks_stigning: 'Maks stigning', gpx_snitt_stigning: 'Snitt stigning',
+    gpx_hoyde_havet: 'Høyde over havet',
+    malte_data: 'Målte data: ',
     gpx_merknad: 'ℹ️ Stigningsdata er beregnet fra GPS-høyder. Grenseverdiene er justert for å ta høyde for GPS-unøyaktighet.',
     // Spørsmål
     sporsmal_tittel: 'Tilleggsinformasjon', ja: 'Ja', nei: 'Nei', vet_ikke: 'Vet ikke',
@@ -550,6 +552,40 @@ const TEKST = {
     gpx_fil_tittel: 'Last opp GPX-fil',
     gpx_fil_hint: '.gpx fra Garmin, Strava, Komoot, UT.no osv.',
     legg_til_sone_btn: '+ Legg til sone / område',
+    upload_tittel: 'Ta bilde eller velg fra bibliotek',
+    upload_hint: 'Alle bilder kan analyseres individuelt',
+    notat_label: 'Egne notater (valgfritt)',
+    notat_ph: 'Ekstra observasjoner eller beskrivelse...',
+    analyserer_bilde: 'Analyserer...',
+    velg_type_forst: '⚠️ Velg type på forrige side først.',
+    ved_ankomst: '📍 Ved ankomst',
+    ovrig: '📋 Øvrig',
+    menneskelig_gjennomgang: '👤 Menneskelig gjennomgang',
+    chat_allergi: 'Hva med allergi?',
+    chat_kollektivt: 'Kollektivtransport til stedet?',
+    godkjent_av_prefix: 'Godkjent av ',
+    guide_badge: 'AccessNorway · Tilgjengelighetsguide',
+    guide_rediger_helhet: '✏️ Rediger helhetsinntrykket',
+    guide_lagre: 'Lagre',
+    feil_skriv_navn: 'Skriv inn ditt navn for å godkjenne.',
+    gps_ikke_tilgjengelig: 'GPS er ikke tilgjengelig i denne nettleseren',
+    gps_avslatt: 'Tilgang til posisjon ble avslått — fyll inn manuelt',
+    gps_oppdater: 'Posisjon hentet — trykk for å oppdatere',
+    chat_feil: 'Beklager, kunne ikke svare nå.',
+    ukjent_sted: 'Ukjent sted',
+    ukjent_fylke: 'Ukjent fylke',
+    kjorer_analyse: 'Kjører AI-analyse per sone...',
+    chat_hvis_ikke: 'Hvis du ikke vet svaret, si det ærlig.',
+    stigning_egnet: '✅ Egnet for rullestol og rullator.',
+    stigning_krevende: '🟡 Krevende for manuell rullestol — elektrisk rullestol kan egne seg.',
+    stigning_bratt_gange: '⚠️ For bratt for de fleste rullestoler. Egnet for gående med god gangfunksjon.',
+    stigning_bratt: '🔴 Svært bratt — krevende tur. Krever god fysisk form.',
+    kjoretoy_egnet: '✅ Terrenget er egnet for kjøretøy og slede. Deltakere sitter under hele turen — god gangevne er ikke nødvendig.',
+    kjoretoy_krevende: '🟡 Krevende terreng for kjøretøy. Vær oppmerksom på stigninger — avklar med guide om det er egnet for din situasjon.',
+    kjoretoy_bratt: '⚠️ Bratt terreng. Krevende for kjøretøy og dyr — avklar med guide før bestilling.',
+    vann_flat: '✅ Flat adkomst til vannet. Egnet for de fleste — deltakere sitter i båt eller kajak under turen.',
+    vann_stigning: '🟡 Noe stigning til/fra vannet. Avklar om assistanse er tilgjengelig ved inn- og utstigning.',
+    vann_krevende: '⚠️ Krevende adkomst til vannet. Avklar med arrangør om tilrettelagt utstigning finnes.',
     // Side 2 — Spørsmål
     side2_tittel: 'Tilleggsspørsmål',
     side2_desc: 'Spørsmål om ting AI-en ikke kan se på bilder.',
@@ -627,6 +663,8 @@ const TEKST = {
     gpx_last_opp: 'Upload GPX file', gpx_analyserer: 'Analysing GPX…',
     gpx_distanse: 'Distance', gpx_hoyde: 'Elevation',
     gpx_maks_stigning: 'Max slope', gpx_snitt_stigning: 'Avg slope',
+    gpx_hoyde_havet: 'Elevation above sea level',
+    malte_data: 'Measured data: ',
     gpx_merknad: 'ℹ️ Slope data is calculated from GPS elevation. Thresholds are adjusted to account for GPS inaccuracy.',
     // Questions
     sporsmal_tittel: 'Additional information', ja: 'Yes', nei: 'No', vet_ikke: "Don't know",
@@ -681,6 +719,40 @@ const TEKST = {
     gpx_fil_tittel: 'Upload GPX file',
     gpx_fil_hint: '.gpx from Garmin, Strava, Komoot, UT.no etc.',
     legg_til_sone_btn: '+ Add zone / area',
+    upload_tittel: 'Take photo or choose from library',
+    upload_hint: 'All images can be analysed individually',
+    notat_label: 'Your notes (optional)',
+    notat_ph: 'Extra observations or description...',
+    analyserer_bilde: 'Analysing...',
+    velg_type_forst: '⚠️ Please select type on the previous page first.',
+    ved_ankomst: '📍 On arrival',
+    ovrig: '📋 Other',
+    menneskelig_gjennomgang: '👤 Human review',
+    chat_allergi: 'What about allergies?',
+    chat_kollektivt: 'Public transport to the venue?',
+    godkjent_av_prefix: 'Approved by ',
+    guide_badge: 'AccessNorway · Accessibility Guide',
+    guide_rediger_helhet: '✏️ Edit overall impression',
+    guide_lagre: 'Save',
+    feil_skriv_navn: 'Please enter your name to approve.',
+    gps_ikke_tilgjengelig: 'GPS is not available in this browser',
+    gps_avslatt: 'Location access denied — please fill in manually',
+    gps_oppdater: 'Location detected — tap to update',
+    chat_feil: 'Sorry, could not respond right now.',
+    ukjent_sted: 'Unknown location',
+    ukjent_fylke: 'Unknown county',
+    kjorer_analyse: 'Running AI analysis per zone...',
+    chat_hvis_ikke: 'If you do not know the answer, say so honestly.',
+    stigning_egnet: '✅ Suitable for wheelchair and walker.',
+    stigning_krevende: '🟡 Demanding for manual wheelchair — electric wheelchair may be suitable.',
+    stigning_bratt_gange: '⚠️ Too steep for most wheelchairs. Suitable for those with good walking ability.',
+    stigning_bratt: '🔴 Very steep — demanding route. Requires good physical fitness.',
+    kjoretoy_egnet: '✅ Terrain is suitable for vehicles and sleds. Participants sit throughout — walking ability is not required.',
+    kjoretoy_krevende: '🟡 Demanding terrain for vehicles. Be aware of slopes — check with guide whether it suits your situation.',
+    kjoretoy_bratt: '⚠️ Steep terrain. Demanding for vehicles and animals — check with guide before booking.',
+    vann_flat: '✅ Flat access to the water. Suitable for most — participants sit in a boat or kayak throughout.',
+    vann_stigning: '🟡 Some slope to/from the water. Check whether assistance is available for entry and exit.',
+    vann_krevende: '⚠️ Demanding access to the water. Check with the organiser whether adapted entry is available.',
     side2_tittel: 'Additional questions',
     side2_desc: 'Questions about things the AI cannot see in images.',
     side3_tittel: 'Accessibility profile',
@@ -755,6 +827,8 @@ const TEKST = {
     gpx_last_opp: 'Subir archivo GPX', gpx_analyserer: 'Analizando GPX…',
     gpx_distanse: 'Distancia', gpx_hoyde: 'Altitud',
     gpx_maks_stigning: 'Pendiente máx.', gpx_snitt_stigning: 'Pendiente media',
+    gpx_hoyde_havet: 'Altitud sobre el nivel del mar',
+    malte_data: 'Datos medidos: ',
     gpx_merknad: 'ℹ️ Los datos de pendiente se calculan a partir de altitudes GPS. Los umbrales están ajustados para compensar la imprecisión del GPS.',
     // Preguntas
     sporsmal_tittel: 'Información adicional', ja: 'Sí', nei: 'No', vet_ikke: 'No sé',
@@ -834,6 +908,40 @@ const TEKST = {
     gpx_fil_tittel: 'Subir archivo GPX',
     gpx_fil_hint: '.gpx de Garmin, Strava, Komoot, UT.no etc.',
     legg_til_sone_btn: '+ Añadir zona / área',
+    upload_tittel: 'Tomar foto o elegir de la biblioteca',
+    upload_hint: 'Todas las imágenes se pueden analizar individualmente',
+    notat_label: 'Tus notas (opcional)',
+    notat_ph: 'Observaciones adicionales o descripción...',
+    analyserer_bilde: 'Analizando...',
+    velg_type_forst: '⚠️ Seleccione el tipo en la página anterior primero.',
+    ved_ankomst: '📍 A la llegada',
+    ovrig: '📋 Otros',
+    menneskelig_gjennomgang: '👤 Revisión humana',
+    chat_allergi: '¿Qué hay de las alergias?',
+    chat_kollektivt: '¿Transporte público al lugar?',
+    godkjent_av_prefix: 'Aprobado por ',
+    guide_badge: 'AccessNorway · Guía de accesibilidad',
+    guide_rediger_helhet: '✏️ Editar impresión general',
+    guide_lagre: 'Guardar',
+    feil_skriv_navn: 'Por favor introduzca su nombre para aprobar.',
+    gps_ikke_tilgjengelig: 'GPS no disponible en este navegador',
+    gps_avslatt: 'Acceso a ubicación denegado — rellene manualmente',
+    gps_oppdater: 'Ubicación detectada — toque para actualizar',
+    chat_feil: 'Lo sentimos, no se pudo responder ahora.',
+    ukjent_sted: 'Lugar desconocido',
+    ukjent_fylke: 'Provincia desconocida',
+    kjorer_analyse: 'Ejecutando análisis IA por zona...',
+    chat_hvis_ikke: 'Si no sabe la respuesta, dígalo con sinceridad.',
+    stigning_egnet: '✅ Apto para silla de ruedas y andador.',
+    stigning_krevende: '🟡 Exigente para silla de ruedas manual — la silla eléctrica puede ser adecuada.',
+    stigning_bratt_gange: '⚠️ Demasiado empinado para la mayoría de sillas de ruedas. Apto para personas con buena capacidad de marcha.',
+    stigning_bratt: '🔴 Muy empinado — recorrido exigente. Requiere buena forma física.',
+    kjoretoy_egnet: '✅ El terreno es apto para vehículos y trineos. Los participantes están sentados durante todo el recorrido.',
+    kjoretoy_krevende: '🟡 Terreno exigente para vehículos. Atención a las pendientes — consulte con el guía si es adecuado para su situación.',
+    kjoretoy_bratt: '⚠️ Terreno empinado. Exigente para vehículos y animales — consulte con el guía antes de reservar.',
+    vann_flat: '✅ Acceso plano al agua. Apto para la mayoría — los participantes están sentados en bote o kayak durante el recorrido.',
+    vann_stigning: '🟡 Algo de pendiente hacia/desde el agua. Consulte si hay asistencia disponible para la entrada y salida.',
+    vann_krevende: '⚠️ Acceso difícil al agua. Consulte con el organizador si hay salida adaptada disponible.',
     side2_tittel: 'Preguntas adicionales',
     side2_desc: 'Preguntas sobre cosas que la IA no puede ver en las imágenes.',
     side3_tittel: 'Perfil de accesibilidad',
@@ -959,6 +1067,10 @@ var LABEL_MAP = {
     'Badeplass':'Swimming area','Utsiktspunkt':'Viewpoint',
     'HC-parkering / toalett':'Accessible parking / toilet',
     'Fellesgode / felles rom':'Public asset / shared space',
+    'Svømmebasseng':'Swimming pool','Transport til start':'Transport to start',
+    'Rasteplass på vann':'Rest area on water','Serveringssted':'Refreshment area',
+    'Rampe til vann':'Water ramp','WC i nærheten':'Nearby WC / toilet',
+    'Uten dun, parfyme, kjæledyr':'Without down, perfume, pets',
   },
   es: {
     // Tipos de negocio
@@ -1010,6 +1122,10 @@ var LABEL_MAP = {
     'Badeplass':'Zona de baño','Utsiktspunkt':'Mirador',
     'HC-parkering / toalett':'Aparcamiento accesible / aseo',
     'Fellesgode / felles rom':'Bien público / espacio compartido',
+    'Svømmebasseng':'Piscina','Transport til start':'Transporte al inicio',
+    'Rasteplass på vann':'Área de descanso en agua','Serveringssted':'Área de refrigerios',
+    'Rampe til vann':'Rampa al agua','WC i nærheten':'Aseo cercano',
+    'Uten dun, parfyme, kjæledyr':'Sin plumas, perfume, mascotas',
   }
 };
 
@@ -1521,25 +1637,25 @@ function gpxVurdering(maxSlope, type) {
 
   if (kjoretoyTyper.indexOf(type) >= 0) {
     // Hest, hundespann, sykkel, slede, sit-ski
-    if (maxSlope <= 12) return '&#9989; Terrenget er egnet for kjøretøy og slede. Deltakere sitter under hele turen &mdash; god gangevne er ikke nødvendig.';
-    if (maxSlope <= 20) return '&#128993; Krevende terreng for kjøretøy. Vær oppmerksom på stigninger &mdash; avklar med guide om det er egnet for din situasjon.';
-    return '&#9888; Bratt terreng. Krevende for kjøretøy og dyr &mdash; avklar med guide før bestilling.';
+    if (maxSlope <= 12) return T('kjoretoy_egnet');
+    if (maxSlope <= 20) return T('kjoretoy_krevende');
+    return T('kjoretoy_bratt');
   }
 
   if (vannsportTyper.indexOf(type) >= 0) {
     // Kajakkpadling, kano, båttur: stigningsgrad på adkomst til vannet
-    if (maxSlope <= 9)  return '&#9989; Flat adkomst til vannet. Egnet for de fleste &mdash; deltakere sitter i båt eller kajak under turen.';
-    if (maxSlope <= 15) return '&#128993; Noe stigning til/fra vannet. Avklar om assistanse er tilgjengelig ved inn- og utstigning.';
-    return '&#9888; Krevende adkomst til vannet. Avklar med arrangør om tilrettelagt utstigning finnes.';
+    if (maxSlope <= 9)  return T('vann_flat');
+    if (maxSlope <= 15) return T('vann_stigning');
+    return T('vann_krevende');
   }
 
   // Standard for gående (A, B1, C-stier)
   // Grenseverdier er justert opp ~4% for å kompensere for at GPS-høyder
   // typisk gir noe høyere maks-stigning enn faktisk terreng.
-  if (maxSlope <= 9)  return '&#9989; Egnet for rullestol og rullator.';
-  if (maxSlope <= 13) return '&#128993; Krevende for manuell rullestol &mdash; elektrisk rullestol kan egne seg.';
-  if (maxSlope <= 18) return '&#9888; For bratt for de fleste rullestoler. Egnet for gående med god gangfunksjon.';
-  return '&#128308; Svært bratt &mdash; krevende tur. Krever god fysisk form.';
+  if (maxSlope <= 9)  return T('stigning_egnet');
+  if (maxSlope <= 13) return T('stigning_krevende');
+  if (maxSlope <= 18) return T('stigning_bratt_gange');
+  return T('stigning_bratt');
 }
 
 function renderGpxResult(r) {
@@ -1550,7 +1666,7 @@ function renderGpxResult(r) {
     '<div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">GPX-analyse</div>'+
     '<div class="gpx-stats">'+
     '<div class="gpx-stat"><div class="gpx-stat-val">'+r.totalDist+' km</div><div class="gpx-stat-label">Distanse</div></div>'+
-    '<div class="gpx-stat"><div class="gpx-stat-val">&#8593;'+r.totalUp+'m &#8595;'+r.totalDown+'m</div><div class="gpx-stat-label">Høyde</div></div>'+
+    '<div class="gpx-stat"><div class="gpx-stat-val">&#8593;'+r.totalUp+'m &#8595;'+r.totalDown+'m</div><div class="gpx-stat-label">'+T('gpx_hoyde')+'</div></div>'+
     '<div class="gpx-stat '+slopeClass(r.maxSlope)+'"><div class="gpx-stat-val">'+r.maxSlope+'%</div><div class="gpx-stat-label">Maks stigning</div></div>'+
     '<div class="gpx-stat '+slopeClass(r.avgSlope)+'"><div class="gpx-stat-val">'+r.avgSlope+'%</div><div class="gpx-stat-label">Snitt stigning</div></div>'+
     '</div>'+
@@ -1571,7 +1687,7 @@ function buildZones() {
   var type = document.getElementById('biz-type').value;
   var config = TYPE_CONFIG[type];
   if (!config) {
-    document.getElementById('zones-container').innerHTML = '<div class="notice">⚠️ Velg type på forrige side først.</div>';
+    document.getElementById('zones-container').innerHTML = '<div class="notice" data-i18n="velg_type_forst">⚠️ Velg type på forrige side først.</div>';
     return;
   }
   document.getElementById('zones-title').textContent = TL(config.pageTitle);
@@ -1629,15 +1745,15 @@ function renderZoneCard(zone, idx) {
   return '<div class="zone-card" id="zone-card-'+idx+'">' +
     '<div class="zone-card-title">'+zone.icon+' '+TL(zone.label)+(zone.optional?'<span class="zone-optional">('+T('sone_valgfri')+')</span>':'')+'</div>' +
     '<div class="upload-zone"><input type="file" accept="image/*" multiple onchange="handleFiles(event,'+idx+')"/>' +
-    '<div class="upload-icon">📷</div><div class="upload-title">Ta bilde eller velg fra bibliotek</div>' +
-    '<div class="upload-hint">Alle bilder kan analyseres individuelt</div></div>' +
+    '<div class="upload-icon">📷</div><div class="upload-title">'+T('upload_tittel')+'</div>' +
+    '<div class="upload-hint">'+T('upload_hint')+'</div></div>' +
     (zone.images.length ? '<div class="image-preview">'+previewHtml+'</div>' : '') +
     (combinedAnalysis ? '<div class="ai-box visible"><div class="ai-header"><span>'+T('ai_analyse_label')+' ('+analyses.length+' '+(analyses.length>1?T('bilde_plural'):T('bilde_singular'))+')</span></div>' +
       '<div class="ai-text">'+combinedAnalysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div></div>' : '') +
-    '<div class="ai-box" id="ai-loading-'+idx+'" style="display:none"><div class="ai-header"><div class="ai-spinner on"></div><span>Analyserer...</span></div></div>' +
+    '<div class="ai-box" id="ai-loading-'+idx+'" style="display:none"><div class="ai-header"><div class="ai-spinner on"></div><span>'+T('analyserer_bilde')+'</span></div></div>' +
     (zone.extraFields.length ? '<div style="margin-top:1rem">'+extraFieldsHtml+'</div>' : '') +
-    '<div class="field" style="margin-top:.75rem"><label class="field-label">Egne notater (valgfritt)</label>' +
-    '<textarea placeholder="Ekstra observasjoner eller beskrivelse..." oninput="state.zones['+idx+'].note=this.value">'+( zone.note||'')+'</textarea></div>' +
+    '<div class="field" style="margin-top:.75rem"><label class="field-label">'+T('notat_label')+'</label>' +
+    '<textarea placeholder="'+T('notat_ph')+'" oninput="state.zones['+idx+'].note=this.value">'+( zone.note||'')+'</textarea></div>' +
     '</div>';
 }
 
@@ -1775,9 +1891,9 @@ function startGenerer() {
 }
 
 async function buildRapport() {
-  document.getElementById('spinner-tekst').textContent = 'Genererer tilgjengelighetsguide...';
+  document.getElementById('spinner-tekst').textContent = T('rapport_genererer');
   await buildGuide();
-  document.getElementById('spinner-tekst').textContent = 'Kjører AI-analyse per sone...';
+  document.getElementById('spinner-tekst').textContent = T('kjorer_analyse');
   await buildAnalyse();
   document.getElementById('generer-spinner').style.display = 'none';
   // Render GPX Leaflet-kart etter at DOM er oppdatert
@@ -1825,7 +1941,7 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
 
 async function buildGuide() {
   var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'es' ? 'español' : 'norsk';
-  var name = document.getElementById('biz-name').value || 'Ukjent sted';
+  var name = document.getElementById('biz-name').value || T('ukjent_sted');
   var type = document.getElementById('biz-type').value;
   var config = TYPE_CONFIG[type];
   var addr = document.getElementById('biz-address').value;
@@ -1849,7 +1965,7 @@ async function buildGuide() {
       '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.totalDist+' km</div><div class="guide-gpx-stat-label">Distanse</div></div>' +
       '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">&#8593;'+r.totalUp+'m</div><div class="guide-gpx-stat-label">Stigning opp</div></div>' +
       '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.maxSlope+'%</div><div class="guide-gpx-stat-label">Maks stigning</div></div>' +
-      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.minEle+'&#8211;'+r.maxEle+'m</div><div class="guide-gpx-stat-label">Høyde over havet</div></div>' +
+      '<div class="guide-gpx-stat"><div class="guide-gpx-stat-val">'+r.minEle+'&#8211;'+r.maxEle+'m</div><div class="guide-gpx-stat-label">'+T('gpx_hoyde')+'</div></div>' +
       '</div>' +
       '<div style="margin-top:10px;font-size:13px;color:var(--text2)">'+vurdering+'</div>' +
       _legendHtml +
@@ -1878,7 +1994,7 @@ async function buildGuide() {
 
     if (alleAnalyser || malInfo) {
       try {
-        var kontekst = [alleAnalyser, malInfo?'Målte data: '+malInfo:''].filter(Boolean).join('\n');
+        var kontekst = [alleAnalyser, malInfo?T('malte_data')+malInfo:''].filter(Boolean).join('\n');
         var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:200,messages:[{role:'user',
             content:'Du skriver tilgjengelighetsguide for "'+name+'". Basert på '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på '+spraakNavn+' om hva gjesten finner her. Beskriv fakta — ikke vurder om det er bra eller dårlig. La gjesten selv avgjøre om det passer for dem. Unngå ord som "dessverre", "mangelfull", "ikke egnet" og lignende. Avslutt med STATUS:GRONN (fungerer for de fleste), STATUS:GUL (fungerer for noen — avhenger av behov) eller STATUS:ROD (begrenset fremkommelighet — beskriv hva).'}]})});
@@ -1951,7 +2067,7 @@ async function buildGuide() {
 
     var banner = document.createElement('div');
     banner.className = 'edit-mode-banner';
-    banner.textContent = '✏️ Rediger helhetsinntrykket';
+    banner.textContent = T('guide_rediger_helhet');
     editPanel.appendChild(banner);
 
     var toggleRow = document.createElement('div');
@@ -1989,9 +2105,9 @@ async function buildGuide() {
   }
 
   var sonerHtml = profilAnalyseHtml +
-    (ankomstHtml ? '<div class="guide-section"><div class="guide-section-title">📍 Ved ankomst</div>'+ankomstHtml+'</div>' : '') +
+    (ankomstHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('ved_ankomst')+'</div>'+ankomstHtml+'</div>' : '') +
     (oppholdHtml ? '<div class="guide-section"><div class="guide-section-title">🏠 Under oppholdet</div>'+oppholdHtml+'</div>' : '') +
-    (annetHtml ? '<div class="guide-section"><div class="guide-section-title">📋 Øvrig</div>'+annetHtml+'</div>' : '');
+    (annetHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('ovrig')+'</div>'+annetHtml+'</div>' : '');
 
   var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
   var jaItems = '';
@@ -2010,7 +2126,7 @@ async function buildGuide() {
       '</div>' +
       '<div id="edit-tjeneste-'+id+'" style="display:none;padding:6px 0 10px;border-bottom:1px solid var(--border)">' +
         '<textarea class="sone-edit-area" id="edit-tjeneste-ta-'+id+'" rows="2" style="font-size:13px">'+utsagnTekst+'</textarea>' +
-        '<button class="tjeneste-save-btn" data-tjeneste-id="'+id+'" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:13px;font-family:inherit;font-weight:600;cursor:pointer;margin-top:5px">Lagre</button>' +
+        '<button class="tjeneste-save-btn" data-tjeneste-id="'+id+'" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:7px 14px;font-size:13px;font-family:inherit;font-weight:600;cursor:pointer;margin-top:5px">'+T('guide_lagre')+'</button>' +
         '<button class="tjeneste-avbryt-btn" data-tjeneste-id="'+id+'" style="background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;margin-left:8px">Avbryt</button>' +
       '</div>';
   }
@@ -2039,7 +2155,7 @@ async function buildGuide() {
     '<div class="guide-hero">' +
     ((state.profilbilde && state.profilbilde.dataUrl) ? '<img class="guide-hero-img" src="'+state.profilbilde.dataUrl+'" alt="'+name+'"/>' : firstImg ? '<img class="guide-hero-img" src="'+firstImg.dataUrl+'" alt="'+name+'"/>' : '') +
     '<div class="guide-hero-body">' +
-    '<div class="guide-hero-badge">AccessNorway · Tilgjengelighetsguide</div>' +
+    '<div class="guide-hero-badge">'+T('guide_badge')+'</div>' +
     '<div class="guide-hero-name">'+name+'</div>' +
     '<div class="guide-hero-type">'+(config?config.label:'')+'</div>' +
     '<div class="guide-hero-meta">'+metaPills+'</div>' +
@@ -2054,7 +2170,7 @@ async function buildGuide() {
     '<div class="chat-suggestions">' +
     '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Passer det for rullestol?\')">Passer for rullestol?</button>' +
     '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Finnes det HC-parkering?\')">Finnes HC-parkering?</button>' +
-    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Hva med allergi?\')">Hva med allergi?</button>' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Hva med allergi?\')">'+T('chat_allergi')+'</button>' +
     '</div>' +
     '<div class="chat-input-row">' +
     '<input type="text" class="chat-input" id="guide-chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key===\'Enter\')sendGuideChatMsg()"/>' +
@@ -2063,7 +2179,7 @@ async function buildGuide() {
     '<div class="edit-mode-banner">✏️ <span>Gjennomgå og rediger teksten før du godkjenner guiden. Klikk <strong>Rediger</strong> på hver sone.</span></div>' +
 
     '<div class="godkjenn-bar" id="godkjenn-bar">' +
-    '<div class="godkjenn-title">👤 Menneskelig gjennomgang</div>' +
+    '<div class="godkjenn-title">'+T('menneskelig_gjennomgang')+'</div>' +
     '<div class="godkjenn-desc">Les gjennom teksten over og gjør eventuelle rettelser. Når du er fornøyd, godkjenn guiden med ditt navn.</div>' +
     '<div class="godkjenn-fields">' +
     '<input type="text" id="godkjenn-navn" placeholder="Ditt fulle navn..." style="width:100%;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:16px;font-family:inherit;outline:none"/>' +
@@ -2089,7 +2205,7 @@ async function buildGuide() {
 async function buildAnalyse() {
   var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'es' ? 'español' : 'norsk';
   var container = document.getElementById('tab-content-analyse');
-  var name = document.getElementById('biz-name').value || 'Ukjent sted';
+  var name = document.getElementById('biz-name').value || T('ukjent_sted');
   var type = document.getElementById('biz-type').value;
   var config = TYPE_CONFIG[type];
   var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
@@ -2106,7 +2222,7 @@ async function buildAnalyse() {
     var gjesteTekst = '', status = 'ukjent';
     if (alleAnalyser || malInfo || zone.note) {
       try {
-        var kontekst = [alleAnalyser, malInfo?'Målte data: '+malInfo:'', zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
+        var kontekst = [alleAnalyser, malInfo?T('malte_data')+malInfo:'', zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
         var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',
             content:'Du skriver tilgjengelighetsprofil for "'+name+'" som gjester skal lese. Basert på: '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på '+spraakNavn+' som forteller gjesten konkret hva som finnes. Beskriv fakta — ikke vurder om det er bra eller dårlig. Unngå ord som "dessverre", "mangelfull", "ikke egnet". La gjesten selv avgjøre om det passer for dem. Avslutt med: STATUS:GRONN (fungerer for de fleste), STATUS:GUL (avhenger av behov) eller STATUS:ROD (begrenset — beskriv hva).'}]})});
@@ -2160,7 +2276,7 @@ async function buildAnalyse() {
   var gpxInfo = state.gpxData ? 'GPX: '+state.gpxData.totalDist+'km, maks stigning '+state.gpxData.maxSlope+'%, snitt '+state.gpxData.avgSlope+'%' : '';
   window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?TL(config.label):type)+'). Svar på '+spraakNavn+', vennlig og konkret.\n\n'+
     (gpxInfo?'RUTE:\n'+gpxInfo+'\n\n':'')+'FASILITETER:\n'+(soneInfo||T('ikke_registrert'))+'\n\nTILLEGGSINFO:\n'+(svarInfo||T('ikke_registrert'))+
-    '\n\nHvis du ikke vet svaret, si det ærlig.';
+    '\n\n'+T('chat_hvis_ikke');
   state.chatHistory = [];
 
   container.innerHTML =
@@ -2173,7 +2289,7 @@ async function buildAnalyse() {
     '<div class="chat-suggestions">' +
     '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer for rullestol?</button>' +
     '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Finnes HC-parkering?</button>' +
-    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Hva med allergi?</button>' +
+    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_allergi')+'</button>' +
     '</div>' +
     '<div class="chat-input-row">' +
     '<input type="text" class="chat-input" id="chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key===\'Enter\')sendChat()"/>' +
@@ -2196,7 +2312,7 @@ async function sendChat() {
       body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:(window._chatKontekst||'')+'\n\n'+hist}]})});
     var data = await res.json();
     var el = document.getElementById(loadingId); if (el) el.remove();
-    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : 'Beklager, kunne ikke svare nå.';
+    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : T('chat_feil');
     state.chatHistory.push({role:'assistant',content:svar});
     appendChatMsg(svar, 'bot');
   } catch(err) {
@@ -2225,7 +2341,7 @@ async function sendGuideChatMsg(msg) {
       body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:250,messages:[{role:'user',content:(window._guideChatKontekst||'')+'\n\n'+hist}]})});
     var data = await res.json();
     var el = document.getElementById(loadId); if (el) el.remove();
-    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : 'Beklager, kunne ikke svare nå.';
+    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : T('chat_feil');
     window._guideChatHistory.push({role:'assistant',content:svar});
     var rDiv = document.createElement('div'); rDiv.className='chat-msg bot'; rDiv.innerHTML='<div class="chat-bubble">'+svar+'</div>'; msgs.appendChild(rDiv);
     msgs.scrollTop = msgs.scrollHeight;
@@ -2418,7 +2534,7 @@ async function sendTilAPI(payload) {
 
 function godkjennGuide() {
   var navn = document.getElementById('godkjenn-navn').value.trim();
-  if (!navn) { alert('Skriv inn ditt navn for å godkjenne.'); return; }
+  if (!navn) { alert(T('feil_skriv_navn')); return; }
   godkjentAv = navn;
   godkjentTidspunkt = new Date();
 
@@ -2431,7 +2547,7 @@ function godkjennGuide() {
   document.getElementById('godkjenn-bar').style.display = 'none';
   document.getElementById('godkjent-badge').style.display = 'flex';
   document.getElementById('godkjent-badge').innerHTML =
-    '✅ <strong>Godkjent av '+navn+'</strong> · '+godkjentTidspunkt.toLocaleString('nb-NO');
+    '✅ <strong>'+T('godkjent_av_prefix')+navn+'</strong> · '+godkjentTidspunkt.toLocaleString('nb-NO');
   // Skjul alle rediger-knapper
   var editBtns = document.querySelectorAll('.sone-edit-btn');
   editBtns.forEach(function(btn) { btn.style.display='none'; });
@@ -2481,7 +2597,7 @@ function hentPosisjon() {
   var label = document.getElementById('gps-label');
   var icon = document.getElementById('gps-icon');
   if (!navigator.geolocation) {
-    visGeoFeil('GPS er ikke tilgjengelig i denne nettleseren');
+    visGeoFeil(T('gps_ikke_tilgjengelig'));
     return;
   }
   label.textContent = T('gps_henter');
@@ -2491,9 +2607,9 @@ function hentPosisjon() {
     function(pos) { reverseGeocode(pos.coords.latitude, pos.coords.longitude); },
     function(err) {
       btn.disabled = false;
-      label.textContent = 'Hent posisjon automatisk';
+      label.textContent = T('geo_btn');
       icon.textContent = '📍';
-      var msg = err.code === 1 ? 'Tilgang til posisjon ble avslått — fyll inn manuelt' :
+      var msg = err.code === 1 ? T('gps_avslatt') :
                 err.code === 2 ? T('gps_feil_posisjon') :
                 'Tidsavbrudd — fyll inn manuelt';
       visGeoFeil(msg);
@@ -2542,7 +2658,7 @@ async function reverseGeocode(lat, lon) {
     lagreStedsprofil();
   } catch(err) {
     btn.disabled = false;
-    label.textContent = 'Hent posisjon automatisk';
+    label.textContent = T('geo_btn');
     icon.textContent = '📍';
     visGeoFeil(T('gps_feil_sted'));
     visManuelleGeoFelt();
@@ -2604,7 +2720,7 @@ function visGeoResultat(kommune, fylke, region) {
 
   var items = [
     { label: '📍 ' + (kommune || 'Ukjent kommune'), field: 'kommune', onclick: function(){ visManuelleGeoFelt('biz-kommune'); }},
-    { label: '🗺️ ' + (fylke || 'Ukjent fylke'), field: 'fylke', onclick: function(){ openFylkeModal(); visManuelleGeoFelt(); }},
+    { label: '🗺️ ' + (fylke || T('ukjent_fylke')), field: 'fylke', onclick: function(){ openFylkeModal(); visManuelleGeoFelt(); }},
     { label: '📊 ' + (region || '— Velg region'), field: 'region', onclick: function(){ openRegionModal(); visManuelleGeoFelt(); }}
   ];
 
@@ -2626,7 +2742,7 @@ function visGeoResultat(kommune, fylke, region) {
   resultat.style.display = 'block';
   // Update GPS button to show success state
   document.getElementById('gps-icon').textContent = '✅';
-  document.getElementById('gps-label').textContent = 'Posisjon hentet — trykk for å oppdatere';
+  document.getElementById('gps-label').textContent = T('gps_oppdater');
   document.getElementById('gps-btn').disabled = false;
 }
 
