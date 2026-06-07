@@ -247,10 +247,11 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.2</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.4</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
+    <button class="lang-btn" data-lang="es" onclick="byttSpraak('es')">ES</button>
     <div style="display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.4);margin-left:4px">
       <span class="api-dot"></span><span id="ai-status-txt">AI aktiv</span>
     </div>
@@ -463,7 +464,10 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.2';
+const APP_VERSION = 'v0.4.4';
+
+// State må deklareres før TEKST/T() siden T() leser state.lang
+const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
 
 // ── Flerspråklig støtte ───────────────────────────────────────────────────
 // Legg til nye språk ved å kopiere 'no'-blokken og oversette verdiene.
@@ -509,6 +513,32 @@ const TEKST = {
     steg_neste_start: 'Start kartlegging →',
     steg_neste_sporsmal: 'Neste: Spørsmål →',
     steg_neste_rapport: 'Se rapport →',
+    // Rapport-generering
+    rapport_genererer: 'Genererer tilgjengelighetsguide...',
+    rapport_genererer_ai: 'Genererer AI-rapport...',
+    rapport_fullfort: 'AI-analyse fullført',
+    rapport_fullfort_desc: 'Detaljert tilgjengelighetsvurdering per sone.',
+    rapport_generer_btn: '✨ Generer tilgjengelighetsguide',
+    // Bilder / analyse
+    ai_analyse_label: 'AI-analyse',
+    ai_kunne_ikke: 'Kunne ikke analysere dette bildet.',
+    bilde_singular: 'bilde', bilde_plural: 'bilder',
+    analysert: '✓ Analysert',
+    // GPS
+    gps_henter: 'Henter posisjon...',
+    gps_feil_posisjon: 'Kunne ikke finne posisjon — fyll inn manuelt',
+    gps_feil_sted: 'Kunne ikke hente stedsinfo — fyll inn manuelt',
+    gps_juster_fylke: ' — juster fylke ved behov',
+    // Soner
+    legg_til_sone_tittel: 'Legg til sone / område',
+    sone_valgfri: 'valgfri',
+    sone_rediger: '✏️ Rediger',
+    sone_lukk: '✓ Lukk',
+    sone_lagre: 'Lagre endringer',
+    // Spørsmål
+    vet_ikke_btn: 'Vet ikke',
+    ikke_registrert: 'Ikke registrert',
+    ikke_vurdert: 'Ikke vurdert',
     // Status
     ai_aktiv: 'AI aktiv',
     status_gronn: 'Tilgjengelig',
@@ -555,11 +585,109 @@ const TEKST = {
     steg_neste_start: 'Start mapping →',
     steg_neste_sporsmal: 'Next: Questions →',
     steg_neste_rapport: 'View report →',
+    // Report generation
+    rapport_genererer: 'Generating accessibility guide...',
+    rapport_genererer_ai: 'Generating AI report...',
+    rapport_fullfort: 'AI analysis complete',
+    rapport_fullfort_desc: 'Detailed accessibility assessment per zone.',
+    rapport_generer_btn: '✨ Generate accessibility guide',
+    // Images / analysis
+    ai_analyse_label: 'AI analysis',
+    ai_kunne_ikke: 'Could not analyse this image.',
+    bilde_singular: 'image', bilde_plural: 'images',
+    analysert: '✓ Analysed',
+    // GPS
+    gps_henter: 'Detecting location...',
+    gps_feil_posisjon: 'Could not detect location — please fill in manually',
+    gps_feil_sted: 'Could not retrieve location info — please fill in manually',
+    gps_juster_fylke: ' — adjust county if needed',
+    // Zones
+    legg_til_sone_tittel: 'Add zone / area',
+    sone_valgfri: 'optional',
+    sone_rediger: '✏️ Edit',
+    sone_lukk: '✓ Close',
+    sone_lagre: 'Save changes',
+    // Questions
+    vet_ikke_btn: "Don't know",
+    ikke_registrert: 'Not registered',
+    ikke_vurdert: 'Not assessed',
     // Status
     ai_aktiv: 'AI active',
     status_gronn: 'Accessible',
     status_gul: 'Partially accessible',
     status_rod: 'Limited access',
+  }
+  ,
+  es: {
+    // Navegación
+    neste: 'Siguiente', tilbake: 'Atrás', hopp_over: 'Omitir',
+    steg_sted: 'Lugar', steg_fasiliteter: 'Instalaciones',
+    steg_sporsmal: 'Preguntas', steg_rapport: 'Informe',
+    // Paso 1 — Lugar
+    sted_tittel: 'Sobre el lugar', sted_navn_label: 'Nombre del lugar / negocio',
+    sted_navn_ph: 'P.ej. Centro Deportivo de Salud Beitostølen',
+    sted_type_label: 'Tipo de negocio', sted_velg_type: 'Seleccionar tipo…',
+    sted_adresse_label: 'Dirección', sted_adresse_ph: 'Calle, código postal, ciudad',
+    sted_dest_label: 'Destino / organización Visit',
+    sted_kontakt_label: 'Correo electrónico de contacto',
+    sted_gps_btn: '📍 Detectar ubicación automáticamente',
+    sted_gps_laster: 'Detectando ubicación…',
+    // Imágenes y análisis
+    last_opp: 'Subir imagen', analyser: 'Analizar',
+    analyserer: 'Analizando…', legg_til_sone: 'Añadir zona',
+    mal_ta: 'Medir con iPhone', mal_lagre: 'Guardar medidas',
+    // GPX
+    gpx_last_opp: 'Subir archivo GPX', gpx_analyserer: 'Analizando GPX…',
+    gpx_distanse: 'Distancia', gpx_hoyde: 'Altitud',
+    gpx_maks_stigning: 'Pendiente máx.', gpx_snitt_stigning: 'Pendiente media',
+    gpx_merknad: 'ℹ️ Los datos de pendiente se calculan a partir de altitudes GPS. Los umbrales están ajustados para compensar la imprecisión del GPS.',
+    // Preguntas
+    sporsmal_tittel: 'Información adicional', ja: 'Sí', nei: 'No', vet_ikke: 'No sé',
+    // Informe
+    rapport_tittel: 'Guía de accesibilidad',
+    rapport_helhetsinntrykk: 'Impresión general',
+    rapport_godkjenn_label: 'Nombre del inspector',
+    rapport_godkjenn_ph: 'Tu nombre',
+    rapport_godkjenn_btn: 'Aprobar y bloquear guía',
+    rapport_godkjent: 'Aprobado por',
+    rapport_last_ned: '⬇ Descargar guía',
+    rapport_rediger: '✏️ Editar',
+    rapport_lagre: 'Guardar',
+    rapport_avbryt: 'Cancelar',
+    rapport_genererer: 'Generando guía de accesibilidad...',
+    rapport_genererer_ai: 'Generando informe IA...',
+    rapport_fullfort: 'Análisis IA completado',
+    rapport_fullfort_desc: 'Evaluación detallada de accesibilidad por zona.',
+    rapport_generer_btn: '✨ Generar guía de accesibilidad',
+    // Imágenes / análisis
+    ai_analyse_label: 'Análisis IA',
+    ai_kunne_ikke: 'No se pudo analizar esta imagen.',
+    bilde_singular: 'imagen', bilde_plural: 'imágenes',
+    analysert: '✓ Analizado',
+    // GPS
+    gps_henter: 'Detectando ubicación...',
+    gps_feil_posisjon: 'No se pudo detectar la ubicación — rellene manualmente',
+    gps_feil_sted: 'No se pudo obtener información del lugar — rellene manualmente',
+    gps_juster_fylke: ' — ajuste la provincia si es necesario',
+    // Zonas
+    legg_til_sone_tittel: 'Añadir zona / área',
+    sone_valgfri: 'opcional',
+    sone_rediger: '✏️ Editar',
+    sone_lukk: '✓ Cerrar',
+    sone_lagre: 'Guardar cambios',
+    // Preguntas
+    vet_ikke_btn: 'No sé',
+    ikke_registrert: 'No registrado',
+    ikke_vurdert: 'No evaluado',
+    // Navegación de pasos
+    steg_neste_start: 'Iniciar inspección →',
+    steg_neste_sporsmal: 'Siguiente: Preguntas →',
+    steg_neste_rapport: 'Ver informe →',
+    // Estado
+    ai_aktiv: 'IA activa',
+    status_gronn: 'Accesible',
+    status_gul: 'Parcialmente accesible',
+    status_rod: 'Acceso limitado',
   }
 };
 
@@ -580,7 +708,118 @@ function byttSpraak(lang) {
   // Re-render gjeldende steg
   goTo(state.step);
 }
-const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
+
+// Oversettelse av TYPE_CONFIG labels og sone-navn
+// Legg til nye språk ved å kopiere en eksisterende språkblokk
+var LABEL_MAP = {
+  en: {
+    // Virksomhetstyper
+    'Hotell':'Hotel','Hytte / leilighet':'Cabin / apartment',
+    'Restaurant / servering':'Restaurant / café','Aktivitetsbedrift':'Activity provider',
+    'Idrettsanlegg':'Sports facility','Camping':'Camping',
+    'Annet (bygg)':'Other (building)','Annet (fellesgode)':'Other (public asset)',
+    'B1 — Guidet tur / friluftsliv':'B1 — Guided tour / outdoor',
+    'B2 — Vannsport og padling':'B2 — Water sports / paddling',
+    'B3 — Kjøretøy og dyr':'B3 — Vehicle and animal activities',
+    'B4 — Tilpassede naturopplevelser':'B4 — Adapted nature experiences',
+    'Tursti / natursti':'Hiking trail','Sykkelløype':'Cycling route',
+    'Skiløype':'Ski trail','Badeplass':'Swimming area',
+    'Utsiktspunkt / attraksjon':'Viewpoint / attraction',
+    'HC-parkering / toalett i utmark':'Accessible parking / outdoor toilet',
+    'Parkering':'Parking','Parkering / innkjøring':'Parking / entrance',
+    'Parkering ved start':'Parking at start','Inngang':'Entrance',
+    'Inngang / resepsjon':'Entrance / reception','Resepsjon':'Reception',
+    'Mottakelse':'Reception desk','Mottakelse / resepsjon':'Reception / front desk',
+    'Hotellrom':'Hotel room','Bad':'Bathroom','WC':'WC / toilet',
+    'WC / garderobe':'WC / changing room','Tilpasset toalett':'Accessible toilet',
+    'HC-toalett':'Accessible toilet','Spisesal':'Dining room',
+    'Spisebord':'Dining table','Bar':'Bar','Heis':'Lift / elevator',
+    'Stue':'Living room','Kjøkken':'Kitchen','Soverom':'Bedroom',
+    'Konferanserom':'Conference room','Skilting innendørs':'Indoor signage',
+    'Aktivitetsområde':'Activity area','Tilrettelagt garderobe':'Accessible changing room',
+    'Toalett':'Toilet','Toalett / garderobe':'Toilet / changing room',
+    'Startpunkt':'Starting point','Møtepunkt / startsted':'Meeting point / start',
+    'Underlag og sti':'Trail surface','Underlag og løype':'Route surface',
+    'Terreng':'Terrain','Terreng / underlag':'Terrain / surface',
+    'Terreng / løype / underlag':'Terrain / route / surface',
+    'Løypetrase':'Route track','Adkomst':'Access route',
+    'Adkomst til vannet':'Access to water','Inn/ut av vannet':'Water entry/exit',
+    'Utleiested / base':'Rental base','Utleiested / stall / base':'Rental / stable / base',
+    'Utstyr':'Equipment','Utstyr og tilpasning':'Equipment and adaptation',
+    'Utstyr og dyr':'Equipment and animals','Tilpasset spesialutstyr':'Adapted equipment',
+    'Sanitæranlegg':'Sanitary facilities','Toalett underveis':'Toilet en route',
+    'Toalett ved start':'Toilet at start','Oversiktsbilde':'Overview image',
+    'Selve utsiktspunktet':'The viewpoint itself','HC-parkering':'Accessible parking',
+    'Hotellfasiliteter':'Hotel facilities','Hytte / leilighetsfasiliteter':'Cabin / apartment facilities',
+    'Restaurantfasiliteter':'Restaurant facilities','Aktivitetsfasiliteter':'Activity facilities',
+    'Idrettsanlegget':'Sports facility','Campingfasiliteter':'Camping facilities',
+    'Fasiliteter':'Facilities','Guidet tur / friluftsliv':'Guided tour / outdoor',
+    'Vannsport og padling':'Water sports and paddling','Kjøretøy og dyr':'Vehicle and animal activities',
+    'Tilpassede naturopplevelser':'Adapted nature experiences',
+    'Tursti':'Hiking trail','Sykkelløype':'Cycling route','Skiløype':'Ski trail',
+    'Badeplass':'Swimming area','Utsiktspunkt':'Viewpoint',
+    'HC-parkering / toalett':'Accessible parking / toilet',
+    'Fellesgode / felles rom':'Public asset / shared space',
+  },
+  es: {
+    // Tipos de negocio
+    'Hotell':'Hotel','Hytte / leilighet':'Cabaña / apartamento',
+    'Restaurant / servering':'Restaurante / cafetería','Aktivitetsbedrift':'Proveedor de actividades',
+    'Idrettsanlegg':'Instalación deportiva','Camping':'Camping',
+    'Annet (bygg)':'Otro (edificio)','Annet (fellesgode)':'Otro (bien público)',
+    'B1 — Guidet tur / friluftsliv':'B1 — Tour guiado / exterior',
+    'B2 — Vannsport og padling':'B2 — Deportes acuáticos / piragüismo',
+    'B3 — Kjøretøy og dyr':'B3 — Vehículos y animales',
+    'B4 — Tilpassede naturopplevelser':'B4 — Experiencias naturales adaptadas',
+    'Tursti / natursti':'Sendero','Sykkelløype':'Ruta ciclista',
+    'Skiløype':'Pista de esquí','Badeplass':'Zona de baño',
+    'Utsiktspunkt / attraksjon':'Mirador / atracción',
+    'HC-parkering / toalett i utmark':'Aparcamiento accesible / aseo exterior',
+    // Zonas
+    'Parkering':'Aparcamiento','Parkering / innkjøring':'Aparcamiento / entrada',
+    'Parkering ved start':'Aparcamiento en inicio','Inngang':'Entrada',
+    'Inngang / resepsjon':'Entrada / recepción','Resepsjon':'Recepción',
+    'Mottakelse':'Mostrador de recepción','Mottakelse / resepsjon':'Recepción / mostrador',
+    'Hotellrom':'Habitación de hotel','Bad':'Baño','WC':'Aseo',
+    'WC / garderobe':'Aseo / vestuario','Tilpasset toalett':'Aseo accesible',
+    'HC-toalett':'Aseo accesible','Spisesal':'Comedor',
+    'Spisebord':'Mesa de comedor','Bar':'Bar','Heis':'Ascensor',
+    'Stue':'Salón','Kjøkken':'Cocina','Soverom':'Dormitorio',
+    'Konferanserom':'Sala de conferencias','Skilting innendørs':'Señalización interior',
+    'Aktivitetsområde':'Zona de actividades','Tilrettelagt garderobe':'Vestuario accesible',
+    'Toalett':'Aseo','Toalett / garderobe':'Aseo / vestuario',
+    'Startpunkt':'Punto de inicio','Møtepunkt / startsted':'Punto de encuentro / inicio',
+    'Underlag og sti':'Superficie del sendero','Underlag og løype':'Superficie de ruta',
+    'Terreng':'Terreno','Terreng / underlag':'Terreno / superficie',
+    'Terreng / løype / underlag':'Terreno / ruta / superficie',
+    'Løypetrase':'Trazado de ruta','Adkomst':'Acceso',
+    'Adkomst til vannet':'Acceso al agua','Inn/ut av vannet':'Entrada/salida al agua',
+    'Utleiested / base':'Base de alquiler','Utleiested / stall / base':'Alquiler / establo / base',
+    'Utstyr':'Equipamiento','Utstyr og tilpasning':'Equipamiento y adaptación',
+    'Utstyr og dyr':'Equipamiento y animales','Tilpasset spesialutstyr':'Equipamiento adaptado',
+    'Sanitæranlegg':'Instalaciones sanitarias','Toalett underveis':'Aseo en ruta',
+    'Toalett ved start':'Aseo en inicio','Oversiktsbilde':'Imagen general',
+    'Selve utsiktspunktet':'El mirador','HC-parkering':'Aparcamiento accesible',
+    // Títulos de página
+    'Hotellfasiliteter':'Instalaciones del hotel','Hytte / leilighetsfasiliteter':'Instalaciones de cabaña / apartamento',
+    'Restaurantfasiliteter':'Instalaciones del restaurante','Aktivitetsfasiliteter':'Instalaciones de actividades',
+    'Idrettsanlegget':'Instalación deportiva','Campingfasiliteter':'Instalaciones de camping',
+    'Fasiliteter':'Instalaciones','Guidet tur / friluftsliv':'Tour guiado / exterior',
+    'Vannsport og padling':'Deportes acuáticos y piragüismo','Kjøretøy og dyr':'Vehículos y animales',
+    'Tilpassede naturopplevelser':'Experiencias naturales adaptadas',
+    'Tursti':'Sendero','Sykkelløype':'Ruta ciclista','Skiløype':'Pista de esquí',
+    'Badeplass':'Zona de baño','Utsiktspunkt':'Mirador',
+    'HC-parkering / toalett':'Aparcamiento accesible / aseo',
+    'Fellesgode / felles rom':'Bien público / espacio compartido',
+  }
+};
+
+// Oversett en label basert på aktivt språk — faller tilbake til norsk
+function TL(norwegianLabel) {
+  var lang = state.lang || 'no';
+  if (lang === 'no') return norwegianLabel;
+  return (LABEL_MAP[lang] && LABEL_MAP[lang][norwegianLabel]) || norwegianLabel;
+}
 
 // Bygg steg-piller
 function buildSteps() {
@@ -667,7 +906,7 @@ function handleProfilbilde(e) {
 
 async function analyzeProfilbilde() {
   if (!state.profilbilde) return;
-  var spraakNavn = state.lang === 'en' ? 'English' : 'norsk';
+  var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'es' ? 'español' : 'norsk';
   try {
     var compressed = await compressImage(state.profilbilde.dataUrl);
     var base64 = compressed.split(',')[1];
@@ -1136,8 +1375,8 @@ function buildZones() {
     document.getElementById('zones-container').innerHTML = '<div class="notice">⚠️ Velg type på forrige side først.</div>';
     return;
   }
-  document.getElementById('zones-title').textContent = config.pageTitle;
-  document.getElementById('zones-desc').textContent = config.pageDesc;
+  document.getElementById('zones-title').textContent = TL(config.pageTitle);
+  document.getElementById('zones-desc').textContent = TL(config.pageDesc);
   var grp = config.group;
   var grpLabel = {A:'A — Bygningsbasert bedrift',B:'B — Naturbasert aktivitetsbedrift',C:'C — Fellesgode / felles rom'}[grp];
   document.getElementById('group-badge-container').innerHTML = '<div class="group-badge '+grp+'">'+grpLabel+'</div>';
@@ -1164,7 +1403,7 @@ function renderZoneCard(zone, idx) {
     var analyzed = img.analysis != null;
     previewHtml += '<div class="preview-item"><img src="'+img.dataUrl+'" alt="">' +
       '<button class="preview-remove" onclick="removeImg('+idx+','+i+')">×</button>' +
-      (analyzed ? '<div class="preview-analyzed">✓ Analysert</div>' : '<button class="preview-analyze" onclick="analyzeSpecificImage('+idx+','+i+')">🔍 Analyser</button>') +
+      (analyzed ? '<div class="preview-analyzed">'+T('analysert')+'</div>' : '<button class="preview-analyze" onclick="analyzeSpecificImage('+idx+','+i+')">🔍 Analyser</button>') +
       '</div>';
   }
   var analyses = zone.images.filter(function(img){return img.analysis;}).map(function(img){return img.analysis;});
@@ -1180,7 +1419,7 @@ function renderZoneCard(zone, idx) {
         + '<div class="yn-field">'
         + '<button class="yn-field-btn' + (cur==='ja' ? ' yn-ja-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ja">Ja</button>'
         + '<button class="yn-field-btn' + (cur==='nei' ? ' yn-nei-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="nei">Nei</button>'
-        + '<button class="yn-field-btn' + (cur==='ukjent' ? ' yn-uk-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ukjent">Vet ikke</button>'
+        + '<button class="yn-field-btn' + (cur==='ukjent' ? ' yn-uk-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ukjent">'+T('vet_ikke_btn')+'</button>'
         + '</div></div>';
     } else {
       extraFieldsHtml += '<div class="field"><label class="field-label">' + f.label + (f.unit ? ' (' + f.unit + ')' : '') + '</label>'
@@ -1189,12 +1428,12 @@ function renderZoneCard(zone, idx) {
     }
   }
   return '<div class="zone-card" id="zone-card-'+idx+'">' +
-    '<div class="zone-card-title">'+zone.icon+' '+zone.label+(zone.optional?'<span class="zone-optional">(valgfri)</span>':'')+'</div>' +
+    '<div class="zone-card-title">'+zone.icon+' '+TL(zone.label)+(zone.optional?'<span class="zone-optional">('+T('sone_valgfri')+')</span>':'')+'</div>' +
     '<div class="upload-zone"><input type="file" accept="image/*" multiple onchange="handleFiles(event,'+idx+')"/>' +
     '<div class="upload-icon">📷</div><div class="upload-title">Ta bilde eller velg fra bibliotek</div>' +
     '<div class="upload-hint">Alle bilder kan analyseres individuelt</div></div>' +
     (zone.images.length ? '<div class="image-preview">'+previewHtml+'</div>' : '') +
-    (combinedAnalysis ? '<div class="ai-box visible"><div class="ai-header"><span>AI-analyse ('+analyses.length+' bilde'+( analyses.length>1?'r':'')+')</span></div>' +
+    (combinedAnalysis ? '<div class="ai-box visible"><div class="ai-header"><span>'+T('ai_analyse_label')+' ('+analyses.length+' '+(analyses.length>1?T('bilde_plural'):T('bilde_singular'))+')</span></div>' +
       '<div class="ai-text">'+combinedAnalysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div></div>' : '') +
     '<div class="ai-box" id="ai-loading-'+idx+'" style="display:none"><div class="ai-header"><div class="ai-spinner on"></div><span>Analyserer...</span></div></div>' +
     (zone.extraFields.length ? '<div style="margin-top:1rem">'+extraFieldsHtml+'</div>' : '') +
@@ -1272,7 +1511,7 @@ async function analyzeSpecificImage(idx, imgIdx) {
   if (loadingBox) loadingBox.style.display = 'block';
   var compressed = await compressImage(zone.images[imgIdx].dataUrl);
   var base64 = compressed.split(',')[1];
-  var spraakNavn = state.lang === 'en' ? 'English' : 'norsk';
+  var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'es' ? 'español' : 'norsk';
   var prompt = (ZONE_PROMPTS[zone.id] || DEFAULT_PROMPT) + ' Svar på ' + spraakNavn + '.';
   try {
     var res = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},
@@ -1284,7 +1523,7 @@ async function analyzeSpecificImage(idx, imgIdx) {
     if (data.content && data.content[0] && data.content[0].text) {
       state.zones[idx].images[imgIdx].analysis = data.content[0].text;
     } else {
-      state.zones[idx].images[imgIdx].analysis = 'Kunne ikke analysere dette bildet.';
+      state.zones[idx].images[imgIdx].analysis = T('ai_kunne_ikke');
     }
   } catch(err) {
     state.zones[idx].images[imgIdx].analysis = 'Feil: ' + err.message;
@@ -1308,7 +1547,7 @@ function buildQuestions() {
       '<div class="yn-group">' +
       '<button class="yn-btn yes '+(state.answers[id]==='ja'?'active':'')+'" onclick="setAns(\''+id+'\',\'ja\',this)">Ja</button>' +
       '<button class="yn-btn no '+(state.answers[id]==='nei'?'active':'')+'" onclick="setAns(\''+id+'\',\'nei\',this)">Nei</button>' +
-      '<button class="yn-btn na '+(state.answers[id]==='na'?'active':'')+'" onclick="setAns(\''+id+'\',\'na\',this)">Vet ikke</button>' +
+      '<button class="yn-btn na '+(state.answers[id]==='na'?'active':'')+'" onclick="setAns(\''+id+'\',\'na\',this)">'+T('vet_ikke_btn')+'</button>' +
       '</div></div>';
   }
   document.getElementById('questions-container').innerHTML = html;
@@ -1363,7 +1602,7 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
   var h = '<div class="guide-sone">';
   h += '<div class="guide-sone-topp">';
   h += '<div class="guide-sone-ikon">'+zone.icon+'</div>';
-  h += '<div class="guide-sone-navn">'+zone.label+'</div>';
+  h += '<div class="guide-sone-navn">'+TL(zone.label)+'</div>';
   h += '<div id="guide-sone-status-'+idx+'">'+statusSpan+'</div>';
   h += '<button class="sone-edit-btn" id="edit-btn-'+idx+'" onclick="toggleEditSone('+idx+')">✏️ Rediger</button>';
   h += '</div>';
@@ -1386,7 +1625,7 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
 }
 
 async function buildGuide() {
-  var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'no' ? 'norsk' : 'norsk';
+  var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'es' ? 'español' : 'norsk';
   var name = document.getElementById('biz-name').value || 'Ukjent sted';
   var type = document.getElementById('biz-type').value;
   var config = TYPE_CONFIG[type];
@@ -1457,7 +1696,7 @@ async function buildGuide() {
     var malChips = '';
     for (var j=0;j<zone.extraFields.length;j++){var fid=zone.extraFields[j];var f=EXTRA_FIELDS[fid];var v=zone.measures[fid];if(f&&v)malChips+='<span class="guide-sone-maal-chip">'+f.label+': '+v+' '+f.unit+'</span>';}
     var bilderHtml='';
-    for (var j=0;j<zone.images.length;j++){bilderHtml+='<div class="guide-bilde"><img src="'+zone.images[j].dataUrl+'" alt="'+zone.label+'"/></div>';}
+    for (var j=0;j<zone.images.length;j++){bilderHtml+='<div class="guide-bilde"><img src="'+zone.images[j].dataUrl+'" alt="'+TL(zone.label)+'"/></div>';}
 
     var sd = {zone:zone, gjesteTekst:gjesteTekst, status:status};
     var soneHtml = lagSoneHTML(sd, i, malChips, bilderHtml);
@@ -1482,7 +1721,7 @@ async function buildGuide() {
     // Topp-rad
     var topp = document.createElement('div');
     topp.className = 'guide-sone-topp';
-    topp.innerHTML = '<div class="guide-sone-ikon">🏠</div><div class="guide-sone-navn">Helhetsinntrykk</div>';
+    topp.innerHTML = '<div class="guide-sone-ikon">🏠</div><div class="guide-sone-navn">'+T('rapport_helhetsinntrykk')+'</div>';
     var editBtn = document.createElement('button');
     editBtn.className = 'sone-edit-btn';
     editBtn.id = 'edit-btn-' + hIdx;
@@ -1594,7 +1833,7 @@ async function buildGuide() {
   }
 
   var container = document.getElementById('tab-content-guide');
-  container.innerHTML = '<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>Genererer tilgjengelighetsguide...</div>';
+  container.innerHTML = '<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>'+T('rapport_genererer')+'</div>';
   // Gi UI tid til å vise spinner
   await new Promise(function(r){setTimeout(r,50);});
   container.innerHTML =
@@ -1649,14 +1888,14 @@ async function buildGuide() {
 }
 
 async function buildAnalyse() {
-  var spraakNavn = state.lang === 'en' ? 'English' : 'norsk';
+  var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'es' ? 'español' : 'norsk';
   var container = document.getElementById('tab-content-analyse');
   var name = document.getElementById('biz-name').value || 'Ukjent sted';
   var type = document.getElementById('biz-type').value;
   var config = TYPE_CONFIG[type];
   var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
 
-  container.innerHTML = '<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>Genererer AI-rapport...</div>';
+  container.innerHTML = '<div class="rapport-spinner"><div class="rapport-spinner-ring"></div>'+T('rapport_genererer_ai')+'</div>';
 
   var soneKorter = [];
   for (var i = 0; i < state.zones.length; i++) {
@@ -1693,7 +1932,7 @@ async function buildAnalyse() {
       return '<div style="margin-top:.5rem;background:var(--surface2);border-radius:8px;padding:.75rem;font-size:13px;color:var(--text2);line-height:1.6">'+
         img.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div>';
     }).join('');
-    return '<div class="sone-kort"><div class="sone-topp"><div class="sone-ikon">'+s.zone.icon+'</div><div class="sone-navn">'+s.zone.label+'</div>' +
+    return '<div class="sone-kort"><div class="sone-topp"><div class="sone-ikon">'+s.zone.icon+'</div><div class="sone-navn">'+TL(s.zone.label)+'</div>' +
       '<div class="status-badge '+s.status+'">'+statusIkon+' '+s.statusTekst+'</div></div>' +
       (s.gjesteTekst?'<div class="sone-tekst">'+s.gjesteTekst+'</div>':'') +
       (s.faktaRader?'<div class="sone-fakta">'+s.faktaRader+'</div>':'') +
@@ -1720,13 +1959,13 @@ async function buildAnalyse() {
   var soneInfo = gyldigeSoner.map(function(s){return s.zone.label+' ('+s.statusTekst+'): '+s.gjesteTekst;}).join('\n');
   var svarInfo = qIds.map(function(id){var q=ALL_QUESTIONS[id];var v=state.answers[id];return q&&v?q.text+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('\n');
   var gpxInfo = state.gpxData ? 'GPX: '+state.gpxData.totalDist+'km, maks stigning '+state.gpxData.maxSlope+'%, snitt '+state.gpxData.avgSlope+'%' : '';
-  window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?config.label:type)+'). Svar på '+spraakNavn+', vennlig og konkret.\n\n'+
-    (gpxInfo?'RUTE:\n'+gpxInfo+'\n\n':'')+'FASILITETER:\n'+(soneInfo||'Ikke registrert')+'\n\nTILLEGGSINFO:\n'+(svarInfo||'Ikke registrert')+
+  window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?TL(config.label):type)+'). Svar på '+spraakNavn+', vennlig og konkret.\n\n'+
+    (gpxInfo?'RUTE:\n'+gpxInfo+'\n\n':'')+'FASILITETER:\n'+(soneInfo||T('ikke_registrert'))+'\n\nTILLEGGSINFO:\n'+(svarInfo||T('ikke_registrert'))+
     '\n\nHvis du ikke vet svaret, si det ærlig.';
   state.chatHistory = [];
 
   container.innerHTML =
-    '<div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">AI-analyse fullført</div><div class="success-text">Detaljert tilgjengelighetsvurdering per sone.</div></div></div>' +
+    '<div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">'+T('rapport_fullfort')+'</div><div class="success-text">'+T('rapport_fullfort_desc')+'</div></div></div>' +
     sonerHtml +
     (jaItems?'<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">'+jaItems+'</div></div>':'') +
     '<div class="chat-card">' +
@@ -1874,7 +2113,7 @@ function toggleEditSone(idx) {
   if (!editDiv) return;
   var isOpen = editDiv.style.display !== 'none';
   editDiv.style.display = isOpen ? 'none' : 'block';
-  editBtn.textContent = isOpen ? '✏️ Rediger' : '✓ Lukk';
+  editBtn.textContent = isOpen ? T('sone_rediger') : T('sone_lukk');
 }
 
 function saveEditSone(idx, newTekst, newStatus) {
@@ -2046,7 +2285,7 @@ function hentPosisjon() {
     visGeoFeil('GPS er ikke tilgjengelig i denne nettleseren');
     return;
   }
-  label.textContent = 'Henter posisjon...';
+  label.textContent = T('gps_henter');
   icon.textContent = '⏳';
   btn.disabled = true;
   navigator.geolocation.getCurrentPosition(
@@ -2056,7 +2295,7 @@ function hentPosisjon() {
       label.textContent = 'Hent posisjon automatisk';
       icon.textContent = '📍';
       var msg = err.code === 1 ? 'Tilgang til posisjon ble avslått — fyll inn manuelt' :
-                err.code === 2 ? 'Kunne ikke finne posisjon — fyll inn manuelt' :
+                err.code === 2 ? T('gps_feil_posisjon') :
                 'Tidsavbrudd — fyll inn manuelt';
       visGeoFeil(msg);
       visManuelleGeoFelt();
@@ -2106,7 +2345,7 @@ async function reverseGeocode(lat, lon) {
     btn.disabled = false;
     label.textContent = 'Hent posisjon automatisk';
     icon.textContent = '📍';
-    visGeoFeil('Kunne ikke hente stedsinfo — fyll inn manuelt');
+    visGeoFeil(T('gps_feil_sted'));
     visManuelleGeoFelt();
   }
 }
@@ -2349,7 +2588,7 @@ function velgRegion(navn) {
     if (multi) {
       var hint = document.getElementById('fylke-auto-hint');
       if (hint) {
-        hint.textContent = '⚠️ Denne regionen strekker seg over ' + multi.join(' og ') + ' — juster fylke ved behov';
+        hint.textContent = '⚠️ Denne regionen strekker seg over ' + multi.join(' og ') + T('gps_juster_fylke');
         hint.style.display = 'block';
       }
     } else {
