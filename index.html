@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.4</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.5</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -263,99 +263,99 @@ textarea{resize:vertical;min-height:80px}
 <div class="content">
 
   <div class="page active" id="page-0">
-    <div class="page-header"><div class="page-title">Registrer sted</div><div class="page-desc">Grunnleggende informasjon om stedet du kartlegger.</div></div>
+    <div class="page-header"><div class="page-title" data-i18n="side0_tittel">Registrer sted</div><div class="page-desc" data-i18n="side0_desc">Grunnleggende informasjon om stedet du kartlegger.</div></div>
     <div id="prefyll-banner" style="display:none;background:var(--green-light);border:1px solid rgba(29,158,117,.25);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);margin-bottom:1rem;line-height:1.7"></div>
     <div class="card">
-      <div class="card-title">📍 Informasjon</div>
+      <div class="card-title" data-i18n="side0_kort_tittel">📍 Informasjon</div>
       <div class="field">
-        <label class="field-label">Profilbilde</label>
+        <label class="field-label" data-i18n="profilbilde_label">Profilbilde</label>
         <div class="upload-zone" style="padding:1rem">
           <input type="file" accept="image/*" onchange="handleProfilbilde(event)"/>
           <div id="profilbilde-preview" style="display:none">
             <img id="profilbilde-img" src="" alt="Profilbilde" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px"/>
-            <div style="font-size:12px;color:var(--green-dark)">✓ Profilbilde lastet opp</div>
+            <div style="font-size:12px;color:var(--green-dark)" data-i18n="profilbilde_lastet">✓ Profilbilde lastet opp</div>
           </div>
           <div id="profilbilde-placeholder">
             <div class="upload-icon">🖼️</div>
-            <div class="upload-title">Last opp profilbilde</div>
-            <div class="upload-hint">Representativt bilde av stedet — brukes i guide og rapport</div>
+            <div class="upload-title" data-i18n="profilbilde_tittel">Last opp profilbilde</div>
+            <div class="upload-hint" data-i18n="profilbilde_hint">Representativt bilde av stedet — brukes i guide og rapport</div>
           </div>
         </div>
       </div>
-      <div class="field"><label class="field-label">Navn</label><input type="text" id="biz-name" placeholder="f.eks. Fjordhotellet AS eller Beitostølen tursti"/></div>
+      <div class="field"><label class="field-label" data-i18n="navn_label">Navn</label><input type="text" id="biz-name" data-i18n-ph="navn_ph" placeholder="f.eks. Fjordhotellet AS eller Beitostølen tursti"/></div>
       <div class="field">
-        <label class="field-label">Type</label>
+        <label class="field-label" data-i18n="type_label">Type</label>
         <select id="biz-type" onchange="onTypeChange()">
-          <option value="">Velg type</option>
-          <optgroup label="A — Bygningsbaserte bedrifter">
-            <option value="hotell">Hotell</option>
-            <option value="hytte">Hytte / leilighet</option>
-            <option value="restaurant">Restaurant / servering</option>
-            <option value="aktivitet">Aktivitetsbedrift (innendørs)</option>
-            <option value="idrett">Idrettsanlegg</option>
-            <option value="camping">Camping</option>
-            <option value="annet_a">Annet (bygg)</option>
+          <option value="" data-i18n="type_velg">Velg type</option>
+          <optgroup data-i18n-label="type_gruppe_a" label="A — Bygningsbaserte bedrifter">
+            <option value="hotell" data-i18n-label-val="Hotell">Hotell</option>
+            <option value="hytte" data-i18n-label-val="Hytte / leilighet">Hytte / leilighet</option>
+            <option value="restaurant" data-i18n-label-val="Restaurant / servering">Restaurant / servering</option>
+            <option value="aktivitet" data-i18n-label-val="Aktivitetsbedrift">Aktivitetsbedrift (innendørs)</option>
+            <option value="idrett" data-i18n-label-val="Idrettsanlegg">Idrettsanlegg</option>
+            <option value="camping" data-i18n-label-val="Camping">Camping</option>
+            <option value="annet_a" data-i18n-label-val="Annet (bygg)">Annet (bygg)</option>
           </optgroup>
-          <optgroup label="B — Naturbaserte aktivitetsbedrifter">
-            <option value="guidet_friluft">B1 — Guidet tur / friluftsliv</option>
-            <option value="vannsport">B2 — Vannsport og padling</option>
-            <option value="kjoretoy_dyr">B3 — Kjøretøy og dyr (sykkel, ridning, hundespann)</option>
-            <option value="tilpasset_natur">B4 — Tilpassede naturopplevelser</option>
+          <optgroup data-i18n-label="type_gruppe_b" label="B — Naturbaserte aktivitetsbedrifter">
+            <option value="guidet_friluft" data-i18n-label-val="B1 — Guidet tur / friluftsliv">B1 — Guidet tur / friluftsliv</option>
+            <option value="vannsport" data-i18n-label-val="B2 — Vannsport og padling">B2 — Vannsport og padling</option>
+            <option value="kjoretoy_dyr" data-i18n-label-val="B3 — Kjøretøy og dyr">B3 — Kjøretøy og dyr (sykkel, ridning, hundespann)</option>
+            <option value="tilpasset_natur" data-i18n-label-val="B4 — Tilpassede naturopplevelser">B4 — Tilpassede naturopplevelser</option>
           </optgroup>
-          <optgroup label="C — Fellesgoder og felles rom">
-            <option value="tursti">Tursti / natursti</option>
-            <option value="sykkelsti">Sykkelløype</option>
-            <option value="skiloype">Skiløype</option>
-            <option value="badeplass">Badeplass</option>
-            <option value="utsiktspunkt">Utsiktspunkt / attraksjon</option>
-            <option value="hc_parkering">HC-parkering / toalett i utmark</option>
-            <option value="annet_c">Annet (fellesgode)</option>
+          <optgroup data-i18n-label="type_gruppe_c" label="C — Fellesgoder og felles rom">
+            <option value="tursti" data-i18n-label-val="Tursti / natursti">Tursti / natursti</option>
+            <option value="sykkelsti" data-i18n-label-val="Sykkelløype">Sykkelløype</option>
+            <option value="skiloype" data-i18n-label-val="Skiløype">Skiløype</option>
+            <option value="badeplass" data-i18n-label-val="Badeplass">Badeplass</option>
+            <option value="utsiktspunkt" data-i18n-label-val="Utsiktspunkt / attraksjon">Utsiktspunkt / attraksjon</option>
+            <option value="hc_parkering" data-i18n-label-val="HC-parkering / toalett i utmark">HC-parkering / toalett i utmark</option>
+            <option value="annet_c" data-i18n-label-val="Annet (fellesgode)">Annet (fellesgode)</option>
           </optgroup>
         </select>
       </div>
       <div id="custom-name-field" style="display:none" class="field">
-        <label class="field-label">Beskriv type</label>
-        <input type="text" id="biz-custom-type" placeholder="Skriv hva slags sted dette er..."/>
+        <label class="field-label" data-i18n="beskriv_type_label">Beskriv type</label>
+        <input type="text" id="biz-custom-type" data-i18n-ph="beskriv_type_ph" placeholder="Skriv hva slags sted dette er..."/>
       </div>
-      <div class="field"><label class="field-label">Adresse / sted</label><input type="text" id="biz-address" placeholder="Adresse, postnummer, sted eller GPS-koordinat"/></div>
-      <div class="field"><label class="field-label">Destinasjonsselskap</label><input type="text" id="biz-dest" placeholder="f.eks. Visit Valdres"/></div>
+      <div class="field"><label class="field-label" data-i18n="adresse_label">Adresse / sted</label><input type="text" id="biz-address" data-i18n-ph="adresse_ph" placeholder="Adresse, postnummer, sted eller GPS-koordinat"/></div>
+      <div class="field"><label class="field-label" data-i18n="destinasjon_label">Destinasjonsselskap</label><input type="text" id="biz-dest" data-i18n-ph="destinasjon_ph" placeholder="f.eks. Visit Valdres"/></div>
       <div class="field">
-        <label class="field-label">Geografisk tilhørighet</label>
+        <label class="field-label" data-i18n="geo_label">Geografisk tilhørighet</label>
         <button type="button" id="gps-btn" onclick="hentPosisjon()" style="width:100%;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:13px 16px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <span id="gps-icon">📍</span> <span id="gps-label">Hent posisjon automatisk</span>
+          <span id="gps-icon">📍</span> <span id="gps-label" data-i18n="geo_btn">Hent posisjon automatisk</span>
         </button>
         <div id="geo-resultat" style="display:none;margin-top:10px;">
           <div id="geo-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
-          <div style="font-size:12px;color:var(--text3)">Trykk på et felt for å endre manuelt</div>
+          <div style="font-size:12px;color:var(--text3)" data-i18n="geo_manuell_hint">Trykk på et felt for å endre manuelt</div>
         </div>
         <div id="geo-feil" style="display:none;font-size:13px;color:var(--amber);background:var(--amber-light);border-radius:var(--radius-sm);padding:8px 10px;margin-top:8px;"></div>
       </div>
       <div id="geo-manuell" style="display:none;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div class="field">
-            <label class="field-label">Kommune</label>
-            <input type="text" id="biz-kommune" placeholder="f.eks. Øystre Slidre" oninput="oppdaterRegionFraKommune(this.value);lagreStedsprofil()"/>
+            <label class="field-label" data-i18n="kommune_label">Kommune</label>
+            <input type="text" id="biz-kommune" data-i18n-ph="kommune_ph" placeholder="f.eks. Øystre Slidre" oninput="oppdaterRegionFraKommune(this.value);lagreStedsprofil()"/>
           </div>
           <div class="field">
-            <label class="field-label">Fylke</label>
+            <label class="field-label" data-i18n="fylke_label">Fylke</label>
             <button type="button" class="picker-btn" id="fylke-btn" onclick="openFylkeModal()">
-              <span id="fylke-display" style="color:var(--text3)">Velg fylke</span>
+              <span id="fylke-display" style="color:var(--text3)" data-i18n="fylke_velg">Velg fylke</span>
               <span class="picker-arrow">›</span>
             </button>
             <input type="hidden" id="biz-fylke" value=""/>
           </div>
         </div>
         <div class="field">
-          <label class="field-label">SSB reiselivsregion</label>
+          <label class="field-label" data-i18n="region_label">SSB reiselivsregion</label>
           <button type="button" class="picker-btn" id="region-btn" onclick="openRegionModal()">
-            <span id="region-display" style="color:var(--text3)">Velg region (SSB)</span>
+            <span id="region-display" style="color:var(--text3)" data-i18n="region_velg">Velg region (SSB)</span>
             <span class="picker-arrow">›</span>
           </button>
           <input type="hidden" id="biz-ssb-region" value=""/>
-          <div style="font-size:11px;color:var(--text3);margin-top:4px">67 offisielle reiselivsregioner (SSB KLASS 527, 2021)</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:4px" data-i18n="region_hint">67 offisielle reiselivsregioner (SSB KLASS 527, 2021)</div>
         </div>
       </div>
-      <div class="field"><label class="field-label">Kontaktperson / forvalter</label><input type="text" id="biz-contact" placeholder="Navn — e-post"/></div>
+      <div class="field"><label class="field-label" data-i18n="kontakt_label">Kontaktperson / forvalter</label><input type="text" id="biz-contact" data-i18n-ph="kontakt_ph" placeholder="Navn — e-post"/></div>
     </div>
 
   </div>
@@ -368,42 +368,42 @@ textarea{resize:vertical;min-height:80px}
     </div>
     <div id="gpx-section" style="display:none">
       <div class="card">
-        <div class="card-title">🗺️ GPX-fil (valgfritt)</div>
-        <div class="notice-blue">Last opp en GPX-fil fra Garmin, Strava eller Komoot for automatisk analyse av stigning og høydeprofil.</div>
+        <div class="card-title" data-i18n="gpx_kort_tittel">🗺️ GPX-fil (valgfritt)</div>
+        <div class="notice-blue" data-i18n="gpx_hint">Last opp en GPX-fil fra Garmin, Strava eller Komoot for automatisk analyse av stigning og høydeprofil.</div>
         <div class="gpx-zone">
           <input type="file" accept=".gpx" onchange="handleGpx(event)"/>
           <div class="gpx-icon">📍</div>
-          <div class="gpx-title">Last opp GPX-fil</div>
-          <div class="gpx-hint">.gpx fra Garmin, Strava, Komoot, UT.no osv.</div>
+          <div class="gpx-title" data-i18n="gpx_fil_tittel">Last opp GPX-fil</div>
+          <div class="gpx-hint" data-i18n="gpx_fil_hint">.gpx fra Garmin, Strava, Komoot, UT.no osv.</div>
         </div>
         <div id="gpx-result" style="display:none"></div>
       </div>
     </div>
     <div id="zones-container"></div>
-    <button class="btn-add-zone" onclick="openAddZoneModal()">+ Legg til sone / område</button>
+    <button class="btn-add-zone" onclick="openAddZoneModal()" data-i18n="legg_til_sone_btn">+ Legg til sone / område</button>
   </div>
 
   <div class="page" id="page-2">
-    <div class="page-header"><div class="page-title">Tilleggsspørsmål</div><div class="page-desc">Spørsmål om ting AI-en ikke kan se på bilder.</div></div>
+    <div class="page-header"><div class="page-title" data-i18n="side2_tittel">Tilleggsspørsmål</div><div class="page-desc" data-i18n="side2_desc">Spørsmål om ting AI-en ikke kan se på bilder.</div></div>
     <div class="card" id="questions-container"></div>
   </div>
 
   <div class="page" id="page-3">
-    <div class="page-header"><div class="page-title">Tilgjengelighetsprofil</div><div class="page-desc">Trykk "Generer rapport" når du er klar — AI analyserer bilder og lager tilgjengelighetsguide.</div></div>
+    <div class="page-header"><div class="page-title" data-i18n="side3_tittel">Tilgjengelighetsprofil</div><div class="page-desc" data-i18n="side3_desc">Trykk "Generer rapport" når du er klar — AI analyserer bilder og lager tilgjengelighetsguide.</div></div>
     <div id="generer-bar" style="background:var(--green-light);border:1.5px solid var(--green);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;text-align:center">
-      <div style="font-size:15px;font-weight:600;color:var(--green-dark);margin-bottom:.5rem">Klar til å generere rapport?</div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:1rem">AI analyserer bildene og lager tilgjengelighetsguide. Du kan redigere og godkjenne etterpå.</div>
-      <button onclick="startGenerer()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px 32px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer">🤖 Generer rapport</button>
+      <div style="font-size:15px;font-weight:600;color:var(--green-dark);margin-bottom:.5rem" data-i18n="klar_tittel">Klar til å generere rapport?</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:1rem" data-i18n="klar_desc">AI analyserer bildene og lager tilgjengelighetsguide. Du kan redigere og godkjenne etterpå.</div>
+      <button onclick="startGenerer()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px 32px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer" data-i18n="generer_btn">🤖 Generer rapport</button>
     </div>
     <div id="generer-spinner" style="display:none;text-align:center;padding:2rem">
       <div class="rapport-spinner-ring" style="margin:0 auto .75rem"></div>
       <div style="font-size:14px;color:var(--text2);margin-bottom:4px" id="spinner-tekst">Genererer tilgjengelighetsguide...</div>
-      <div style="font-size:12px;color:var(--text3)">Dette kan ta 15–30 sekunder</div>
+      <div style="font-size:12px;color:var(--text3)" data-i18n="generer_spinner_desc">Dette kan ta 15–30 sekunder</div>
     </div>
     <div id="rapport-innhold" style="display:none">
     <div class="tab-bar">
-      <button class="tab-btn active" id="tab-guide" onclick="switchTab('guide')">🗺️ Tilgjengelighetsguide</button>
-      <button class="tab-btn" id="tab-analyse" onclick="switchTab('analyse')">🤖 AI-analyse</button>
+      <button class="tab-btn active" id="tab-guide" onclick="switchTab('guide')" data-i18n="tab_guide">🗺️ Tilgjengelighetsguide</button>
+      <button class="tab-btn" id="tab-analyse" onclick="switchTab('analyse')" data-i18n="tab_analyse">🤖 AI-analyse</button>
     </div>
     <div id="tab-content-guide"></div>
     <div id="tab-content-analyse" style="display:none"></div>
@@ -413,19 +413,19 @@ textarea{resize:vertical;min-height:80px}
 </div>
 
 <div class="bottom-bar">
-  <button class="btn-secondary" id="btn-back" onclick="goBack()" style="display:none">← Tilbake</button>
+  <button class="btn-secondary" id="btn-back" onclick="goBack()" style="display:none" data-i18n="tilbake_pil">← Tilbake</button>
   <button class="btn-primary" id="btn-next" onclick="goNext()">Start kartlegging →</button>
 </div>
 
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalIfBg(event)">
   <div class="modal-sheet">
-    <div class="modal-title">Legg til sone / område</div>
+    <div class="modal-title" data-i18n="modal_tittel">Legg til sone / område</div>
     <div class="modal-options" id="modal-options"></div>
     <div class="modal-custom">
-      <input type="text" id="custom-zone-name" placeholder="Eget navn..."/>
-      <button onclick="addCustomZone()">Legg til</button>
+      <input type="text" id="custom-zone-name" data-i18n-ph="modal_eget_ph" placeholder="Eget navn..."/>
+      <button onclick="addCustomZone()" data-i18n="modal_legg_til">Legg til</button>
     </div>
-    <button class="modal-cancel" onclick="closeAddZoneModal()">Avbryt</button>
+    <button class="modal-cancel" onclick="closeAddZoneModal()" data-i18n="modal_avbryt">Avbryt</button>
   </div>
 </div>
 
@@ -464,7 +464,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.4';
+const APP_VERSION = 'v0.4.5';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -509,6 +509,66 @@ const TEKST = {
     rapport_rediger: '✏️ Rediger',
     rapport_lagre: 'Lagre',
     rapport_avbryt: 'Avbryt',
+    // Side 0 — Sted
+    side0_tittel: 'Registrer sted',
+    side0_desc: 'Grunnleggende informasjon om stedet du kartlegger.',
+    side0_kort_tittel: '📍 Informasjon',
+    profilbilde_label: 'Profilbilde',
+    profilbilde_tittel: 'Last opp profilbilde',
+    profilbilde_hint: 'Representativt bilde av stedet — brukes i guide og rapport',
+    profilbilde_lastet: '✓ Profilbilde lastet opp',
+    navn_label: 'Navn',
+    navn_ph: 'f.eks. Fjordhotellet AS eller Beitostølen tursti',
+    type_label: 'Type',
+    type_velg: 'Velg type',
+    type_gruppe_a: 'A — Bygningsbaserte bedrifter',
+    type_gruppe_b: 'B — Naturbaserte aktivitetsbedrifter',
+    type_gruppe_c: 'C — Fellesgoder og felles rom',
+    beskriv_type_label: 'Beskriv type',
+    beskriv_type_ph: 'Skriv hva slags sted dette er...',
+    adresse_label: 'Adresse / sted',
+    adresse_ph: 'Adresse, postnummer, sted eller GPS-koordinat',
+    destinasjon_label: 'Destinasjonsselskap',
+    destinasjon_ph: 'f.eks. Visit Valdres',
+    geo_label: 'Geografisk tilhørighet',
+    geo_btn: 'Hent posisjon automatisk',
+    geo_manuell_hint: 'Trykk på et felt for å endre manuelt',
+    kommune_label: 'Kommune',
+    kommune_ph: 'f.eks. Øystre Slidre',
+    fylke_label: 'Fylke',
+    fylke_velg: 'Velg fylke',
+    region_label: 'SSB reiselivsregion',
+    region_velg: 'Velg region (SSB)',
+    region_hint: '67 offisielle reiselivsregioner (SSB KLASS 527, 2021)',
+    kontakt_label: 'Kontaktperson / forvalter',
+    kontakt_ph: 'Navn — e-post',
+    prefyll_tekst: '🔄 Forhåndsutfylt fra forrige kartlegging:',
+    prefyll_nullstill: 'Nullstill',
+    // Side 1 — Fasiliteter
+    gpx_kort_tittel: '🗺️ GPX-fil (valgfritt)',
+    gpx_hint: 'Last opp en GPX-fil fra Garmin, Strava eller Komoot for automatisk analyse av stigning og høydeprofil.',
+    gpx_fil_tittel: 'Last opp GPX-fil',
+    gpx_fil_hint: '.gpx fra Garmin, Strava, Komoot, UT.no osv.',
+    legg_til_sone_btn: '+ Legg til sone / område',
+    // Side 2 — Spørsmål
+    side2_tittel: 'Tilleggsspørsmål',
+    side2_desc: 'Spørsmål om ting AI-en ikke kan se på bilder.',
+    // Side 3 — Rapport
+    side3_tittel: 'Tilgjengelighetsprofil',
+    side3_desc: 'Trykk "Generer rapport" når du er klar — AI analyserer bilder og lager tilgjengelighetsguide.',
+    klar_tittel: 'Klar til å generere rapport?',
+    klar_desc: 'AI analyserer bildene og lager tilgjengelighetsguide. Du kan redigere og godkjenne etterpå.',
+    generer_btn: '🤖 Generer rapport',
+    generer_spinner_desc: 'Dette kan ta 15–30 sekunder',
+    tab_guide: '🗺️ Tilgjengelighetsguide',
+    tab_analyse: '🤖 AI-analyse',
+    // Modal
+    modal_tittel: 'Legg til sone / område',
+    modal_eget_ph: 'Eget navn...',
+    modal_legg_til: 'Legg til',
+    modal_avbryt: 'Avbryt',
+    // Navigasjonsknapper
+    tilbake_pil: '← Tilbake',
     // Navigasjonsknapper steg
     steg_neste_start: 'Start kartlegging →',
     steg_neste_sporsmal: 'Neste: Spørsmål →',
@@ -581,6 +641,61 @@ const TEKST = {
     rapport_rediger: '✏️ Edit',
     rapport_lagre: 'Save',
     rapport_avbryt: 'Cancel',
+    // Page 0 — Location
+    side0_tittel: 'Register location',
+    side0_desc: 'Basic information about the place you are mapping.',
+    side0_kort_tittel: '📍 Information',
+    profilbilde_label: 'Profile image',
+    profilbilde_tittel: 'Upload profile image',
+    profilbilde_hint: 'Representative image of the place — used in guide and report',
+    profilbilde_lastet: '✓ Profile image uploaded',
+    navn_label: 'Name',
+    navn_ph: 'e.g. Fjord Hotel or Beitostølen trail',
+    type_label: 'Type',
+    type_velg: 'Select type',
+    type_gruppe_a: 'A — Building-based businesses',
+    type_gruppe_b: 'B — Nature-based activity providers',
+    type_gruppe_c: 'C — Public assets and shared spaces',
+    beskriv_type_label: 'Describe type',
+    beskriv_type_ph: 'Describe what kind of place this is...',
+    adresse_label: 'Address / location',
+    adresse_ph: 'Address, postal code, city or GPS coordinates',
+    destinasjon_label: 'Destination organisation',
+    destinasjon_ph: 'e.g. Visit Valdres',
+    geo_label: 'Geographic location',
+    geo_btn: 'Detect location automatically',
+    geo_manuell_hint: 'Tap a field to edit manually',
+    kommune_label: 'Municipality',
+    kommune_ph: 'e.g. Øystre Slidre',
+    fylke_label: 'County',
+    fylke_velg: 'Select county',
+    region_label: 'SSB tourism region',
+    region_velg: 'Select region (SSB)',
+    region_hint: '67 official tourism regions (SSB KLASS 527, 2021)',
+    kontakt_label: 'Contact person / manager',
+    kontakt_ph: 'Name — email',
+    prefyll_tekst: '🔄 Pre-filled from previous mapping:',
+    prefyll_nullstill: 'Reset',
+    gpx_kort_tittel: '🗺️ GPX file (optional)',
+    gpx_hint: 'Upload a GPX file from Garmin, Strava or Komoot for automatic slope and elevation analysis.',
+    gpx_fil_tittel: 'Upload GPX file',
+    gpx_fil_hint: '.gpx from Garmin, Strava, Komoot, UT.no etc.',
+    legg_til_sone_btn: '+ Add zone / area',
+    side2_tittel: 'Additional questions',
+    side2_desc: 'Questions about things the AI cannot see in images.',
+    side3_tittel: 'Accessibility profile',
+    side3_desc: 'Press "Generate report" when ready — AI analyses images and creates accessibility guide.',
+    klar_tittel: 'Ready to generate report?',
+    klar_desc: 'AI analyses the images and creates an accessibility guide. You can edit and approve afterwards.',
+    generer_btn: '🤖 Generate report',
+    generer_spinner_desc: 'This may take 15–30 seconds',
+    tab_guide: '🗺️ Accessibility guide',
+    tab_analyse: '🤖 AI analysis',
+    modal_tittel: 'Add zone / area',
+    modal_eget_ph: 'Custom name...',
+    modal_legg_til: 'Add',
+    modal_avbryt: 'Cancel',
+    tilbake_pil: '← Back',
     // Navigation step buttons
     steg_neste_start: 'Start mapping →',
     steg_neste_sporsmal: 'Next: Questions →',
@@ -679,6 +794,61 @@ const TEKST = {
     vet_ikke_btn: 'No sé',
     ikke_registrert: 'No registrado',
     ikke_vurdert: 'No evaluado',
+    // Página 0 — Lugar
+    side0_tittel: 'Registrar lugar',
+    side0_desc: 'Información básica sobre el lugar que está inspeccionando.',
+    side0_kort_tittel: '📍 Información',
+    profilbilde_label: 'Imagen de perfil',
+    profilbilde_tittel: 'Subir imagen de perfil',
+    profilbilde_hint: 'Imagen representativa del lugar — usada en la guía e informe',
+    profilbilde_lastet: '✓ Imagen de perfil subida',
+    navn_label: 'Nombre',
+    navn_ph: 'p.ej. Hotel del Fiordo o Sendero Beitostølen',
+    type_label: 'Tipo',
+    type_velg: 'Seleccionar tipo',
+    type_gruppe_a: 'A — Negocios en edificios',
+    type_gruppe_b: 'B — Proveedores de actividades en la naturaleza',
+    type_gruppe_c: 'C — Bienes públicos y espacios compartidos',
+    beskriv_type_label: 'Describir tipo',
+    beskriv_type_ph: 'Describa qué tipo de lugar es este...',
+    adresse_label: 'Dirección / lugar',
+    adresse_ph: 'Dirección, código postal, ciudad o coordenadas GPS',
+    destinasjon_label: 'Organización de destino',
+    destinasjon_ph: 'p.ej. Visit Valdres',
+    geo_label: 'Ubicación geográfica',
+    geo_btn: 'Detectar ubicación automáticamente',
+    geo_manuell_hint: 'Toque un campo para editar manualmente',
+    kommune_label: 'Municipio',
+    kommune_ph: 'p.ej. Øystre Slidre',
+    fylke_label: 'Provincia',
+    fylke_velg: 'Seleccionar provincia',
+    region_label: 'Región turística SSB',
+    region_velg: 'Seleccionar región (SSB)',
+    region_hint: '67 regiones turísticas oficiales (SSB KLASS 527, 2021)',
+    kontakt_label: 'Persona de contacto / gestor',
+    kontakt_ph: 'Nombre — correo electrónico',
+    prefyll_tekst: '🔄 Rellenado previamente desde la inspección anterior:',
+    prefyll_nullstill: 'Restablecer',
+    gpx_kort_tittel: '🗺️ Archivo GPX (opcional)',
+    gpx_hint: 'Sube un archivo GPX de Garmin, Strava o Komoot para análisis automático de pendiente y altitud.',
+    gpx_fil_tittel: 'Subir archivo GPX',
+    gpx_fil_hint: '.gpx de Garmin, Strava, Komoot, UT.no etc.',
+    legg_til_sone_btn: '+ Añadir zona / área',
+    side2_tittel: 'Preguntas adicionales',
+    side2_desc: 'Preguntas sobre cosas que la IA no puede ver en las imágenes.',
+    side3_tittel: 'Perfil de accesibilidad',
+    side3_desc: 'Pulse "Generar informe" cuando esté listo — la IA analiza las imágenes y crea la guía de accesibilidad.',
+    klar_tittel: '¿Listo para generar el informe?',
+    klar_desc: 'La IA analiza las imágenes y crea una guía de accesibilidad. Podrá editarla y aprobarla después.',
+    generer_btn: '🤖 Generar informe',
+    generer_spinner_desc: 'Esto puede tardar 15–30 segundos',
+    tab_guide: '🗺️ Guía de accesibilidad',
+    tab_analyse: '🤖 Análisis IA',
+    modal_tittel: 'Añadir zona / área',
+    modal_eget_ph: 'Nombre personalizado...',
+    modal_legg_til: 'Añadir',
+    modal_avbryt: 'Cancelar',
+    tilbake_pil: '← Atrás',
     // Navegación de pasos
     steg_neste_start: 'Iniciar inspección →',
     steg_neste_sporsmal: 'Siguiente: Preguntas →',
@@ -697,6 +867,33 @@ function T(key) {
   return (TEKST[lang] && TEKST[lang][key]) || TEKST['no'][key] || key;
 }
 
+// Oppdater alle data-i18n elementer i DOM
+function oppdaterI18n() {
+  // Tekstinnhold
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    var val = T(key);
+    if (val) el.textContent = val;
+  });
+  // Placeholder-attributter
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n-ph');
+    var val = T(key);
+    if (val) el.placeholder = val;
+  });
+  // optgroup label-attributter
+  document.querySelectorAll('[data-i18n-label]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n-label');
+    var val = T(key);
+    if (val) el.label = val;
+  });
+  // option tekst via label-val (bruker LABEL_MAP)
+  document.querySelectorAll('[data-i18n-label-val]').forEach(function(el) {
+    var norsk = el.getAttribute('data-i18n-label-val');
+    el.textContent = TL(norsk);
+  });
+}
+
 // Sett aktivt språk og re-render gjeldende steg
 function byttSpraak(lang) {
   state.lang = lang;
@@ -705,6 +902,8 @@ function byttSpraak(lang) {
   document.querySelectorAll('.lang-btn').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
+  // Oppdater statisk HTML via data-i18n
+  oppdaterI18n();
   // Re-render gjeldende steg
   goTo(state.step);
 }
@@ -2706,8 +2905,8 @@ function visPrefyllBanner(profil) {
   var chips = [profil['biz-name'], profil['biz-ssb-region']].filter(Boolean).map(function(v) {
     return '<span style="background:var(--green-light);color:var(--green-dark);border-radius:20px;padding:2px 9px;font-size:12px;font-weight:500;margin-right:4px">' + v + '</span>';
   }).join('');
-  banner.innerHTML = '&#x1F504; Forhåndsutfylt fra forrige kartlegging: ' + chips +
-    ' <button onclick="nullstillProfil()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;margin-left:6px;text-decoration:underline">Nullstill</button>';
+  banner.innerHTML = T('prefyll_tekst') + ' ' + chips +
+    ' <button onclick="nullstillProfil()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;margin-left:6px;text-decoration:underline">' + T('prefyll_nullstill') + '</button>';
   banner.style.display = 'block';
 }
 
