@@ -20,6 +20,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .topbar{background:#1a1a18;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100}
 .topbar-logo{font-size:17px;font-weight:700;color:#fff}
 .topbar-logo span{color:var(--green)}
+.lang-btn{background:none;border:1px solid rgba(255,255,255,.2);border-radius:6px;color:rgba(255,255,255,.4);font-size:11px;font-weight:600;padding:3px 7px;cursor:pointer;font-family:inherit;transition:all .15s}
+.lang-btn.active{background:rgba(29,158,117,.25);border-color:rgba(29,158,117,.5);color:#4fd1a5}
+.lang-btn:hover:not(.active){border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.65)}
 .api-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px}
 .progress-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.625rem 1rem;position:sticky;top:54px;z-index:90}
 .steps-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
@@ -244,9 +247,13 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-    <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.1</div>
-  <div style="display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.4)">
-    <span class="api-dot"></span>AI aktiv
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.2</div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
+    <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
+    <div style="display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.4);margin-left:4px">
+      <span class="api-dot"></span><span id="ai-status-txt">AI aktiv</span>
+    </div>
   </div>
 </div>
 <div class="progress-bar">
@@ -456,8 +463,116 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.1';
-const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null};
+const APP_VERSION = 'v0.4.2';
+
+// ── Flerspråklig støtte ───────────────────────────────────────────────────
+// Legg til nye språk ved å kopiere 'no'-blokken og oversette verdiene.
+// Bruk T('nokkel') overalt i koden i stedet for hardkodede norske tekster.
+const TEKST = {
+  no: {
+    // Navigasjon
+    neste: 'Neste', tilbake: 'Tilbake', hopp_over: 'Hopp over',
+    steg_sted: 'Sted', steg_fasiliteter: 'Fasiliteter',
+    steg_sporsmal: 'Spørsmål', steg_rapport: 'Rapport',
+    // Steg 1 — Sted
+    sted_tittel: 'Om stedet', sted_navn_label: 'Navn på sted / bedrift',
+    sted_navn_ph: 'F.eks. Beitostølen Helsesportsenter',
+    sted_type_label: 'Type virksomhet', sted_velg_type: 'Velg type…',
+    sted_adresse_label: 'Adresse', sted_adresse_ph: 'Gate, postnummer, sted',
+    sted_dest_label: 'Destinasjon / Visit-selskap',
+    sted_kontakt_label: 'Kontaktperson e-post',
+    sted_gps_btn: '📍 Hent posisjon automatisk',
+    sted_gps_laster: 'Henter posisjon…',
+    // Bilder og analyse
+    last_opp: 'Last opp bilde', analyser: 'Analyser',
+    analyserer: 'Analyserer…', legg_til_sone: 'Legg til sone',
+    mal_ta: 'Ta mål med iPhone', mal_lagre: 'Lagre mål',
+    // GPX
+    gpx_last_opp: 'Last opp GPX-fil', gpx_analyserer: 'Analyserer GPX…',
+    gpx_distanse: 'Distanse', gpx_hoyde: 'Høyde',
+    gpx_maks_stigning: 'Maks stigning', gpx_snitt_stigning: 'Snitt stigning',
+    gpx_merknad: 'ℹ️ Stigningsdata er beregnet fra GPS-høyder. Grenseverdiene er justert for å ta høyde for GPS-unøyaktighet.',
+    // Spørsmål
+    sporsmal_tittel: 'Tilleggsinformasjon', ja: 'Ja', nei: 'Nei', vet_ikke: 'Vet ikke',
+    // Rapport
+    rapport_tittel: 'Tilgjengelighetsguide',
+    rapport_helhetsinntrykk: 'Helhetsinntrykk',
+    rapport_godkjenn_label: 'Navn på kartlegger',
+    rapport_godkjenn_ph: 'Ditt navn',
+    rapport_godkjenn_btn: 'Godkjenn og lås guiden',
+    rapport_godkjent: 'Godkjent av',
+    rapport_last_ned: '⬇ Last ned guide',
+    rapport_rediger: '✏️ Rediger',
+    rapport_lagre: 'Lagre',
+    rapport_avbryt: 'Avbryt',
+    // Status
+    ai_aktiv: 'AI aktiv',
+    status_gronn: 'Tilgjengelig',
+    status_gul: 'Delvis tilgjengelig',
+    status_rod: 'Begrenset',
+  },
+  en: {
+    // Navigation
+    neste: 'Next', tilbake: 'Back', hopp_over: 'Skip',
+    steg_sted: 'Location', steg_fasiliteter: 'Facilities',
+    steg_sporsmal: 'Questions', steg_rapport: 'Report',
+    // Step 1 — Location
+    sted_tittel: 'About the location', sted_navn_label: 'Name of place / business',
+    sted_navn_ph: 'E.g. Beitostølen Health Sports Centre',
+    sted_type_label: 'Type of business', sted_velg_type: 'Select type…',
+    sted_adresse_label: 'Address', sted_adresse_ph: 'Street, postal code, city',
+    sted_dest_label: 'Destination / Visit organisation',
+    sted_kontakt_label: 'Contact person email',
+    sted_gps_btn: '📍 Detect location automatically',
+    sted_gps_laster: 'Detecting location…',
+    // Images and analysis
+    last_opp: 'Upload image', analyser: 'Analyse',
+    analyserer: 'Analysing…', legg_til_sone: 'Add zone',
+    mal_ta: 'Measure with iPhone', mal_lagre: 'Save measurements',
+    // GPX
+    gpx_last_opp: 'Upload GPX file', gpx_analyserer: 'Analysing GPX…',
+    gpx_distanse: 'Distance', gpx_hoyde: 'Elevation',
+    gpx_maks_stigning: 'Max slope', gpx_snitt_stigning: 'Avg slope',
+    gpx_merknad: 'ℹ️ Slope data is calculated from GPS elevation. Thresholds are adjusted to account for GPS inaccuracy.',
+    // Questions
+    sporsmal_tittel: 'Additional information', ja: 'Yes', nei: 'No', vet_ikke: 'Don't know',
+    // Report
+    rapport_tittel: 'Accessibility Guide',
+    rapport_helhetsinntrykk: 'Overall impression',
+    rapport_godkjenn_label: 'Surveyor name',
+    rapport_godkjenn_ph: 'Your name',
+    rapport_godkjenn_btn: 'Approve and lock guide',
+    rapport_godkjent: 'Approved by',
+    rapport_last_ned: '⬇ Download guide',
+    rapport_rediger: '✏️ Edit',
+    rapport_lagre: 'Save',
+    rapport_avbryt: 'Cancel',
+    // Status
+    ai_aktiv: 'AI active',
+    status_gronn: 'Accessible',
+    status_gul: 'Partially accessible',
+    status_rod: 'Limited access',
+  }
+};
+
+// Hent oversatt tekst — faller tilbake til norsk om nøkkel mangler i valgt språk
+function T(key) {
+  var lang = (state && state.lang) ? state.lang : 'no';
+  return (TEKST[lang] && TEKST[lang][key]) || TEKST['no'][key] || key;
+}
+
+// Sett aktivt språk og re-render gjeldende steg
+function byttSpraak(lang) {
+  state.lang = lang;
+  document.documentElement.setAttribute('lang', lang);
+  // Oppdater språkknapper
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  // Re-render gjeldende steg
+  if (typeof buildCurrentStep === 'function') buildCurrentStep();
+}
+const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
 
 // Bygg steg-piller
 function buildSteps() {
@@ -535,11 +650,12 @@ function handleProfilbilde(e) {
 
 async function analyzeProfilbilde() {
   if (!state.profilbilde) return;
+  var spraakNavn = state.lang === 'en' ? 'English' : 'norsk';
   try {
     var compressed = await compressImage(state.profilbilde.dataUrl);
     var base64 = compressed.split(',')[1];
     var type = document.getElementById('biz-type').value;
-    var prompt = 'Dette er et profilbilde av stedet. Beskriv stedet kort og nøkternt — hva slags sted er det, og hva gir bildet av inntrykk av tilgjengelighet. Unngå karakterer og dommer. **Helhetsinntrykk:** [kort beskrivelse av stedet og stemning] **Tilgjengelighet:** [hva bildet viser av adkomst, underlag og nivåer]';
+    var prompt = 'Dette er et profilbilde av stedet. Beskriv stedet kort og nøkternt — hva slags sted er det, og hva gir bildet av inntrykk av tilgjengelighet. Unngå karakterer og dommer. **Helhetsinntrykk:** [kort beskrivelse av stedet og stemning] **Tilgjengelighet:** [hva bildet viser av adkomst, underlag og nivåer]. Svar på ' + spraakNavn + '.';
     var res = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},
@@ -1139,7 +1255,8 @@ async function analyzeSpecificImage(idx, imgIdx) {
   if (loadingBox) loadingBox.style.display = 'block';
   var compressed = await compressImage(zone.images[imgIdx].dataUrl);
   var base64 = compressed.split(',')[1];
-  var prompt = ZONE_PROMPTS[zone.id] || DEFAULT_PROMPT;
+  var spraakNavn = state.lang === 'en' ? 'English' : 'norsk';
+  var prompt = (ZONE_PROMPTS[zone.id] || DEFAULT_PROMPT) + ' Svar på ' + spraakNavn + '.';
   try {
     var res = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:500,messages:[{role:'user',content:[
@@ -1252,6 +1369,7 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
 }
 
 async function buildGuide() {
+  var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'no' ? 'norsk' : 'norsk';
   var name = document.getElementById('biz-name').value || 'Ukjent sted';
   var type = document.getElementById('biz-type').value;
   var config = TYPE_CONFIG[type];
@@ -1308,7 +1426,7 @@ async function buildGuide() {
         var kontekst = [alleAnalyser, malInfo?'Målte data: '+malInfo:''].filter(Boolean).join('\n');
         var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:200,messages:[{role:'user',
-            content:'Du skriver tilgjengelighetsguide for "'+name+'". Basert på '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på norsk om hva gjesten finner her. Beskriv fakta — ikke vurder om det er bra eller dårlig. La gjesten selv avgjøre om det passer for dem. Unngå ord som "dessverre", "mangelfull", "ikke egnet" og lignende. Avslutt med STATUS:GRONN (fungerer for de fleste), STATUS:GUL (fungerer for noen — avhenger av behov) eller STATUS:ROD (begrenset fremkommelighet — beskriv hva).'}]})});
+            content:'Du skriver tilgjengelighetsguide for "'+name+'". Basert på '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på '+spraakNavn+' om hva gjesten finner her. Beskriv fakta — ikke vurder om det er bra eller dårlig. La gjesten selv avgjøre om det passer for dem. Unngå ord som "dessverre", "mangelfull", "ikke egnet" og lignende. Avslutt med STATUS:GRONN (fungerer for de fleste), STATUS:GUL (fungerer for noen — avhenger av behov) eller STATUS:ROD (begrenset fremkommelighet — beskriv hva).'}]})});
         var data = await res.json();
         if (data.content&&data.content[0]&&data.content[0].text) {
           var tekst = data.content[0].text;
@@ -1506,7 +1624,7 @@ async function buildGuide() {
     '<div style="text-align:center;font-size:11px;color:var(--text3);margin-top:1rem;padding-bottom:1rem">Tilgjengelighetsguide generert med AccessNorway · '+new Date().toLocaleDateString('nb-NO')+'</div>';
 
   var soner = state.zones.filter(function(z){return z.images.length>0||z.note;});
-  var kontekstTekst = 'Du er tilgjengelighetsassistent for "'+name+'". Svar kort og konkret på norsk. Fasiliteter: ';
+  var kontekstTekst = 'Du er tilgjengelighetsassistent for "'+name+'". Svar kort og konkret på '+spraakNavn+'. Fasiliteter: ';
   kontekstTekst += soner.map(function(z){return z.label+(z.note?' - '+z.note:'');}).join(', ');
   kontekstTekst += '. Kun bruk informasjonen gitt.';
   window._guideChatKontekst = kontekstTekst;
@@ -1514,6 +1632,7 @@ async function buildGuide() {
 }
 
 async function buildAnalyse() {
+  var spraakNavn = state.lang === 'en' ? 'English' : 'norsk';
   var container = document.getElementById('tab-content-analyse');
   var name = document.getElementById('biz-name').value || 'Ukjent sted';
   var type = document.getElementById('biz-type').value;
@@ -1535,7 +1654,7 @@ async function buildAnalyse() {
         var kontekst = [alleAnalyser, malInfo?'Målte data: '+malInfo:'', zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
         var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',
-            content:'Du skriver tilgjengelighetsprofil for "'+name+'" som gjester skal lese. Basert på: '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på norsk som forteller gjesten konkret hva som finnes. Beskriv fakta — ikke vurder om det er bra eller dårlig. Unngå ord som "dessverre", "mangelfull", "ikke egnet". La gjesten selv avgjøre om det passer for dem. Avslutt med: STATUS:GRONN (fungerer for de fleste), STATUS:GUL (avhenger av behov) eller STATUS:ROD (begrenset — beskriv hva).'}]})});
+            content:'Du skriver tilgjengelighetsprofil for "'+name+'" som gjester skal lese. Basert på: '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på '+spraakNavn+' som forteller gjesten konkret hva som finnes. Beskriv fakta — ikke vurder om det er bra eller dårlig. Unngå ord som "dessverre", "mangelfull", "ikke egnet". La gjesten selv avgjøre om det passer for dem. Avslutt med: STATUS:GRONN (fungerer for de fleste), STATUS:GUL (avhenger av behov) eller STATUS:ROD (begrenset — beskriv hva).'}]})});
         var data = await res.json();
         if (data.content && data.content[0] && data.content[0].text) {
           var tekst = data.content[0].text;
@@ -1584,7 +1703,7 @@ async function buildAnalyse() {
   var soneInfo = gyldigeSoner.map(function(s){return s.zone.label+' ('+s.statusTekst+'): '+s.gjesteTekst;}).join('\n');
   var svarInfo = qIds.map(function(id){var q=ALL_QUESTIONS[id];var v=state.answers[id];return q&&v?q.text+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('\n');
   var gpxInfo = state.gpxData ? 'GPX: '+state.gpxData.totalDist+'km, maks stigning '+state.gpxData.maxSlope+'%, snitt '+state.gpxData.avgSlope+'%' : '';
-  window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?config.label:type)+'). Svar på norsk, vennlig og konkret.\n\n'+
+  window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?config.label:type)+'). Svar på '+spraakNavn+', vennlig og konkret.\n\n'+
     (gpxInfo?'RUTE:\n'+gpxInfo+'\n\n':'')+'FASILITETER:\n'+(soneInfo||'Ikke registrert')+'\n\nTILLEGGSINFO:\n'+(svarInfo||'Ikke registrert')+
     '\n\nHvis du ikke vet svaret, si det ærlig.';
   state.chatHistory = [];
@@ -1790,6 +1909,7 @@ function byggKartleggingPayload(godkjentAvNavn) {
       dato: new Date().toISOString(),
       godkjent_av: godkjentAvNavn,
       status: 'bekreftet',
+      spraak: state.lang || 'no',
       ai_sammendrag: state.profilbilde && state.profilbilde.analysis ? state.profilbilde.analysis : null
     },
     soner: state.zones
