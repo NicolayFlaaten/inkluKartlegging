@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.8</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.9</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -414,7 +414,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="bottom-bar">
   <button class="btn-secondary" id="btn-back" onclick="goBack()" style="display:none" data-i18n="tilbake_pil">← Tilbake</button>
-  <button class="btn-primary" id="btn-next" onclick="goNext()">Start kartlegging →</button>
+  <button class="btn-primary" id="btn-next" onclick="goNext()" data-i18n="steg_neste_start">Start kartlegging →</button>
 </div>
 
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalIfBg(event)">
@@ -464,7 +464,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.8';
+const APP_VERSION = 'v0.4.9';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -605,6 +605,23 @@ const TEKST = {
     modal_avbryt: 'Avbryt',
     // Navigasjonsknapper
     tilbake_pil: '← Tilbake',
+    chat_tittel: 'Tilgjengelighetsassistent',
+    chat_spor_om: 'Spør om tilgjengelighet',
+    chat_ai_assistent: 'AI-assistent',
+    chat_passer_rullestol: 'Passer for rullestol?',
+    chat_hc_parkering: 'Finnes HC-parkering?',
+    chat_input_ph: 'Skriv spørsmål...',
+    edit_banner: 'Gjennomgå og rediger teksten før du godkjenner guiden. Klikk Rediger på hver sone.',
+    godkjenn_desc: 'Les gjennom teksten over og gjør eventuelle rettelser. Når du er fornøyd, godkjenn guiden med ditt navn.',
+    godkjenn_navn_ph: 'Ditt fulle navn...',
+    last_ned_html: '📄 Last ned guide (HTML)',
+    last_ned_json: '⬇️ Last ned rådata (JSON)',
+    last_ned_json_btn: '⬇️ Last ned JSON',
+    guide_footer: 'Tilgjengelighetsguide generert med AccessNorway',
+    gruppe_a: 'A — Bygningsbasert bedrift',
+    gruppe_b: 'B — Naturbasert aktivitetsbedrift',
+    gruppe_c: 'C — Fellesgode / felles rom',
+    pageDesc_default: 'Last opp bilder og registrer mål.',
     // Navigasjonsknapper steg
     steg_neste_start: 'Start kartlegging →',
     steg_neste_sporsmal: 'Neste: Spørsmål →',
@@ -768,6 +785,23 @@ const TEKST = {
     modal_legg_til: 'Add',
     modal_avbryt: 'Cancel',
     tilbake_pil: '← Back',
+    chat_tittel: 'Accessibility assistant',
+    chat_spor_om: 'Ask about accessibility',
+    chat_ai_assistent: 'AI assistant',
+    chat_passer_rullestol: 'Suitable for wheelchair?',
+    chat_hc_parkering: 'Accessible parking available?',
+    chat_input_ph: 'Type your question...',
+    edit_banner: 'Review and edit the text before approving the guide. Click Edit on each zone.',
+    godkjenn_desc: 'Read through the text above and make any corrections. When satisfied, approve the guide with your name.',
+    godkjenn_navn_ph: 'Your full name...',
+    last_ned_html: '📄 Download guide (HTML)',
+    last_ned_json: '⬇️ Download raw data (JSON)',
+    last_ned_json_btn: '⬇️ Download JSON',
+    guide_footer: 'Accessibility guide generated with AccessNorway',
+    gruppe_a: 'A — Building-based business',
+    gruppe_b: 'B — Nature-based activity provider',
+    gruppe_c: 'C — Public asset / shared space',
+    pageDesc_default: 'Upload images and record measurements.',
     // Navigation step buttons
     steg_neste_start: 'Start mapping →',
     steg_neste_sporsmal: 'Next: Questions →',
@@ -957,6 +991,23 @@ const TEKST = {
     modal_legg_til: 'Añadir',
     modal_avbryt: 'Cancelar',
     tilbake_pil: '← Atrás',
+    chat_tittel: 'Asistente de accesibilidad',
+    chat_spor_om: 'Preguntar sobre accesibilidad',
+    chat_ai_assistent: 'Asistente IA',
+    chat_passer_rullestol: '¿Apto para silla de ruedas?',
+    chat_hc_parkering: '¿Hay aparcamiento accesible?',
+    chat_input_ph: 'Escriba su pregunta...',
+    edit_banner: 'Revise y edite el texto antes de aprobar la guía. Haga clic en Editar en cada zona.',
+    godkjenn_desc: 'Lea el texto anterior y haga las correcciones necesarias. Cuando esté satisfecho, apruebe la guía con su nombre.',
+    godkjenn_navn_ph: 'Su nombre completo...',
+    last_ned_html: '📄 Descargar guía (HTML)',
+    last_ned_json: '⬇️ Descargar datos brutos (JSON)',
+    last_ned_json_btn: '⬇️ Descargar JSON',
+    guide_footer: 'Guía de accesibilidad generada con AccessNorway',
+    gruppe_a: 'A — Negocio en edificio',
+    gruppe_b: 'B — Proveedor de actividades en la naturaleza',
+    gruppe_c: 'C — Bien público / espacio compartido',
+    pageDesc_default: 'Suba imágenes y registre medidas.',
     // Navegación de pasos
     steg_neste_start: 'Iniciar inspección →',
     steg_neste_sporsmal: 'Siguiente: Preguntas →',
@@ -1401,6 +1452,93 @@ var TYPE_CONFIG = {
     questions:['q_sti_rullestol','q_hc_wc','q_sti_merking','q_ledsager']}
 };
 
+// Oversettelser av spørsmålstekster — legg til språk ved å kopiere en blokk
+var Q_TEXT = {
+  en: {
+    q_allergi: 'Are allergy-friendly alternatives available?',
+    q_parfyme: 'Can rooms be booked with fragrance-free products?',
+    q_meny: 'Is the menu available digitally, in large print or with allergen labelling?',
+    q_skriftlig: 'Can guests communicate in writing (SMS/email)?',
+    q_opplaering: 'Have staff / guides received training in serving guests with diverse needs?',
+    q_teleslynge: 'Is there a hearing loop in the reception or common areas?',
+    q_ledsager: 'Is a companion card accepted?',
+    q_evakuering: 'Is there an evacuation plan that covers everyone?',
+    q_tilpassetutstyr: 'Do you have adapted equipment for people with reduced mobility?',
+    q_sti_rullestol: 'Is the trail / route passable by wheelchair or walker?',
+    q_sti_barnevogn: 'Is the trail passable by pram?',
+    q_sti_merking: 'Is the trail / route clearly marked?',
+    q_sti_belysning: 'Is there lighting along the trail?',
+    q_hc_wc: 'Is an accessible toilet available nearby?',
+    q_badeplass_rampe: 'Is there a ramp or adapted access to the water?',
+    q_hvileplasser: 'Are there benches or rest areas along the route?',
+    q_hvileplasser_avstand: 'Is there a rest area every 500 metres or less?',
+    q_luminans: 'Is there good luminance contrast between signs, counters and surroundings?',
+    q_taktil: 'Are there tactile or visual markings at stairs and level changes?',
+    q_taxi_buss: 'Is there a drop-off/pick-up point for bus or taxi near the entrance?',
+    q_regulerbar_seng: 'Is an adjustable bed available?',
+    q_lading_el: 'Is it possible to charge an electric wheelchair in the room overnight?',
+    q_visuell_brannalarm: 'Is there a visual fire alarm in the rooms?',
+    q_alarm_resepsjon: 'Is there an alarm or alert system connecting the room to reception?',
+    q_garderobe_tilrettelagt: 'Is there an accessible changing room or shower for people with reduced mobility?',
+  },
+  es: {
+    q_allergi: '¿Hay alternativas aptas para alérgicos disponibles?',
+    q_parfyme: '¿Se pueden reservar habitaciones con productos sin fragancia?',
+    q_meny: '¿Está el menú disponible en formato digital, letra grande o con etiquetado de alérgenos?',
+    q_skriftlig: '¿Pueden los huéspedes comunicarse por escrito (SMS/correo)?',
+    q_opplaering: '¿Han recibido el personal / guías formación para atender huéspedes con diversas necesidades?',
+    q_teleslynge: '¿Hay bucle de inducción en la recepción o zonas comunes?',
+    q_ledsager: '¿Se acepta tarjeta de acompañante?',
+    q_evakuering: '¿Existe un plan de evacuación que contemple a todos?',
+    q_tilpassetutstyr: '¿Disponen de equipamiento adaptado para personas con movilidad reducida?',
+    q_sti_rullestol: '¿Es el sendero / ruta transitable en silla de ruedas o andador?',
+    q_sti_barnevogn: '¿Es el sendero transitable con cochecito?',
+    q_sti_merking: '¿Está el sendero / ruta claramente señalizado?',
+    q_sti_belysning: '¿Hay iluminación a lo largo del sendero?',
+    q_hc_wc: '¿Hay un aseo accesible disponible cerca?',
+    q_badeplass_rampe: '¿Hay rampa o acceso adaptado al agua?',
+    q_hvileplasser: '¿Hay bancos o áreas de descanso a lo largo del recorrido?',
+    q_hvileplasser_avstand: '¿Hay un área de descanso cada 500 metros o menos?',
+    q_luminans: '¿Hay buen contraste de luminancia entre señales, mostradores y entorno?',
+    q_taktil: '¿Hay marcaciones táctiles o visuales en escaleras y cambios de nivel?',
+    q_taxi_buss: '¿Hay zona de embarque/desembarque para autobús o taxi cerca de la entrada?',
+    q_regulerbar_seng: '¿Hay cama ajustable disponible?',
+    q_lading_el: '¿Es posible cargar una silla de ruedas eléctrica en la habitación durante la noche?',
+    q_visuell_brannalarm: '¿Hay alarma de incendio visual en las habitaciones?',
+    q_alarm_resepsjon: '¿Hay un sistema de alarma o alerta que conecte la habitación con recepción?',
+    q_garderobe_tilrettelagt: '¿Hay vestuario o ducha accesible para personas con movilidad reducida?',
+  }
+};
+
+var Q_CTX = {
+  en: {
+    q_allergi: 'Without down, perfume, pets',
+    q_skriftlig: 'Important for hearing impaired',
+    q_tilpassetutstyr: 'Sit-ski, handbike, amfistol, adapted kayaks etc.',
+    q_sti_merking: 'Signs, poles, map',
+    q_hvileplasser: 'Important for elderly and people with limited walking ability',
+    q_hvileplasser_avstand: 'Recommended to make the route accessible for elderly',
+    q_luminans: 'Important for visually impaired',
+    q_taktil: 'Tactile studs, stair nose markings, contrast strips',
+    q_regulerbar_seng: 'Important for guests with mobility challenges',
+    q_ledsager: 'Companion for a person with disability',
+    q_visuell_brannalarm: 'Important for hearing impaired',
+  },
+  es: {
+    q_allergi: 'Sin plumas, perfume, mascotas',
+    q_skriftlig: 'Importante para personas con discapacidad auditiva',
+    q_tilpassetutstyr: 'Sit-ski, handbike, amfistol, kayaks adaptados, etc.',
+    q_sti_merking: 'Señales, balizas, mapa',
+    q_hvileplasser: 'Importante para mayores y personas con movilidad reducida',
+    q_hvileplasser_avstand: 'Recomendado para hacer la ruta accesible para mayores',
+    q_luminans: 'Importante para personas con baja visión',
+    q_taktil: 'Pavimento táctil, bordes de escalón, bandas de contraste',
+    q_regulerbar_seng: 'Importante para huéspedes con dificultades de movilidad',
+    q_ledsager: 'Acompañante para persona con discapacidad',
+    q_visuell_brannalarm: 'Importante para personas con discapacidad auditiva',
+  }
+};
+
 var ALL_QUESTIONS = {
   q_allergi:{text:'Er det allergivennlige alternativer tilgjengelig?',ctx:'Uten dun, parfyme, kjæledyr',utsagn:'Allergivennlige alternativer er tilgjengelig',ikon:'🌿'},
   q_parfyme:{text:'Kan rom bestilles med parfymefrie produkter?',ctx:'',utsagn:'Rom kan bestilles med parfymefrie produkter',ikon:'🌸'},
@@ -1693,7 +1831,7 @@ function buildZones() {
   document.getElementById('zones-title').textContent = TL(config.pageTitle);
   document.getElementById('zones-desc').textContent = TL(config.pageDesc);
   var grp = config.group;
-  var grpLabel = {A:'A — Bygningsbasert bedrift',B:'B — Naturbasert aktivitetsbedrift',C:'C — Fellesgode / felles rom'}[grp];
+  var grpLabel = {A:T('gruppe_a'),B:T('gruppe_b'),C:T('gruppe_c')}[grp];
   document.getElementById('group-badge-container').innerHTML = '<div class="group-badge '+grp+'">'+grpLabel+'</div>';
   document.getElementById('gpx-section').style.display = (grp==='B'||grp==='C') ? 'block' : 'none';
   if (state.zones.length===0 || state._builtForType!==type) {
@@ -1857,8 +1995,11 @@ function buildQuestions() {
     var id = qIds[i];
     var q = ALL_QUESTIONS[id];
     if (!q) continue;
-    html += '<div class="question-item"><div class="question-text">'+q.text+'</div>' +
-      (q.ctx ? '<div class="question-context">'+q.ctx+'</div>' : '') +
+    var _lang = state.lang || 'no';
+    var qText = (Q_TEXT[_lang] && Q_TEXT[_lang][id]) ? Q_TEXT[_lang][id] : q.text;
+    var qCtx = (Q_CTX[_lang] && Q_CTX[_lang][id]) ? Q_CTX[_lang][id] : (q.ctx || '');
+    html += '<div class="question-item"><div class="question-text">'+qText+'</div>' +
+      (q.ctx ? '<div class="question-context">'+qCtx+'</div>' : '') +
       '<div class="yn-group">' +
       '<button class="yn-btn yes '+(state.answers[id]==='ja'?'active':'')+'" onclick="setAns(\''+id+'\',\'ja\',this)">Ja</button>' +
       '<button class="yn-btn no '+(state.answers[id]==='nei'?'active':'')+'" onclick="setAns(\''+id+'\',\'nei\',this)">Nei</button>' +
@@ -2165,34 +2306,34 @@ async function buildGuide() {
     (jaItems ? '<div class="guide-section"><div class="guide-section-title">Tilleggstjenester</div><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
     '<div class="guide-section"><div class="guide-section-title">Spør om tilgjengelighet</div>' +
     '<div class="chat-card">' +
-    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">Tilgjengelighetsassistent</div><div class="chat-header-sub">AI</div></div>' +
+    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_tittel')+'</div><div class="chat-header-sub">AI</div></div>' +
     '<div class="chat-messages" id="guide-chat-messages"><div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten på '+name+'. Hva lurer du på?</div></div></div>' +
     '<div class="chat-suggestions">' +
-    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Passer det for rullestol?\')">Passer for rullestol?</button>' +
-    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Finnes det HC-parkering?\')">Finnes HC-parkering?</button>' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Passer det for rullestol?\')">'+T('chat_passer_rullestol')+'</button>' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Finnes det HC-parkering?\')">'+T('chat_hc_parkering')+'</button>' +
     '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Hva med allergi?\')">'+T('chat_allergi')+'</button>' +
     '</div>' +
     '<div class="chat-input-row">' +
-    '<input type="text" class="chat-input" id="guide-chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key===\'Enter\')sendGuideChatMsg()"/>' +
+    '<input type="text" class="chat-input" id="guide-chat-input" placeholder="'+T('chat_input_ph')+'" onkeydown="if(event.key===\'Enter\')sendGuideChatMsg()"/>' +
     '<button class="chat-send" onclick="sendGuideChatMsg()">➤</button>' +
     '</div></div></div>' +
-    '<div class="edit-mode-banner">✏️ <span>Gjennomgå og rediger teksten før du godkjenner guiden. Klikk <strong>Rediger</strong> på hver sone.</span></div>' +
+    '<div class="edit-mode-banner">✏️ <span>'+T('edit_banner')+'</span></div>' +
 
     '<div class="godkjenn-bar" id="godkjenn-bar">' +
     '<div class="godkjenn-title">'+T('menneskelig_gjennomgang')+'</div>' +
-    '<div class="godkjenn-desc">Les gjennom teksten over og gjør eventuelle rettelser. Når du er fornøyd, godkjenn guiden med ditt navn.</div>' +
+    '<div class="godkjenn-desc">'+T('godkjenn_desc')+'</div>' +
     '<div class="godkjenn-fields">' +
-    '<input type="text" id="godkjenn-navn" placeholder="Ditt fulle navn..." style="width:100%;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:16px;font-family:inherit;outline:none"/>' +
+    '<input type="text" id="godkjenn-navn" placeholder="'+T('godkjenn_navn_ph')+'" style="width:100%;border:1.5px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;font-size:16px;font-family:inherit;outline:none"/>' +
     '</div>' +
-    '<button class="godkjenn-btn" onclick="godkjennGuide()">✅ Godkjenn og lås guiden</button>' +
+    '<button class="godkjenn-btn" onclick="godkjennGuide()">'+T('rapport_godkjenn_btn')+'</button>' +
     '</div>' +
     '<div class="godkjent-badge" id="godkjent-badge" style="display:none"></div>' +
 
     '<div class="guide-download-bar">' +
-    '<button class="guide-btn-dl" onclick="downloadGuideHTML()">📄 Last ned guide (HTML)</button>' +
-    '<button class="guide-btn-dl primary" onclick="downloadProfile()">⬇️ Last ned rådata (JSON)</button>' +
+    '<button class="guide-btn-dl" onclick="downloadGuideHTML()">'+T('last_ned_html')+'</button>' +
+    '<button class="guide-btn-dl primary" onclick="downloadProfile()">'+T('last_ned_json')+'</button>' +
     '</div>' +
-    '<div style="text-align:center;font-size:11px;color:var(--text3);margin-top:1rem;padding-bottom:1rem">Tilgjengelighetsguide generert med AccessNorway · '+new Date().toLocaleDateString('nb-NO')+'</div>';
+    '<div style="text-align:center;font-size:11px;color:var(--text3);margin-top:1rem;padding-bottom:1rem">'+T('guide_footer')+' · '+new Date().toLocaleDateString('nb-NO')+'</div>';
 
   var soner = state.zones.filter(function(z){return z.images.length>0||z.note;});
   var kontekstTekst = 'Du er tilgjengelighetsassistent for "'+name+'". Svar kort og konkret på '+spraakNavn+'. Fasiliteter: ';
@@ -2284,15 +2425,15 @@ async function buildAnalyse() {
     sonerHtml +
     (jaItems?'<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">'+jaItems+'</div></div>':'') +
     '<div class="chat-card">' +
-    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">Spør om tilgjengelighet</div><div class="chat-header-sub">AI-assistent</div></div>' +
+    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_spor_om')+'</div><div class="chat-header-sub">'+T('chat_ai_assistent')+'</div></div>' +
     '<div class="chat-messages" id="chat-messages"><div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten her. Hva lurer du på?</div></div></div>' +
     '<div class="chat-suggestions">' +
-    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Passer for rullestol?</button>' +
-    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">Finnes HC-parkering?</button>' +
+    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_passer_rullestol')+'</button>' +
+    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_hc_parkering')+'</button>' +
     '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_allergi')+'</button>' +
     '</div>' +
     '<div class="chat-input-row">' +
-    '<input type="text" class="chat-input" id="chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key===\'Enter\')sendChat()"/>' +
+    '<input type="text" class="chat-input" id="chat-input" placeholder="'+T('chat_input_ph')+'" onkeydown="if(event.key===\'Enter\')sendChat()"/>' +
     '<button class="chat-send" onclick="sendChat()">➤</button>' +
     '</div></div>';
 }
