@@ -25,6 +25,7 @@ Ingen kategorisering av brukere. Presis og ærlig informasjon. Mennesker med fun
 | `erfaring.html` | Brukererfaringsskjema for gjester | 🔵 Mockup — kobles til DB |
 | `dashboard.html` | Bedriftens interne oversikt | 🔵 Mockup — kobles til DB |
 | `CHANGELOG.md` | Alle endringer versjon for versjon | ✅ Oppdateres ved hver release |
+| `worker.js` | Cloudflare Worker — API-proxy og origin-validering | ✅ Live |
 | `README.md` | Denne filen | ✅ |
 
 ---
@@ -39,6 +40,7 @@ Ingen kategorisering av brukere. Presis og ærlig informasjon. Mennesker med fun
 | AI-modell | Claude claude-haiku-4-5 (via Anthropic API) |
 | Kart / GPX | Leaflet.js + Nominatim/OpenStreetMap |
 | Geografi | SSB KLASS 527 (2021) — 67 reiselivsregioner |
+| Flerspråklig | Norsk, engelsk og spansk (NO/EN/ES) — arkitektur støtter flere språk |
 | Database (planlagt) | Supabase / PostgreSQL |
 
 ---
@@ -68,7 +70,7 @@ Prototype-fasen bruker `0.x.x`. Versjon `1.0.0` = nasjonal løsning klar.
    ```
 4. Last opp til GitHub med beskrivende commitmelding:
    ```
-   v0.4.1 — justerte AI-prompts til nøytral tone
+   v0.4.12 — siste endringer
    ```
 
 **Versjonsnummeret vises i topbaren i appen** — enkelt å bekrefte at riktig versjon er lastet opp.
@@ -77,7 +79,7 @@ Prototype-fasen bruker `0.x.x`. Versjon `1.0.0` = nasjonal løsning klar.
 
 ## Opplasting til GitHub
 
-> ⚠️ Filen er ~80–90 KB. Bruk alltid **"Upload files"** (drag and drop) — aldri lim inn i GitHub-editoren, den trunkerer store filer.
+> ⚠️ Filen er ~165 KB. Bruk alltid **"Upload files"** (drag and drop) — aldri lim inn i GitHub-editoren, den trunkerer store filer.
 
 1. Gå til [github.com/NicolayFlaaten/inkluKartlegging](https://github.com/NicolayFlaaten/inkluKartlegging)
 2. Klikk **"Add file" → "Upload files"**
@@ -154,10 +156,10 @@ GitHub Pages oppdateres automatisk innen ~30 sekunder.
 | Rolle | Person | Ansvar |
 |---|---|---|
 | Prosjektleder / frontend | Nicolay Flaaten | Kartleggingsverktøy, rapporter, UX |
-| Database / backend | Ole | PostgreSQL, REST API, auth |
+| Database / backend | Ole (NTC) | PostgreSQL, REST API, auth |
 | Faglig forankring | INKLU Valdres (BHSS, Beitostølen Utvikling, Øystre Slidre Kommune) | Innhold, kartleggingsmanual |
 | Nasjonal koordinering | NTC (Norwegian Travel Cluster) | 50 reisemål, 5000 bedrifter |
 
 ---
 
-*Sist oppdatert: 2026-06-07 · Versjon v0.4.1*
+*Sist oppdatert: 2026-06-08 · Versjon v0.4.12*

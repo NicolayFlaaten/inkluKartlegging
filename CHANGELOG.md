@@ -3,6 +3,137 @@
 Alle vesentlige endringer dokumenteres her.  
 Format: `MAJOR.MINOR.PATCH` — prototype-fase bruker `0.x.x`.
 
+## [v0.4.12] — 2026-06-08
+
+### Endret
+- **Rediger-knapper i guide** — to forekomster i `lagSoneHTML()` bruker nå `T('sone_rediger')` og `T('sone_rediger_tekst')`
+- **Stigning krevende — utvidet anbefaling** — `stigning_krevende` oppdatert på alle tre språk: anbefaler nå elektrisk rullestol eller scooter ved krevende stigning, med henvisning til leverandør
+
+---
+
+## [v0.4.11] — 2026-06-08
+
+### Lagt til
+- **`Q_UTSAGN`-oversettelseskart** — alle 25 utsagn-tekster (tilleggstjenester i guide) oversatt til engelsk og spansk; `buildGuide()` bruker nå oversatt tekst basert på `state.lang`
+- **Gruppe-badge oversatt** — "B — Naturbasert aktivitetsbedrift" o.l. bruker nå `T('gruppe_b')` osv.
+
+### Endret
+- **Chat-velkomstmelding** — "Hei! Jeg kan svare på spørsmål..." bruker nå `T('chat_hei')` og `T('chat_hva_lurer')`
+- **Guide-seksjoner** — "Fasiliteter og tilgjengelighet", "Tilleggstjenester", "Under oppholdet", "Spør om tilgjengelighet" bruker nå `T()`-nøkler
+- **Ja/Nei-knapper** — bruker nå `T('ja')` / `T('nei')`; vises som "Sí"/"No" på spansk
+- **"Last ned JSON"** — navigasjonsknapp på steg 4 bruker nå `T('last_ned_json_btn')`
+- **guide-hero-type** — enhetens typenavnet bruker nå `TL(config.label)` for oversettelse
+- **Godkjenn-seksjon** — alle tekster (instruksjon, navn-placeholder, knapp, nedlastingsknapper, footer) bruker nå `T()`
+
+---
+
+## [v0.4.10] — 2026-06-08
+
+### Endret
+- Versjonsnummer justert tilbake fra v0.5.1 til v0.4.10 — flerspråklig er minor/patch, ikke major
+- Løst kritisk feil: `chat_hei_generell: T('chat_hei_generell')` inne i `TEKST.no`-objektet krasjet hele scriptet ved oppstart (selvreference ved initialisering)
+
+---
+
+## [v0.4.9] — 2026-06-08
+
+### Lagt til
+- **Spørsmålstekster oversatt** — `Q_TEXT` og `Q_CTX`-kart med oversettelser for alle ~25 spørsmål på engelsk og spansk; `buildQuestions()` bruker nå oversatt tekst
+- **`EF_LABEL`-kart og `TEF()`-funksjon** — oversetter EXTRA_FIELDS målefelt-labels (Dørbredde, Stigningsgrad o.l.) på engelsk og spansk
+- **`Q_UTSAGN`-grunnstruktur** — forberedt for tilleggstjeneste-oversettelser
+
+### Endret
+- **pageDesc i TYPE_CONFIG** — alle 17 unike beskrivelsestekster lagt til i `LABEL_MAP` for engelsk og spansk; `TL()` oversetter automatisk
+- **GPX-statistikk** — "Distanse", "Maks stigning", "Snitt stigning", "Stigning opp", "GPX-ANALYSE" bruker nå `T()`-nøkler
+- **Slope-legend** — refaktorert til `getLegendHtml()`-funksjon som kalles dynamisk; legend oppdateres ved språkbytte
+- **JSON-eksport** — `charset=utf-8` lagt til i Blob-type; løser encoding-feil (Ã¸/Ã˜) i nedlastet JSON
+
+---
+
+## [v0.4.8] — 2026-06-08
+
+### Endret
+- **Systematisk språkgjennomgang** — alle JS-genererte UI-strenger med norske tegn (ø/å/æ) utenfor oversettelsesblokker erstattet med `T()`-kall
+- **GPX-vurderingstekster** — alle `gpxVurdering()`-returstrenger bruker nå `T()`-nøkler på alle tre språk
+- **GPS-feilmeldinger** — bruker nå `T('gps_ikke_tilgjengelig')`, `T('gps_avslatt')`, `T('gps_oppdater')`
+- **Chat-feilmelding, godkjenning, guide-titler** — bruker nå `T()`
+
+### Fikset
+- Kritisk feil: `T()`-kall inne i `TEKST.no`-blokken for `gps_*` og `chat_feil` krasjet scriptet — erstattet med direkte strenger
+- `guide-gpx-stat-label`-elementer hadde ugyldige `"'>` i generert HTML — rettet
+
+---
+
+## [v0.4.7] — 2026-06-08
+
+### Lagt til
+- **Sone-upload-tekster** — "Ta bilde eller velg fra bibliotek", "Alle bilder kan analyseres individuelt", "Egne notater (valgfritt)" bruker nå `T()`
+- **Stigning-vurderingstekster** — alle seks `gpxVurdering()`-strenger lagt til i `TEKST` for no/en/es
+
+---
+
+## [v0.4.6] — 2026-06-08
+
+### Endret
+- Lastet inn oppdatert fil fra bruker (v0.4.5) som base
+- **Sone-kort** — "Ta bilde eller velg fra bibliotek", "Alle bilder kan analyseres individuelt", "EGNE NOTATER (VALGFRITT)" og "Analyserer..." bruker nå `T()`
+
+---
+
+## [v0.4.5] — 2026-06-08
+
+### Lagt til
+- **Spansk (ES)** — tredje språk fullt implementert; NO/EN/ES-knapper i topbar
+- **`LABEL_MAP`** — refaktorert fra `LABEL_EN` til flernivå-kart (`LABEL_MAP.en`, `LABEL_MAP.es`) med ~80 zone- og type-labels per språk
+- **`oppdaterI18n()`** — traverserer DOM og oppdaterer `data-i18n`, `data-i18n-ph`, `data-i18n-label` og `data-i18n-label-val`-attributter
+- **`spraakNavn`** — dynamisk variabel brukt i alle AI-prompts; støtter nå 'norsk' / 'English' / 'español'
+
+### Endret
+- Alle statiske HTML-elementer på side 0–3 har fått `data-i18n`-attributter
+- Alle `f.eks.`-placeholders oversettes til `e.g.` (EN) eller `p.ej.` (ES) via `oppdaterI18n()`
+
+---
+
+## [v0.4.4] — 2026-06-07
+
+### Lagt til
+- **Spansk grunnstruktur** — `TEKST.es`-blokk med ~50 nøkler; ES-knapp i topbar
+
+### Fikset
+- `T('gps_juster_fylke')` inne i `TEKST.no`-objektet krasjet scriptet — erstattet med direkte streng
+- `state` deklarert før `TEKST`-objektet (var etter — `const` er ikke hoistet)
+
+---
+
+## [v0.4.3] — 2026-06-07
+
+### Lagt til
+- **Engelsk (EN)** — andre språk implementert; NO/EN-knapper i topbar
+- **`TEKST`-objekt med `no`/`en`-blokker** — alle UI-tekster samlet
+- **`T('nokkel')`-funksjon** — henter riktig tekst; faller tilbake til norsk
+- **`byttSpraak(lang)`** — bytter språk og kaller `oppdaterI18n()` + `goTo(state.step)`
+- **Steg-piller, navigasjonsknapper, GPX-labels, sone-titler** — alle oversatt
+
+### Fikset
+- `Don't know` hadde apostrof i enkeltfnutt-streng — krasjet JS; byttet til doble anførselstegn
+
+---
+
+## [v0.4.2] — 2026-06-07
+
+### Lagt til
+- **Flerspråklig støtte** — norsk og engelsk implementert; arkitektur støtter flere språk i fremtiden
+- **`TEKST`-objekt** — alle UI-tekster samlet i ett objekt med `no` og `en` blokker; nye språk legges til ved å kopiere en blokk og oversette
+- **`T('nokkel')`-funksjon** — henter riktig tekst basert på `state.lang`; faller tilbake til norsk om oversettelse mangler
+- **`byttSpraak(lang)`-funksjon** — bytter språk og re-rendrer gjeldende steg
+- **Språkvelger i topbaren** — `NO` / `EN`-knapper med visuell markering av aktivt språk
+- **AI-output på valgt språk** — bildeanalyser, sone-tekster, chat og profilbilde-analyse instrueres til å svare på valgt språk via `spraakNavn`-variabel i alle prompts
+- **`spraak`-felt i payload** — `kartlegging.spraak: 'no'/'en'` sendes til API så Ole vet hvilket språk teksten er på
+
+### Endret
+- Alle hardkodede "på norsk" i AI-prompts erstattet med dynamisk `spraakNavn`-variabel
+- Versjonsnummer i topbar og `APP_VERSION` oppdatert til `v0.4.2`
+
 ---
 
 ## [v0.4.1] — 2026-06-07

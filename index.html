@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.11</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.12</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -464,7 +464,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.11';
+const APP_VERSION = 'v0.4.12';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -577,7 +577,7 @@ const TEKST = {
     kjorer_analyse: 'Kjører AI-analyse per sone...',
     chat_hvis_ikke: 'Hvis du ikke vet svaret, si det ærlig.',
     stigning_egnet: '✅ Egnet for rullestol og rullator.',
-    stigning_krevende: '🟡 Krevende for manuell rullestol — elektrisk rullestol kan egne seg.',
+    stigning_krevende: '🟡 Krevende for manuell rullestol. Elektrisk rullestol eller scooter kan egne seg bedre — sjekk med leverandøren.',
     stigning_bratt_gange: '⚠️ For bratt for de fleste rullestoler. Egnet for gående med god gangfunksjon.',
     stigning_bratt: '🔴 Svært bratt — krevende tur. Krever god fysisk form.',
     kjoretoy_egnet: '✅ Terrenget er egnet for kjøretøy og slede. Deltakere sitter under hele turen — god gangevne er ikke nødvendig.',
@@ -662,6 +662,7 @@ const TEKST = {
     legg_til_sone_tittel: 'Legg til sone / område',
     sone_valgfri: 'valgfri',
     sone_rediger: '✏️ Rediger',
+    sone_rediger_tekst: 'Rediger tekst',
     sone_lukk: '✓ Lukk',
     sone_lagre: 'Lagre endringer',
     // Spørsmål
@@ -777,7 +778,7 @@ const TEKST = {
     kjorer_analyse: 'Running AI analysis per zone...',
     chat_hvis_ikke: 'If you do not know the answer, say so honestly.',
     stigning_egnet: '✅ Suitable for wheelchair and walker.',
-    stigning_krevende: '🟡 Demanding for manual wheelchair — electric wheelchair may be suitable.',
+    stigning_krevende: '🟡 Demanding for manual wheelchair. Electric wheelchair or scooter may handle this better — check with your supplier.',
     stigning_bratt_gange: '⚠️ Too steep for most wheelchairs. Suitable for those with good walking ability.',
     stigning_bratt: '🔴 Very steep — demanding route. Requires good physical fitness.',
     kjoretoy_egnet: '✅ Terrain is suitable for vehicles and sleds. Participants sit throughout — walking ability is not required.',
@@ -858,6 +859,7 @@ const TEKST = {
     legg_til_sone_tittel: 'Add zone / area',
     sone_valgfri: 'optional',
     sone_rediger: '✏️ Edit',
+    sone_rediger_tekst: 'Edit text',
     sone_lukk: '✓ Close',
     sone_lagre: 'Save changes',
     // Questions
@@ -928,6 +930,7 @@ const TEKST = {
     legg_til_sone_tittel: 'Añadir zona / área',
     sone_valgfri: 'opcional',
     sone_rediger: '✏️ Editar',
+    sone_rediger_tekst: 'Editar texto',
     sone_lukk: '✓ Cerrar',
     sone_lagre: 'Guardar cambios',
     // Preguntas
@@ -999,7 +1002,7 @@ const TEKST = {
     kjorer_analyse: 'Ejecutando análisis IA por zona...',
     chat_hvis_ikke: 'Si no sabe la respuesta, dígalo con sinceridad.',
     stigning_egnet: '✅ Apto para silla de ruedas y andador.',
-    stigning_krevende: '🟡 Exigente para silla de ruedas manual — la silla eléctrica puede ser adecuada.',
+    stigning_krevende: '🟡 Exigente para silla de ruedas manual. La silla eléctrica o el scooter pueden manejarlo mejor — consulte con su proveedor.',
     stigning_bratt_gange: '⚠️ Demasiado empinado para la mayoría de sillas de ruedas. Apto para personas con buena capacidad de marcha.',
     stigning_bratt: '🔴 Muy empinado — recorrido exigente. Requiere buena forma física.',
     kjoretoy_egnet: '✅ El terreno es apto para vehículos y trineos. Los participantes están sentados durante todo el recorrido.',
@@ -2246,13 +2249,13 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
   h += '<div class="guide-sone-ikon">'+zone.icon+'</div>';
   h += '<div class="guide-sone-navn">'+TL(zone.label)+'</div>';
   h += '<div id="guide-sone-status-'+idx+'">'+statusSpan+'</div>';
-  h += '<button class="sone-edit-btn" id="edit-btn-'+idx+'" onclick="toggleEditSone('+idx+')">✏️ Rediger</button>';
+  h += '<button class="sone-edit-btn" id="edit-btn-'+idx+'" onclick="toggleEditSone('+idx+')">'+T('sone_rediger')+'</button>';
   h += '</div>';
   h += '<div id="guide-sone-tekst-'+idx+'" class="guide-sone-tekst">'+sd.gjesteTekst+'</div>';
   if (malChips) h += '<div class="guide-sone-maal">'+malChips+'</div>';
   if (bilderHtml) h += '<div class="guide-bilder">'+bilderHtml+'</div>';
   h += '<div id="edit-sone-'+idx+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
-  h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Rediger tekst</div>';
+  h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">'+T('sone_rediger_tekst')+'</div>';
   h += '<textarea class="sone-edit-area" id="edit-tekst-'+idx+'" oninput="guideRedigert['+idx+']=guideRedigert['+idx+']||{};guideRedigert['+idx+'].tekst=this.value">'+sd.gjesteTekst+'</textarea>';
   h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:10px;margin-bottom:6px">Status</div>';
   h += '<div class="status-toggle">';
