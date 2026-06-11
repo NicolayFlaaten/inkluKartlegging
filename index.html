@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.13</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.14</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -469,7 +469,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.13';
+const APP_VERSION = 'v0.4.14';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, usynlig:{}, soneTekster:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -1412,7 +1412,7 @@ var TYPE_CONFIG = {
       {id:'konferanse',label:'Konferanserom',icon:'📋',extraFields:[],optional:true}],
     extraOptions:['Treningssenter','Basseng','Spa','Butikk','Frokostrom','Garderobe'],
     questions:['q_allergi','q_parfyme','q_meny','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_evakuering','q_luminans','q_taktil','q_regulerbar_seng','q_lading_el','q_visuell_brannalarm','q_alarm_resepsjon']},
-  hytte:{label:'Hytte / leilighet',group:'A',pageTitle:'Hytte / leilighetsfasiliteter',pageDesc:'Last opp bilder. Legg til flere rom ved behov.',
+  hytte:{label:'Hytte / leilighet',group:'A',ubSkip:['ub_medisinsk','ub_diskret'],pageTitle:'Hytte / leilighetsfasiliteter',pageDesc:'Last opp bilder. Legg til flere rom ved behov.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
@@ -1422,7 +1422,7 @@ var TYPE_CONFIG = {
       {id:'soverom',label:'Soverom',icon:'🛏️',extraFields:['seng_cm','regulerbar_seng','lading_el_rullestol'],optional:false}],
     extraOptions:['Bad 2','Soverom 2','Soverom 3','TVstue','Vaskerom','Terrasse'],
     questions:['q_allergi','q_parfyme','q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil','q_regulerbar_seng','q_lading_el']},
-  restaurant:{label:'Restaurant / servering',group:'A',pageTitle:'Restaurantfasiliteter',pageDesc:'Last opp bilder av restaurantens tilgjengelighet.',
+  restaurant:{label:'Restaurant / servering',group:'A',ubSkip:['ub_avbryte'],pageTitle:'Restaurantfasiliteter',pageDesc:'Last opp bilder av restaurantens tilgjengelighet.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm','taktil_trapp'],optional:false},
@@ -2200,25 +2200,36 @@ var UB_TEXT = {
 };
 var UB_SEK_IKON = {1:'\uD83D\uDD07', 2:'\uD83E\uDDED', 3:'\uD83D\uDEBB', 4:'\uD83E\uDD1D'};
 var UB_QUESTIONS = [
- {id:'ub_stoy',sek:1,no:'Er støynivået generelt lavt i fellesarealer?',en:'Is the noise level generally low in common areas?',es:'¿El nivel de ruido es generalmente bajo en las áreas comunes?'},
- {id:'ub_stille',sek:1,no:'Finnes det stille soner eller lavstimulerte arealer?',en:'Are there quiet zones or low-stimulation areas?',es:'¿Existen zonas tranquilas o áreas de baja estimulación?'},
- {id:'ub_lys',sek:1,no:'Er belysningen jevn, uten flimmer eller brå lysskift?',en:'Is the lighting even, without flickering or sudden changes?',es:'¿La iluminación es uniforme, sin parpadeos ni cambios bruscos?'},
- {id:'ub_lukt',sek:1,no:'Er det fritt for sterke lukter i fellesarealer?',en:'Are common areas free from strong odours?',es:'¿Las áreas comunes están libres de olores fuertes?'},
- {id:'ub_skilting',sek:2,no:'Er det tydelig skilting som viser vei gjennom anlegget?',en:'Is there clear signage guiding visitors through the venue?',es:'¿Existe señalización clara que guíe a los visitantes por el establecimiento?'},
- {id:'ub_forhaand',sek:2,no:'Er informasjon om besøket tilgjengelig på forhånd (nettside, kart, beskrivelse)?',en:'Is information about the visit available in advance (website, map, description)?',es:'¿Está disponible información sobre la visita con antelación (sitio web, mapa, descripción)?'},
- {id:'ub_spraak',sek:2,no:'Er informasjonen skrevet i enkelt og tydelig språk?',en:'Is the information written in plain and clear language?',es:'¿La información está escrita en un lenguaje sencillo y claro?'},
- {id:'ub_merking',sek:2,no:'Er toalett, utganger og sitteplasser tydelig merket?',en:'Are toilets, exits and seating areas clearly marked?',es:'¿Están claramente señalizados los aseos, salidas y zonas de descanso?'},
- {id:'ub_wc',sek:3,no:'Er toalett lett tilgjengelig fra alle aktivitetsarealer?',en:'Is a toilet easily accessible from all activity areas?',es:'¿Hay un aseo fácilmente accesible desde todas las áreas de actividad?'},
- {id:'ub_hvile',sek:3,no:'Finnes det hvilerom eller stille plass der gjester kan trekke seg unna?',en:'Is there a rest room or quiet space where guests can withdraw?',es:'¿Hay una sala de descanso o espacio tranquilo al que los huéspedes puedan retirarse?'},
- {id:'ub_sitte',sek:3,no:'Er det sitteplasser tilgjengelig underveis — ikke bare ved start/mål?',en:'Are seating options available along the way — not only at the start or end?',es:'¿Hay asientos disponibles durante el recorrido, no solo al inicio o al final?'},
- {id:'ub_avbryte',sek:3,no:'Kan gjester avbryte en aktivitet uten å måtte forklare seg?',en:'Can guests withdraw from an activity without having to explain themselves?',es:'¿Pueden los huéspedes retirarse de una actividad sin tener que dar explicaciones?'},
- {id:'ub_opplaering',sek:4,no:'Har ansatte fått opplæring i å møte gjester med ulike behov?',en:'Have staff received training in meeting guests with diverse needs?',es:'¿El personal ha recibido formación para atender a huéspedes con diversas necesidades?'},
- {id:'ub_medisinsk',sek:4,no:'Vet ansatte hva de skal gjøre ved en medisinsk hendelse (f.eks. epileptisk anfall)?',en:'Do staff know what to do in a medical emergency (e.g. epileptic seizure)?',es:'¿Sabe el personal qué hacer ante una emergencia médica (p. ej. un ataque epiléptico)?'},
- {id:'ub_diskret',sek:4,no:'Er det enkelt for gjester å diskret be om hjelp?',en:'Is it easy for guests to discreetly ask for help?',es:'¿Es fácil para los huéspedes pedir ayuda de forma discreta?'}
+ {id:'ub_stoy',grupper:['A','B'],sek:1,no:'Er støynivået generelt lavt i fellesarealer?',en:'Is the noise level generally low in common areas?',es:'¿El nivel de ruido es generalmente bajo en las áreas comunes?'},
+ {id:'ub_stille',grupper:['A','B'],sek:1,no:'Finnes det stille soner eller lavstimulerte arealer?',en:'Are there quiet zones or low-stimulation areas?',es:'¿Existen zonas tranquilas o áreas de baja estimulación?'},
+ {id:'ub_lys',grupper:['A','B'],sek:1,no:'Er belysningen jevn, uten flimmer eller brå lysskift?',en:'Is the lighting even, without flickering or sudden changes?',es:'¿La iluminación es uniforme, sin parpadeos ni cambios bruscos?'},
+ {id:'ub_lukt',grupper:['A','B'],sek:1,no:'Er det fritt for sterke lukter i fellesarealer?',en:'Are common areas free from strong odours?',es:'¿Las áreas comunes están libres de olores fuertes?'},
+ {id:'ub_skilting',grupper:['A','B','C'],sek:2,no:'Er det tydelig skilting som viser vei gjennom anlegget?',en:'Is there clear signage guiding visitors through the venue?',es:'¿Existe señalización clara que guíe a los visitantes por el establecimiento?'},
+ {id:'ub_forhaand',grupper:['A','B','C'],sek:2,no:'Er informasjon om besøket tilgjengelig på forhånd (nettside, kart, beskrivelse)?',en:'Is information about the visit available in advance (website, map, description)?',es:'¿Está disponible información sobre la visita con antelación (sitio web, mapa, descripción)?'},
+ {id:'ub_spraak',grupper:['A','B','C'],sek:2,no:'Er informasjonen skrevet i enkelt og tydelig språk?',en:'Is the information written in plain and clear language?',es:'¿La información está escrita en un lenguaje sencillo y claro?'},
+ {id:'ub_merking',grupper:['A','B','C'],sek:2,no:'Er toalett, utganger og sitteplasser tydelig merket?',en:'Are toilets, exits and seating areas clearly marked?',es:'¿Están claramente señalizados los aseos, salidas y zonas de descanso?'},
+ {id:'ub_wc',grupper:['A','B','C'],sek:3,no:'Er toalett lett tilgjengelig fra alle aktivitetsarealer?',en:'Is a toilet easily accessible from all activity areas?',es:'¿Hay un aseo fácilmente accesible desde todas las áreas de actividad?'},
+ {id:'ub_hvile',grupper:['A','B'],sek:3,no:'Finnes det hvilerom eller stille plass der gjester kan trekke seg unna?',en:'Is there a rest room or quiet space where guests can withdraw?',es:'¿Hay una sala de descanso o espacio tranquilo al que los huéspedes puedan retirarse?'},
+ {id:'ub_sitte',grupper:['A','B','C'],sek:3,no:'Er det sitteplasser tilgjengelig underveis — ikke bare ved start/mål?',en:'Are seating options available along the way — not only at the start or end?',es:'¿Hay asientos disponibles durante el recorrido, no solo al inicio o al final?'},
+ {id:'ub_avbryte',grupper:['A','B'],sek:3,no:'Kan gjester avbryte en aktivitet uten å måtte forklare seg?',en:'Can guests withdraw from an activity without having to explain themselves?',es:'¿Pueden los huéspedes retirarse de una actividad sin tener que dar explicaciones?'},
+ {id:'ub_opplaering',grupper:['A','B'],sek:4,no:'Har ansatte fått opplæring i å møte gjester med ulike behov?',en:'Have staff received training in meeting guests with diverse needs?',es:'¿El personal ha recibido formación para atender a huéspedes con diversas necesidades?'},
+ {id:'ub_medisinsk',grupper:['A','B'],sek:4,no:'Vet ansatte hva de skal gjøre ved en medisinsk hendelse (f.eks. epileptisk anfall)?',en:'Do staff know what to do in a medical emergency (e.g. epileptic seizure)?',es:'¿Sabe el personal qué hacer ante una emergencia médica (p. ej. un ataque epiléptico)?'},
+ {id:'ub_diskret',grupper:['A','B'],sek:4,no:'Er det enkelt for gjester å diskret be om hjelp?',en:'Is it easy for guests to discreetly ask for help?',es:'¿Es fácil para los huéspedes pedir ayuda de forma discreta?'}
 ];
 function ubTxt(key) { var l = state.lang || 'no'; return (UB_TEXT[l] && UB_TEXT[l][key]) || UB_TEXT.no[key]; }
 function ubQTxt(q) { var l = state.lang || 'no'; return q[l] || q.no; }
 function ubSvarTekst(v) { return v === 'ja' ? T('ja') : v === 'nei' ? T('nei') : T('vet_ikke_btn'); }
+// Returnerer true hvis spørsmålet er relevant for valgt virksomhetstype.
+// Filtrerer på gruppe (A/B/C) og typespesifikke unntak (ubSkip) — f.eks.
+// har et fellesgode som en sti verken personal eller innendørs fellesarealer.
+function ubRelevant(q) {
+  var type = document.getElementById('biz-type').value;
+  var config = TYPE_CONFIG[type];
+  var group = config ? config.group : 'A';
+  if (q.grupper && q.grupper.indexOf(group) < 0) return false;
+  if (config && config.ubSkip && config.ubSkip.indexOf(q.id) >= 0) return false;
+  return true;
+}
 
 function buildUsynlig() {
   document.getElementById('ub-tittel').textContent = ubTxt('tittel');
@@ -2226,19 +2237,19 @@ function buildUsynlig() {
   var c = document.getElementById('ub-container');
   var html = '';
   for (var s = 1; s <= 4; s++) {
-    html += '<div class="card"><div class="card-title">' + UB_SEK_IKON[s] + ' ' + ubTxt('sek' + s) + '</div>';
+    var sekHtml = '';
     for (var i = 0; i < UB_QUESTIONS.length; i++) {
       var q = UB_QUESTIONS[i];
-      if (q.sek !== s) continue;
+      if (q.sek !== s || !ubRelevant(q)) continue;
       var v = state.usynlig[q.id];
-      html += '<div class="question-item"><div class="question-text">' + ubQTxt(q) + '</div>' +
+      sekHtml += '<div class="question-item"><div class="question-text">' + ubQTxt(q) + '</div>' +
         '<div class="yn-group">' +
         '<button class="yn-btn yes' + (v === 'ja' ? ' active' : '') + '" data-ub-id="' + q.id + '" data-ub-val="ja">' + T('ja') + '</button>' +
         '<button class="yn-btn no' + (v === 'nei' ? ' active' : '') + '" data-ub-id="' + q.id + '" data-ub-val="nei">' + T('nei') + '</button>' +
         '<button class="yn-btn na' + (v === 'na' ? ' active' : '') + '" data-ub-id="' + q.id + '" data-ub-val="na">' + T('vet_ikke_btn') + '</button>' +
         '</div></div>';
     }
-    html += '</div>';
+    if (sekHtml) html += '<div class="card"><div class="card-title">' + UB_SEK_IKON[s] + ' ' + ubTxt('sek' + s) + '</div>' + sekHtml + '</div>';
   }
   c.innerHTML = html;
   if (!c._ubBound) {
@@ -2572,7 +2583,7 @@ async function buildGuide() {
     var ubRows = '';
     for (var i = 0; i < UB_QUESTIONS.length; i++) {
       var q = UB_QUESTIONS[i];
-      if (q.sek !== s) continue;
+      if (q.sek !== s || !ubRelevant(q)) continue;
       var v = state.usynlig[q.id];
       if (v !== 'ja' && v !== 'nei') continue;
       var farge = v === 'ja' ? 'var(--green-dark)' : 'var(--text2)';
@@ -2649,7 +2660,7 @@ async function buildGuide() {
   var soner = state.zones.filter(function(z){return z.images.length>0||z.note;});
   var kontekstTekst = 'Du er tilgjengelighetsassistent for "'+name+'". Svar kort og konkret på '+spraakNavn+'. Fasiliteter: ';
   kontekstTekst += soner.map(function(z){return z.label+(z.note?' - '+z.note:'');}).join(', ');
-  var ubChatInfo = UB_QUESTIONS.map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('; ');
+  var ubChatInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('; ');
   if (ubChatInfo) kontekstTekst += '. Tilrettelegging for alle: ' + ubChatInfo;
   kontekstTekst += '. Kun bruk informasjonen gitt.';
   window._guideChatKontekst = kontekstTekst;
@@ -2714,7 +2725,7 @@ async function buildAnalyse() {
 
   var soneInfo = gyldigeSoner.map(function(s){return s.zone.label+' ('+s.statusTekst+'): '+s.gjesteTekst;}).join('\n');
   var svarInfo = qIds.map(function(id){var q=ALL_QUESTIONS[id];var v=state.answers[id];return q&&v?q.text+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('\n');
-  var ubInfo = UB_QUESTIONS.map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('\n');
+  var ubInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('\n');
   if (ubInfo) svarInfo = (svarInfo ? svarInfo + '\n' : '') + 'TILRETTELEGGING FOR ALLE:\n' + ubInfo;
   var gpxInfo = state.gpxData ? 'GPX: '+state.gpxData.totalDist+'km, maks stigning '+state.gpxData.maxSlope+'%, snitt '+state.gpxData.avgSlope+'%' : '';
   window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?TL(config.label):type)+'). Svar på '+spraakNavn+', vennlig og konkret.\n\n'+
@@ -2955,7 +2966,7 @@ function byggKartleggingPayload(godkjentAvNavn) {
         };
       }),
     svar: state.answers || {},
-    svar_usynlig: state.usynlig || {},
+    svar_usynlig: (function(){ var ut = {}; UB_QUESTIONS.filter(ubRelevant).forEach(function(q){ if (state.usynlig[q.id]) ut[q.id] = state.usynlig[q.id]; }); return ut; })(),
     gpx: state.gpxData ? {
       lengde_km: state.gpxData.totalDist,
       stigning_opp_m: state.gpxData.totalUp,
