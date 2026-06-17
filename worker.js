@@ -1,19 +1,14 @@
 /**
  * AccessNorway — Cloudflare Worker
- * 
- * Håndterer:
- *   1. CORS + Origin-validering (blokkerer kall fra ukjente domener)
- *   2. POST / — videresender bildeanalyse til Anthropic Claude API
- *   3. POST /api/kartlegging — tar imot og lagrer kartlegging (stub — returnerer 501 til Ole implementerer)
- *   4. PUT /api/enhet/:id/bekreft — bekreft enhet (stub)
- *   5. POST /api/enhet/:id/erfaring — lagre brukererfaring (stub)
  *
- * Miljøvariabler (settes i Cloudflare Dashboard → Workers → Settings → Variables):
- *   ANTHROPIC_API_KEY  — din Anthropic API-nøkkel (kryptert)
- *   ALLOWED_ORIGINS    — kommaseparert liste, f.eks: https://nicolayflaaten.github.io,http://localhost:5500
+ * Miljøvariabler (Cloudflare Dashboard → Workers → Settings → Variables):
+ *   ANTHROPIC_API_KEY  — Anthropic API-nøkkel (Secret)
+ *   ALLOWED_ORIGINS    — kommaseparert, f.eks: https://nicolayflaaten.github.io,null
+ *   WORKER_TOKEN       — hemmelig token som klienten må sende i X-Worker-Token (Secret)
  */
 
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+const MISTRAL_URL   = 'https://api.mistral.ai/v1/chat/completions';
 
 export default {
   async fetch(request, env) {
@@ -35,7 +30,7 @@ export default {
       });
     }
 
-    // Blokkér ukjente origins (tillat også localhost for utvikling)
+    // Blokkér ukjente origins
     if (!originOk) {
       return new Response(
         JSON.stringify({ error: 'Origin ikke tillatt: ' + origin }),
@@ -43,31 +38,35 @@ export default {
       );
     }
 
-    // ── 2. Ruting ─────────────────────────────────────────────────────────
-    const url = new URL(request.url);
+    // ── 2. Worker-token-validering ────────────────────────────────────────
+    // Beskytter mot misbruk fra noen som finner Worker-URL-en
+    if (env.WORKER_TOKEN) {
+      const clientToken = request.headers.get('X-Worker-Token') || '';
+      if (clientToken !== env.WORKER_TOKEN) {
+        return new Response(
+          JSON.stringify({ error: 'Ugyldig token' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // ── 3. Ruting ─────────────────────────────────────────────────────────
+    const url  = new URL(request.url);
     const path = url.pathname;
 
     try {
-      // Rotkall — Claude bildeanalyse (eksisterende flyt)
       if (path === '/' || path === '') {
         return await handleClaude(request, env, origin);
       }
-
-      // Kartlegging lagres (Ole implementerer databasekoblingen)
       if (path === '/api/kartlegging' && request.method === 'POST') {
         return await handleKartlegging(request, env, origin);
       }
-
-      // Bekreft enhet
       if (path.match(/^\/api\/enhet\/[^/]+\/bekreft$/) && request.method === 'PUT') {
         return await handleBekreft(request, env, origin, path);
       }
-
-      // Brukererfaring
       if (path.match(/^\/api\/enhet\/[^/]+\/erfaring$/) && request.method === 'POST') {
         return await handleErfaring(request, env, origin, path);
       }
-
       return jsonResponse({ error: 'Ukjent endepunkt: ' + path }, 404, origin);
 
     } catch (err) {
@@ -77,39 +76,100 @@ export default {
   }
 };
 
-// ── Claude API-videresending ───────────────────────────────────────────────
+// ── Ruter til riktig AI-leverandør ────────────────────────────────────────
 async function handleClaude(request, env, origin) {
   if (request.method !== 'POST') {
     return jsonResponse({ error: 'Kun POST støttes' }, 405, origin);
   }
 
+  const provider = request.headers.get('X-Provider') || 'anthropic';
   const body = await request.json();
 
+  if (provider === 'mistral') {
+    return await forwardMistral(body, env, origin);
+  }
+  return await forwardAnthropic(body, env, origin);
+}
+
+// ── Anthropic ──────────────────────────────────────────────────────────────
+async function forwardAnthropic(body, env, origin) {
   const res = await fetch(ANTHROPIC_URL, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': env.ANTHROPIC_API_KEY,
+      'Content-Type':      'application/json',
+      'x-api-key':         env.ANTHROPIC_API_KEY,
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify(body),
   });
-
   const data = await res.json();
   return jsonResponse(data, res.status, origin);
 }
 
-// ── Kartlegging — stub til Ole kobler database ────────────────────────────
+// ── Mistral ────────────────────────────────────────────────────────────────
+// Konverterer Anthropic-format → Mistral-format og tilbake
+async function forwardMistral(body, env, origin) {
+  if (!env.MISTRAL_API_KEY) {
+    return jsonResponse({ error: 'MISTRAL_API_KEY ikke satt i Cloudflare' }, 500, origin);
+  }
+
+  // Konverter Anthropic messages-format til Mistral
+  // Mistral støtter ikke document-type direkte — konverter base64 PDF til image_url
+  const mistralMessages = (body.messages || []).map(msg => {
+    if (Array.isArray(msg.content)) {
+      const parts = msg.content.map(part => {
+        if (part.type === 'document' || part.type === 'image') {
+          const mediaType = part.source?.media_type || 'image/jpeg';
+          const data = part.source?.data || '';
+          return {
+            type: 'image_url',
+            image_url: { url: `data:${mediaType};base64,${data}` }
+          };
+        }
+        if (part.type === 'text') {
+          return { type: 'text', text: part.text };
+        }
+        return part;
+      });
+      return { role: msg.role, content: parts };
+    }
+    return msg;
+  });
+
+  const mistralBody = {
+    model:       body.model || 'mistral-small-latest',
+    max_tokens:  body.max_tokens || 1024,
+    messages:    mistralMessages,
+  };
+
+  const res = await fetch(MISTRAL_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': 'Bearer ' + env.MISTRAL_API_KEY,
+    },
+    body: JSON.stringify(mistralBody),
+  });
+
+  const mistralData = await res.json();
+
+  // Konverter Mistral-respons tilbake til Anthropic-format så HTML-en slipper å endre seg
+  if (mistralData.choices?.[0]?.message?.content) {
+    const converted = {
+      content: [{ type: 'text', text: mistralData.choices[0].message.content }],
+      model: mistralData.model,
+      usage: mistralData.usage,
+    };
+    return jsonResponse(converted, res.status, origin);
+  }
+
+  return jsonResponse(mistralData, res.status, origin);
+}
+
+// ── Kartlegging ───────────────────────────────────────────────────────────
 async function handleKartlegging(request, env, origin) {
   const payload = await request.json();
-
-  // TODO (Ole): lagre payload til database
-  // payload inneholder: enhet, kartlegging, soner, svar, gpx, tagger
-  // Se README.md for full payload-struktur
-
   console.log('Kartlegging mottatt:', payload?.enhet?.navn, payload?.kartlegging?.dato);
-
-  // Returner stub-respons til Nicolay kobler ekte DB
   return jsonResponse({
     ok: true,
     kartlegging_id: 'stub-' + Date.now(),
@@ -120,13 +180,9 @@ async function handleKartlegging(request, env, origin) {
 // ── Bekreft enhet ─────────────────────────────────────────────────────────
 async function handleBekreft(request, env, origin, path) {
   const enhetId = path.split('/')[3];
-
-  // TODO (Ole): oppdater sist_bekreftet i database for enhetId
   console.log('Bekreft enhet:', enhetId);
-
   return jsonResponse({
-    ok: true,
-    enhet_id: enhetId,
+    ok: true, enhet_id: enhetId,
     sist_bekreftet: new Date().toISOString(),
     melding: 'Bekreftet — database ikke koblet ennå'
   }, 200, origin);
@@ -136,14 +192,9 @@ async function handleBekreft(request, env, origin, path) {
 async function handleErfaring(request, env, origin, path) {
   const enhetId = path.split('/')[3];
   const body = await request.json();
-
-  // TODO (Ole): lagre erfaring til BRUKERERFARING-tabellen
-  // body inneholder: stemmer_med_info, anbefaler, erfaring_tekst, forfatter_type, offentlig
   console.log('Erfaring mottatt for enhet:', enhetId, '| stemmer:', body?.stemmer_med_info);
-
   return jsonResponse({
-    ok: true,
-    enhet_id: enhetId,
+    ok: true, enhet_id: enhetId,
     melding: 'Erfaring mottatt — database ikke koblet ennå'
   }, 201, origin);
 }
@@ -151,19 +202,16 @@ async function handleErfaring(request, env, origin, path) {
 // ── Hjelpefunksjoner ──────────────────────────────────────────────────────
 function corsHeaders(origin) {
   return {
-    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Origin':  origin,
     'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Worker-Token, X-Provider',
+    'Access-Control-Max-Age':       '86400',
   };
 }
 
 function jsonResponse(data, status, origin) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      ...corsHeaders(origin),
-    },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
   });
 }
