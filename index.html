@@ -247,7 +247,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.16</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.17</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -319,7 +319,6 @@ textarea{resize:vertical;min-height:80px}
       </div>
       <div class="field"><label class="field-label" data-i18n="adresse_label">Adresse / sted</label><input type="text" id="biz-address" data-i18n-ph="adresse_ph" placeholder="Adresse, postnummer, sted eller GPS-koordinat"/></div>
       <div class="field"><label class="field-label" data-i18n="destinasjon_label">Destinasjonsselskap</label><input type="text" id="biz-dest" data-i18n-ph="destinasjon_ph" placeholder="f.eks. Visit Valdres"/></div>
-      <div class="field"><label class="field-label" data-i18n="kartlegger_org_label">Kartleggerorganisasjon</label><input type="text" id="biz-kartlegger-org" data-i18n-ph="kartlegger_org_ph" placeholder="f.eks. INKLU Valdres, NTC eller Visit Valdres"/></div>
       <div class="field">
         <label class="field-label" data-i18n="geo_label">Geografisk tilhørighet</label>
         <button type="button" id="gps-btn" onclick="hentPosisjon()" style="width:100%;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:13px 16px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -470,23 +469,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.16';
-
-// ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
-// enhet_id:       permanent per sted — gjenbrukes ved oppdatering (lagres i localStorage per navn+type)
-// kartlegging_id: unik per kartleggingshendelse — ny UUID hver gang appen lastes
-// bruker_id:      null inntil Supabase-innlogging er på plass
-function hentEllerLagEnhetId(navn, type) {
-  try {
-    var nøkkel = 'enhet_id__' + (navn || '').trim().toLowerCase() + '__' + (type || '');
-    var eksisterende = localStorage.getItem(nøkkel);
-    if (eksisterende) return eksisterende;
-    var ny = crypto.randomUUID();
-    localStorage.setItem(nøkkel, ny);
-    return ny;
-  } catch(e) { return crypto.randomUUID(); }
-}
-var KARTLEGGING_ID = crypto.randomUUID();
+const APP_VERSION = 'v0.4.17';
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, usynlig:{}, soneTekster:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -554,8 +537,6 @@ const TEKST = {
     adresse_label: 'Adresse / sted',
     adresse_ph: 'Adresse, postnummer, sted eller GPS-koordinat',
     destinasjon_label: 'Destinasjonsselskap',
-    kartlegger_org_label: 'Kartleggerorganisasjon',
-    kartlegger_org_ph: 'f.eks. INKLU Valdres, NTC eller Visit Valdres',
     destinasjon_ph: 'f.eks. Visit Valdres',
     geo_label: 'Geografisk tilhørighet',
     geo_btn: 'Hent posisjon automatisk',
@@ -759,8 +740,6 @@ const TEKST = {
     adresse_label: 'Address / location',
     adresse_ph: 'Address, postal code, city or GPS coordinates',
     destinasjon_label: 'Destination organisation',
-    kartlegger_org_label: 'Mapping organisation',
-    kartlegger_org_ph: 'e.g. INKLU Valdres, NTC or Visit Valdres',
     destinasjon_ph: 'e.g. Visit Valdres',
     geo_label: 'Geographic location',
     geo_btn: 'Detect location automatically',
@@ -986,8 +965,6 @@ const TEKST = {
     adresse_label: 'Dirección / lugar',
     adresse_ph: 'Dirección, código postal, ciudad o coordenadas GPS',
     destinasjon_label: 'Organización de destino',
-    kartlegger_org_label: 'Organización cartógrafa',
-    kartlegger_org_ph: 'p. ej. INKLU Valdres, NTC o Visit Valdres',
     destinasjon_ph: 'p.ej. Visit Valdres',
     geo_label: 'Ubicación geográfica',
     geo_btn: 'Detectar ubicación automáticamente',
@@ -1389,12 +1366,14 @@ function handleProfilbilde(e) {
   if (!file) return;
   var reader = new FileReader();
   reader.onload = function(ev) {
-    state.profilbilde = {dataUrl: ev.target.result, file: file, analysis: null};
-    document.getElementById('profilbilde-preview').style.display = 'block';
-    document.getElementById('profilbilde-placeholder').style.display = 'none';
-    document.getElementById('profilbilde-img').src = ev.target.result;
-    // Analyser profilbildet
-    analyzeProfilbilde();
+    // v0.4.17: skaler til maks 1600px ved opplasting
+    skalerBilde(ev.target.result).then(function(skalert) {
+      state.profilbilde = {dataUrl: skalert, file: file, analysis: null};
+      document.getElementById('profilbilde-preview').style.display = 'block';
+      document.getElementById('profilbilde-placeholder').style.display = 'none';
+      document.getElementById('profilbilde-img').src = skalert;
+      analyzeProfilbilde();
+    });
   };
   reader.readAsDataURL(file);
 }
@@ -2121,10 +2100,13 @@ function handleFiles(e, idx) {
   Array.from(e.target.files).forEach(function(file) {
     var reader = new FileReader();
     reader.onload = function(ev) {
-      var imgObj = {dataUrl:ev.target.result,file:file,analysis:null};
-      state.zones[idx].images.push(imgObj);
-      renderZones();
-      analyzeSpecificImage(idx, state.zones[idx].images.length-1);
+      // v0.4.17: skaler til maks 1600px ved opplasting
+      skalerBilde(ev.target.result).then(function(skalert) {
+        var imgObj = {dataUrl: skalert, file: file, analysis: null};
+        state.zones[idx].images.push(imgObj);
+        renderZones();
+        analyzeSpecificImage(idx, state.zones[idx].images.length-1);
+      });
     };
     reader.readAsDataURL(file);
   });
@@ -2175,6 +2157,35 @@ function compressImage(dataUrl, maxWidth, quality) {
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(imgEl,0,0,w,h);
       resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    imgEl.src = dataUrl;
+  });
+}
+
+// ── Nedskalering ved opplasting (v0.4.17) ────────────────────────────────────
+// Skalerer til maks 1600px på lengste side ved opplasting — skjer lokalt i
+// nettleseren uten nettverkskall. compressImage (over) brukes fortsatt til
+// AI-analyse (1024px / 0.7) og er uendret.
+function skalerBilde(dataUrl) {
+  var MAKS_PX = 1600; var KVALITET = 0.88;
+  return new Promise(function(resolve) {
+    var imgEl = new Image();
+    imgEl.onload = function() {
+      var w = imgEl.width, h = imgEl.height;
+      var storst = Math.max(w, h);
+      if (storst <= MAKS_PX) {
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(imgEl, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', KVALITET));
+        return;
+      }
+      if (w >= h) { h = Math.round(h * MAKS_PX / w); w = MAKS_PX; }
+      else        { w = Math.round(w * MAKS_PX / h); h = MAKS_PX; }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(imgEl, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', KVALITET));
     };
     imgEl.src = dataUrl;
   });
@@ -2938,16 +2949,10 @@ function setStatusToggle(idx, status) {
 
 function byggKartleggingPayload(godkjentAvNavn) {
   var type = document.getElementById('biz-type').value;
-  var navn = document.getElementById('biz-name').value || '';
   var config = TYPE_CONFIG[type] || {};
   return {
-    enhet_id: hentEllerLagEnhetId(navn, type),
-    kartlegging_id: KARTLEGGING_ID,
-    bruker_id: null,
-    kartlegger_org: document.getElementById('biz-kartlegger-org').value || '',
-    app_versjon: APP_VERSION,
     enhet: {
-      navn: navn,
+      navn: document.getElementById('biz-name').value || '',
       gruppe: config.group || '',
       type: type,
       adresse: document.getElementById('biz-address').value || '',
