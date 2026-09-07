@@ -2,7 +2,7 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AccessNorway — Kartlegging</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -11,7 +11,7 @@
   --amber:#BA7517;--amber-light:#FAEEDA;
   --red:#E24B4A;--red-light:#FCEBEB;
   --blue:#065A82;--blue-light:#E3F2FA;
-  --text:#1a1a18;--text2:#5f5e5a;--text3:#999890;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#6b6a62;
   --surface:#fff;--surface2:#f7f6f2;--surface3:#f1efe8;
   --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
   --radius:16px;--radius-sm:10px;
@@ -245,9 +245,9 @@ textarea{resize:vertical;min-height:80px}
 </head>
 <body>
 
-<div class="topbar">
+<div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.17</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.18</div>
   <div style="display:flex;align-items:center;gap:6px">
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
@@ -258,12 +258,13 @@ textarea{resize:vertical;min-height:80px}
   </div>
 </div>
 <div class="progress-bar">
-  <div class="steps-scroll" id="steps-scroll"></div>
+  <nav class="steps-scroll" id="steps-scroll" aria-label="Fremdrift"></nav>
 </div>
-<div class="content">
+<div class="content" role="main">
 
   <div class="page active" id="page-0">
-    <div class="page-header"><div class="page-title" data-i18n="side0_tittel">Registrer sted</div><div class="page-desc" data-i18n="side0_desc">Grunnleggende informasjon om stedet du kartlegger.</div></div>
+    <div class="page-header"><h1 class="page-title" data-i18n="side0_tittel">Registrer sted</h1><div class="page-desc" data-i18n="side0_desc">Grunnleggende informasjon om stedet du kartlegger.</div></div>
+    <div id="okt-banner" style="display:none;background:var(--blue-light);border:1px solid rgba(6,90,130,.25);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--blue);margin-bottom:1rem;line-height:1.7"></div>
     <div id="prefyll-banner" style="display:none;background:var(--green-light);border:1px solid rgba(29,158,117,.25);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);margin-bottom:1rem;line-height:1.7"></div>
     <div class="card">
       <div class="card-title" data-i18n="side0_kort_tittel">📍 Informasjon</div>
@@ -319,6 +320,7 @@ textarea{resize:vertical;min-height:80px}
       </div>
       <div class="field"><label class="field-label" data-i18n="adresse_label">Adresse / sted</label><input type="text" id="biz-address" data-i18n-ph="adresse_ph" placeholder="Adresse, postnummer, sted eller GPS-koordinat"/></div>
       <div class="field"><label class="field-label" data-i18n="destinasjon_label">Destinasjonsselskap</label><input type="text" id="biz-dest" data-i18n-ph="destinasjon_ph" placeholder="f.eks. Visit Valdres"/></div>
+      <div class="field"><label class="field-label" data-i18n="kartlegger_org_label">Kartleggerorganisasjon</label><input type="text" id="biz-kartlegger-org" data-i18n-ph="kartlegger_org_ph" placeholder="f.eks. INKLU Valdres, NTC eller Visit Valdres"/></div>
       <div class="field">
         <label class="field-label" data-i18n="geo_label">Geografisk tilhørighet</label>
         <button type="button" id="gps-btn" onclick="hentPosisjon()" style="width:100%;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:13px 16px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -363,7 +365,7 @@ textarea{resize:vertical;min-height:80px}
   <div class="page" id="page-1">
     <div class="page-header">
       <div id="group-badge-container"></div>
-      <div class="page-title" id="zones-title">Fasiliteter</div>
+      <h1 class="page-title" id="zones-title">Fasiliteter</h1>
       <div class="page-desc" id="zones-desc">Last opp bilder og registrer mål.</div>
     </div>
     <div id="gpx-section" style="display:none">
@@ -384,17 +386,17 @@ textarea{resize:vertical;min-height:80px}
   </div>
 
   <div class="page" id="page-2">
-    <div class="page-header"><div class="page-title" data-i18n="side2_tittel">Tilleggsspørsmål</div><div class="page-desc" data-i18n="side2_desc">Spørsmål om ting AI-en ikke kan se på bilder.</div></div>
+    <div class="page-header"><h1 class="page-title" data-i18n="side2_tittel">Tilleggsspørsmål</h1><div class="page-desc" data-i18n="side2_desc">Spørsmål om ting AI-en ikke kan se på bilder.</div></div>
     <div class="card" id="questions-container"></div>
   </div>
 
   <div class="page" id="page-3">
-    <div class="page-header"><div class="page-title" id="ub-tittel">Tilrettelegging for alle</div><div class="page-desc" id="ub-intro"></div></div>
+    <div class="page-header"><h1 class="page-title" id="ub-tittel">Tilrettelegging for alle</h1><div class="page-desc" id="ub-intro"></div></div>
     <div id="ub-container"></div>
   </div>
 
   <div class="page" id="page-4">
-    <div class="page-header"><div class="page-title" data-i18n="side3_tittel">Tilgjengelighetsprofil</div><div class="page-desc" data-i18n="side3_desc">Trykk "Generer rapport" når du er klar — AI analyserer bilder og lager tilgjengelighetsguide.</div></div>
+    <div class="page-header"><h1 class="page-title" data-i18n="side3_tittel">Tilgjengelighetsprofil</h1><div class="page-desc" data-i18n="side3_desc">Trykk "Generer rapport" når du er klar — AI analyserer bilder og lager tilgjengelighetsguide.</div></div>
     <div id="generer-bar" style="background:var(--green-light);border:1.5px solid var(--green);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;text-align:center">
       <div style="font-size:15px;font-weight:600;color:var(--green-dark);margin-bottom:.5rem" data-i18n="klar_tittel">Klar til å generere rapport?</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:1rem" data-i18n="klar_desc">AI analyserer bildene og lager tilgjengelighetsguide. Du kan redigere og godkjenne etterpå.</div>
@@ -417,7 +419,7 @@ textarea{resize:vertical;min-height:80px}
 
 </div>
 
-<div class="bottom-bar">
+<div class="bottom-bar" role="navigation">
   <button class="btn-secondary" id="btn-back" onclick="goBack()" style="display:none" data-i18n="tilbake_pil">← Tilbake</button>
   <button class="btn-primary" id="btn-next" onclick="goNext()" data-i18n="steg_neste_start">Start kartlegging →</button>
 </div>
@@ -469,7 +471,25 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.17';
+const APP_VERSION = 'v0.4.18';
+
+// ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
+// enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
+// kartlegging_id: unik per kartleggingshendelse — ny UUID hver gang appen lastes
+// bruker_id:      null inntil Supabase-innlogging er på plass
+// org_id:         null inntil organisasjonsvalg/innlogging finnes — mottaket faller
+//                 da tilbake på kartlegger_org (avtalt med Ole)
+function hentEllerLagEnhetId(navn, type) {
+  try {
+    var nokkel = 'enhet_id__' + (navn || '').trim().toLowerCase() + '__' + (type || '');
+    var eksisterende = localStorage.getItem(nokkel);
+    if (eksisterende) return eksisterende;
+    var ny = crypto.randomUUID();
+    localStorage.setItem(nokkel, ny);
+    return ny;
+  } catch(e) { return crypto.randomUUID(); }
+}
+var KARTLEGGING_ID = crypto.randomUUID();
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
 const state = {step:0, tags:[], zones:[], answers:{}, usynlig:{}, soneTekster:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
@@ -484,6 +504,9 @@ const TEKST = {
     steg_sted: 'Sted', steg_fasiliteter: 'Fasiliteter',
     steg_sporsmal: 'Spørsmål', steg_usynlig: 'For alle', steg_rapport: 'Rapport',
     steg_neste_usynlig: 'Neste: Tilrettelegging →',
+    valider_navn_type: 'Fyll inn navn og velg type før du går videre.',
+    okt_gjenopprettet: '💾 Påbegynt kartlegging gjenopprettet automatisk.',
+    okt_forkast: 'Forkast og start på nytt',
     // Steg 1 — Sted
     sted_tittel: 'Om stedet', sted_navn_label: 'Navn på sted / bedrift',
     sted_navn_ph: 'F.eks. Beitostølen Helsesportsenter',
@@ -537,6 +560,8 @@ const TEKST = {
     adresse_label: 'Adresse / sted',
     adresse_ph: 'Adresse, postnummer, sted eller GPS-koordinat',
     destinasjon_label: 'Destinasjonsselskap',
+    kartlegger_org_label: 'Kartleggerorganisasjon',
+    kartlegger_org_ph: 'f.eks. INKLU Valdres, NTC eller Visit Valdres',
     destinasjon_ph: 'f.eks. Visit Valdres',
     geo_label: 'Geografisk tilhørighet',
     geo_btn: 'Hent posisjon automatisk',
@@ -687,6 +712,9 @@ const TEKST = {
     steg_sted: 'Location', steg_fasiliteter: 'Facilities',
     steg_sporsmal: 'Questions', steg_usynlig: 'For all', steg_rapport: 'Report',
     steg_neste_usynlig: 'Next: Accessibility for all →',
+    valider_navn_type: 'Enter a name and select a type before continuing.',
+    okt_gjenopprettet: '💾 Unfinished mapping restored automatically.',
+    okt_forkast: 'Discard and start over',
     // Step 1 — Location
     sted_tittel: 'About the location', sted_navn_label: 'Name of place / business',
     sted_navn_ph: 'E.g. Beitostølen Health Sports Centre',
@@ -740,6 +768,8 @@ const TEKST = {
     adresse_label: 'Address / location',
     adresse_ph: 'Address, postal code, city or GPS coordinates',
     destinasjon_label: 'Destination organisation',
+    kartlegger_org_label: 'Mapping organisation',
+    kartlegger_org_ph: 'e.g. INKLU Valdres, NTC or Visit Valdres',
     destinasjon_ph: 'e.g. Visit Valdres',
     geo_label: 'Geographic location',
     geo_btn: 'Detect location automatically',
@@ -886,6 +916,9 @@ const TEKST = {
     steg_sted: 'Lugar', steg_fasiliteter: 'Instalaciones',
     steg_sporsmal: 'Preguntas', steg_usynlig: 'Para todos', steg_rapport: 'Informe',
     steg_neste_usynlig: 'Siguiente: Accesibilidad →',
+    valider_navn_type: 'Introduzca un nombre y seleccione un tipo antes de continuar.',
+    okt_gjenopprettet: '💾 Inspección en curso restaurada automáticamente.',
+    okt_forkast: 'Descartar y empezar de nuevo',
     // Paso 1 — Lugar
     sted_tittel: 'Sobre el lugar', sted_navn_label: 'Nombre del lugar / negocio',
     sted_navn_ph: 'P.ej. Centro Deportivo de Salud Beitostølen',
@@ -965,6 +998,8 @@ const TEKST = {
     adresse_label: 'Dirección / lugar',
     adresse_ph: 'Dirección, código postal, ciudad o coordenadas GPS',
     destinasjon_label: 'Organización de destino',
+    kartlegger_org_label: 'Organización cartógrafa',
+    kartlegger_org_ph: 'p. ej. INKLU Valdres, NTC o Visit Valdres',
     destinasjon_ph: 'p.ej. Visit Valdres',
     geo_label: 'Ubicación geográfica',
     geo_btn: 'Detectar ubicación automáticamente',
@@ -1325,6 +1360,7 @@ function goTo(step) {
   ];
   document.getElementById('btn-next').textContent = labels[step];
   state.step = step;
+  lagreOkt();
   if (step === 1) buildZones();
   if (step === 2) buildQuestions();
   if (step === 3) buildUsynlig();
@@ -1338,6 +1374,12 @@ function goTo(step) {
 
 function goNext() {
   if (state.step === 4) { downloadProfile(); return; }
+  // v0.4.15: minimumsvalidering før kartleggingen starter
+  if (state.step === 0) {
+    var navn = document.getElementById('biz-name').value.trim();
+    var type = document.getElementById('biz-type').value;
+    if (!navn || !type) { alert(T('valider_navn_type')); return; }
+  }
   goTo(state.step + 1);
 }
 function goBack() {
@@ -2041,6 +2083,19 @@ function buildZones() {
     });
     state._builtForType = type;
   }
+  // v0.4.15: flett inn notater/mål fra gjenopprettet økt (kun samme type)
+  if (state._oktZoner && state._oktZoner.length) {
+    for (var oi = 0; oi < state._oktZoner.length; oi++) {
+      var oz = state._oktZoner[oi];
+      var match = null;
+      for (var zi = 0; zi < state.zones.length; zi++) {
+        if (state.zones[zi].id === oz.id && state.zones[zi].label === oz.label) { match = state.zones[zi]; break; }
+      }
+      if (match) { match.note = oz.note || ''; match.measures = oz.measures || {}; }
+      else state.zones.push({id:oz.id,label:oz.label,icon:oz.icon||'📍',extraFields:oz.extraFields||[],optional:true,images:[],aiAnalysis:null,measures:oz.measures||{},note:oz.note||''});
+    }
+    state._oktZoner = null;
+  }
   renderZones();
 }
 
@@ -2278,12 +2333,12 @@ function buildUsynlig() {
       var v = state.usynlig[q.id];
       sekHtml += '<div class="question-item"><div class="question-text">' + ubQTxt(q) + '</div>' +
         '<div class="yn-group">' +
-        '<button class="yn-btn yes' + (v === 'ja' ? ' active' : '') + '" data-ub-id="' + q.id + '" data-ub-val="ja">' + T('ja') + '</button>' +
-        '<button class="yn-btn no' + (v === 'nei' ? ' active' : '') + '" data-ub-id="' + q.id + '" data-ub-val="nei">' + T('nei') + '</button>' +
-        '<button class="yn-btn na' + (v === 'na' ? ' active' : '') + '" data-ub-id="' + q.id + '" data-ub-val="na">' + T('vet_ikke_btn') + '</button>' +
+        '<button class="yn-btn yes' + (v === 'ja' ? ' active' : '') + '" aria-pressed="' + (v === 'ja') + '" data-ub-id="' + q.id + '" data-ub-val="ja">' + T('ja') + '</button>' +
+        '<button class="yn-btn no' + (v === 'nei' ? ' active' : '') + '" aria-pressed="' + (v === 'nei') + '" data-ub-id="' + q.id + '" data-ub-val="nei">' + T('nei') + '</button>' +
+        '<button class="yn-btn na' + (v === 'na' ? ' active' : '') + '" aria-pressed="' + (v === 'na') + '" data-ub-id="' + q.id + '" data-ub-val="na">' + T('vet_ikke_btn') + '</button>' +
         '</div></div>';
     }
-    if (sekHtml) html += '<div class="card"><div class="card-title">' + UB_SEK_IKON[s] + ' ' + ubTxt('sek' + s) + '</div>' + sekHtml + '</div>';
+    if (sekHtml) html += '<div class="card"><h2 class="card-title">' + UB_SEK_IKON[s] + ' ' + ubTxt('sek' + s) + '</h2>' + sekHtml + '</div>';
   }
   c.innerHTML = html;
   if (!c._ubBound) {
@@ -2313,9 +2368,9 @@ function buildQuestions() {
     html += '<div class="question-item"><div class="question-text">'+qText+'</div>' +
       (q.ctx ? '<div class="question-context">'+qCtx+'</div>' : '') +
       '<div class="yn-group">' +
-      '<button class="yn-btn yes '+(state.answers[id]==='ja'?'active':'')+'" onclick="setAns(\''+id+'\',\'ja\',this)">'+T('ja')+'</button>' +
-      '<button class="yn-btn no '+(state.answers[id]==='nei'?'active':'')+'" onclick="setAns(\''+id+'\',\'nei\',this)">'+T('nei')+'</button>' +
-      '<button class="yn-btn na '+(state.answers[id]==='na'?'active':'')+'" onclick="setAns(\''+id+'\',\'na\',this)">'+T('vet_ikke_btn')+'</button>' +
+      '<button class="yn-btn yes '+(state.answers[id]==='ja'?'active':'')+'" aria-pressed="'+(state.answers[id]==='ja')+'" onclick="setAns(\''+id+'\',\'ja\',this)">'+T('ja')+'</button>' +
+      '<button class="yn-btn no '+(state.answers[id]==='nei'?'active':'')+'" aria-pressed="'+(state.answers[id]==='nei')+'" onclick="setAns(\''+id+'\',\'nei\',this)">'+T('nei')+'</button>' +
+      '<button class="yn-btn na '+(state.answers[id]==='na'?'active':'')+'" aria-pressed="'+(state.answers[id]==='na')+'" onclick="setAns(\''+id+'\',\'na\',this)">'+T('vet_ikke_btn')+'</button>' +
       '</div></div>';
   }
   document.getElementById('questions-container').innerHTML = html;
@@ -2324,8 +2379,9 @@ function buildQuestions() {
 function setAns(id, val, btn) {
   state.answers[id] = val;
   var group = btn.closest('.yn-group').querySelectorAll('.yn-btn');
-  for (var i = 0; i < group.length; i++) group[i].classList.remove('active');
+  for (var i = 0; i < group.length; i++) { group[i].classList.remove('active'); group[i].setAttribute('aria-pressed','false'); }
   btn.classList.add('active');
+  btn.setAttribute('aria-pressed','true');
 }
 
 // RAPPORT
@@ -2409,7 +2465,7 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
   var h = '<div class="guide-sone">';
   h += '<div class="guide-sone-topp">';
   h += '<div class="guide-sone-ikon">'+zone.icon+'</div>';
-  h += '<div class="guide-sone-navn">'+TL(zone.label)+'</div>';
+  h += '<h3 class=\"guide-sone-navn\">'+TL(zone.label)+'</h3>';
   h += '<div id="guide-sone-status-'+idx+'">'+statusSpan+'</div>';
   h += '<button class="sone-edit-btn" id="edit-btn-'+idx+'" onclick="toggleEditSone('+idx+')">'+T('sone_rediger')+'</button>';
   h += '</div>';
@@ -2514,7 +2570,7 @@ async function buildGuide() {
     // Topp-rad
     var topp = document.createElement('div');
     topp.className = 'guide-sone-topp';
-    topp.innerHTML = '<div class="guide-sone-ikon">🏠</div><div class="guide-sone-navn">'+T('rapport_helhetsinntrykk')+'</div>';
+    topp.innerHTML = '<div class="guide-sone-ikon">🏠</div><h3 class=\"guide-sone-navn\">'+T('rapport_helhetsinntrykk')+'</h3>';
     var editBtn = document.createElement('button');
     editBtn.className = 'sone-edit-btn';
     editBtn.id = 'edit-btn-' + hIdx;
@@ -2583,9 +2639,9 @@ async function buildGuide() {
   }
 
   var sonerHtml = profilAnalyseHtml +
-    (ankomstHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('ved_ankomst')+'</div>'+ankomstHtml+'</div>' : '') +
-    (oppholdHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('guide_under_oppholdet')+'</div>'+oppholdHtml+'</div>' : '') +
-    (annetHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('ovrig')+'</div>'+annetHtml+'</div>' : '');
+    (ankomstHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('ved_ankomst')+'</h2>'+ankomstHtml+'</div>' : '') +
+    (oppholdHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_under_oppholdet')+'</h2>'+oppholdHtml+'</div>' : '') +
+    (annetHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('ovrig')+'</h2>'+annetHtml+'</div>' : '');
 
   var qIds = config ? config.questions : Object.keys(ALL_QUESTIONS);
   var jaItems = '';
@@ -2652,18 +2708,18 @@ async function buildGuide() {
     ((state.profilbilde && state.profilbilde.dataUrl) ? '<img class="guide-hero-img" src="'+state.profilbilde.dataUrl+'" alt="'+name+'"/>' : firstImg ? '<img class="guide-hero-img" src="'+firstImg.dataUrl+'" alt="'+name+'"/>' : '') +
     '<div class="guide-hero-body">' +
     '<div class="guide-hero-badge">'+T('guide_badge')+'</div>' +
-    '<div class="guide-hero-name">'+name+'</div>' +
+    '<h1 class="guide-hero-name">'+name+'</h1>' +
     '<div class="guide-hero-type">'+(config?TL(config.label):'')+'</div>' +
     '<div class="guide-hero-meta">'+metaPills+'</div>' +
     '</div></div>' +
     (state.gpxData ? '' : mapHtml) + gpxHtml + (state.gpxData ? mapHtml : '') +
-    (sonerHtml ? '<div class="guide-section"><div class="guide-section-title">'+T('guide_fasiliteter')+'</div>'+sonerHtml+'</div>' : '') +
-    (jaItems ? '<div class="guide-section"><div class="guide-section-title">'+T('guide_tilleggstjenester')+'</div><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
-    (ubHtml ? '<div class="guide-section"><div class="guide-section-title">'+ubTxt('tittel')+'</div><div class="guide-tillegg">'+ubHtml+'</div></div>' : '') +
-    '<div class="guide-section"><div class="guide-section-title">'+T('guide_spor_om')+'</div>' +
+    (sonerHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_fasiliteter')+'</h2>'+sonerHtml+'</div>' : '') +
+    (jaItems ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_tilleggstjenester')+'</h2><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
+    (ubHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+ubTxt('tittel')+'</h2><div class="guide-tillegg">'+ubHtml+'</div></div>' : '') +
+    '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_spor_om')+'</h2>' +
     '<div class="chat-card">' +
     '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_tittel')+'</div><div class="chat-header-sub">AI</div></div>' +
-    '<div class="chat-messages" id="guide-chat-messages"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei')+' '+name+'. '+T('chat_hva_lurer')+'</div></div></div>' +
+    '<div class="chat-messages" id="guide-chat-messages" role="log" aria-live="polite"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei')+' '+name+'. '+T('chat_hva_lurer')+'</div></div></div>' +
     '<div class="chat-suggestions">' +
     '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Passer det for rullestol?\')">'+T('chat_passer_rullestol')+'</button>' +
     '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Finnes det HC-parkering?\')">'+T('chat_hc_parkering')+'</button>' +
@@ -2733,7 +2789,7 @@ async function buildAnalyse() {
       return '<div style="margin-top:.5rem;background:var(--surface2);border-radius:8px;padding:.75rem;font-size:13px;color:var(--text2);line-height:1.6">'+
         img.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div>';
     }).join('');
-    return '<div class="sone-kort"><div class="sone-topp"><div class="sone-ikon">'+s.zone.icon+'</div><div class="sone-navn">'+TL(s.zone.label)+'</div>' +
+    return '<div class="sone-kort"><div class="sone-topp"><div class="sone-ikon">'+s.zone.icon+'</div><h3 class=\"sone-navn\">'+TL(s.zone.label)+'</h3>' +
       '<div class="status-badge '+s.status+'">'+statusIkon+' '+s.statusTekst+'</div></div>' +
       (s.gjesteTekst?'<div class="sone-tekst">'+s.gjesteTekst+'</div>':'') +
       (s.faktaRader?'<div class="sone-fakta">'+s.faktaRader+'</div>':'') +
@@ -2773,7 +2829,7 @@ async function buildAnalyse() {
     (jaItems?'<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">'+jaItems+'</div></div>':'') +
     '<div class="chat-card">' +
     '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_spor_om')+'</div><div class="chat-header-sub">'+T('chat_ai_assistent')+'</div></div>' +
-    '<div class="chat-messages" id="chat-messages"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei_generell')+'</div></div></div>' +
+    '<div class="chat-messages" id="chat-messages" role="log" aria-live="polite"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei_generell')+'</div></div></div>' +
     '<div class="chat-suggestions">' +
     '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_passer_rullestol')+'</button>' +
     '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_hc_parkering')+'</button>' +
@@ -2949,10 +3005,17 @@ function setStatusToggle(idx, status) {
 
 function byggKartleggingPayload(godkjentAvNavn) {
   var type = document.getElementById('biz-type').value;
+  var navn = document.getElementById('biz-name').value || '';
   var config = TYPE_CONFIG[type] || {};
   return {
+    enhet_id: hentEllerLagEnhetId(navn, type),
+    kartlegging_id: KARTLEGGING_ID,
+    bruker_id: null,
+    org_id: null,
+    kartlegger_org: document.getElementById('biz-kartlegger-org').value || '',
+    app_versjon: APP_VERSION,
     enhet: {
-      navn: document.getElementById('biz-name').value || '',
+      navn: navn,
       gruppe: config.group || '',
       type: type,
       adresse: document.getElementById('biz-address').value || '',
@@ -3012,6 +3075,40 @@ function byggKartleggingPayload(godkjentAvNavn) {
   };
 }
 
+// v0.4.18: gjør en base64 dataUrl om til en Blob for PUT-body (Supabase
+// Storage forventer rå bytes, ikke JSON).
+function dataUrlTilBlob(dataUrl) {
+  var deler = dataUrl.split(',');
+  var mime = deler[0].match(/:(.*?);/)[1];
+  var bin = atob(deler[1]);
+  var arr = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+// v0.4.18: laster opp bilder til Supabase Storage via signerte URL-er fra
+// ingest-svaret. Matcher på (sone_id, rekkefolge) — rekkefolge er indeksen
+// bildet hadde i sonens bilder-array ved sending. Kjøres i bakgrunnen uten
+// å blokkere UI. Signerte URL-er trenger ingen egen nøkkel (avtalt med Ole).
+async function lastOppBilder(bilderSvar) {
+  if (!Array.isArray(bilderSvar)) return;
+  for (var i = 0; i < bilderSvar.length; i++) {
+    var b = bilderSvar[i];
+    if (!b || !b.upload_url) continue;
+    var sone = state.zones.filter(function(z){ return z.id === b.sone_id; })[0];
+    if (!sone || !sone.images[b.rekkefolge] || !sone.images[b.rekkefolge].dataUrl) continue;
+    try {
+      await fetch(b.upload_url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'image/jpeg' },
+        body: dataUrlTilBlob(sone.images[b.rekkefolge].dataUrl)
+      });
+    } catch(e) {
+      console.warn('Bildeopplasting feilet for sone', b.sone_id, 'bilde', b.rekkefolge, e.message);
+    }
+  }
+}
+
 async function sendTilAPI(payload) {
   try {
     var res = await fetch(WORKER_URL + '/api/kartlegging', {
@@ -3021,6 +3118,7 @@ async function sendTilAPI(payload) {
     });
     if (res.ok) {
       var data = await res.json();
+      if (data.bilder) lastOppBilder(data.bilder);
       return data.kartlegging_id || null;
     }
   } catch(e) {
@@ -3041,6 +3139,7 @@ function godkjennGuide() {
   });
 
   // Vis godkjent-badge
+  try { localStorage.removeItem(OKT_KEY); } catch(e) {}
   document.getElementById('godkjenn-bar').style.display = 'none';
   document.getElementById('godkjent-badge').style.display = 'flex';
   document.getElementById('godkjent-badge').innerHTML =
@@ -3478,6 +3577,71 @@ function oppdaterPickerBtns(profil) {
   }
 }
 
+
+// ---- ØKT-AUTOSAVE (v0.4.15): beskytter feltarbeid mot krasj/mistet fane ----
+// Lagrer svar, soner (notater/mål), tagger og steg hvert 15. sekund + ved
+// stegbytte og når fanen skjules. Bilder og GPX lagres IKKE (localStorage-
+// kvote ~5MB) — ved gjenoppretting må bilder lastes opp på nytt.
+var OKT_KEY = 'accessnorway_okt';
+var OKT_MAKS_ALDER_MS = 24 * 60 * 60 * 1000;
+
+function lagreOkt() {
+  try {
+    var okt = {
+      ts: Date.now(),
+      step: state.step,
+      type: document.getElementById('biz-type').value,
+      adresse: document.getElementById('biz-address').value,
+      answers: state.answers,
+      usynlig: state.usynlig,
+      tags: state.tags,
+      builtForType: state._builtForType,
+      zoner: state.zones.map(function(z) {
+        return { id: z.id, label: z.label, icon: z.icon, optional: z.optional,
+                 extraFields: z.extraFields, note: z.note, measures: z.measures };
+      })
+    };
+    localStorage.setItem(OKT_KEY, JSON.stringify(okt));
+  } catch(e) {}
+}
+
+function forkastOkt() {
+  try { localStorage.removeItem(OKT_KEY); } catch(e) {}
+  location.reload();
+}
+
+function gjenopprettOkt() {
+  try {
+    var raw = localStorage.getItem(OKT_KEY);
+    if (!raw) return;
+    var okt = JSON.parse(raw);
+    if (!okt.ts || Date.now() - okt.ts > OKT_MAKS_ALDER_MS) {
+      localStorage.removeItem(OKT_KEY); return;
+    }
+    var harInnhold = Object.keys(okt.answers || {}).length > 0 ||
+      Object.keys(okt.usynlig || {}).length > 0 ||
+      (okt.zoner || []).some(function(z) { return z.note || Object.keys(z.measures || {}).some(function(k){return z.measures[k];}); });
+    if (!harInnhold) return;
+    state.answers = okt.answers || {};
+    state.usynlig = okt.usynlig || {};
+    state.tags = okt.tags || [];
+    state._oktZoner = okt.zoner || null;
+    if (okt.adresse) { var a = document.getElementById('biz-address'); if (a && !a.value) a.value = okt.adresse; }
+    document.querySelectorAll('.tag-btn').forEach(function(btn) {
+      if (state.tags.indexOf(btn.textContent.trim()) >= 0) btn.classList.add('active');
+    });
+    var banner = document.getElementById('okt-banner');
+    if (banner) {
+      banner.innerHTML = T('okt_gjenopprettet') +
+        ' <button onclick="forkastOkt()" style="background:none;border:none;color:var(--blue);font-size:12px;cursor:pointer;margin-left:6px;text-decoration:underline">' + T('okt_forkast') + '</button>';
+      banner.style.display = 'block';
+    }
+  } catch(e) {}
+}
+
+setInterval(lagreOkt, 15000);
+document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden') lagreOkt(); });
+
 // ---- STEDSPROFIL: localStorage lagring og prefylling ----
 var ORG_FIELDS = [
   'biz-name','biz-type','biz-dest','biz-kommune','biz-fylke','biz-ssb-region','biz-contact'
@@ -3573,6 +3737,7 @@ downloadProfile = function() {
 
 // Start
 buildSteps();
+gjenopprettOkt();
 setupOrgAutoSave();
 lastStedsprofil();
 </script>
