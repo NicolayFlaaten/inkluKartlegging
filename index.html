@@ -214,6 +214,14 @@ textarea{resize:vertical;min-height:80px}
 .godkjenn-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer}
 .godkjenn-btn:disabled{background:var(--text3);cursor:not-allowed}
 .godkjent-badge{background:var(--green-light);border:1px solid var(--green);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);display:flex;align-items:center;gap:8px;margin-top:1rem}
+.sync-status{border-radius:var(--radius-sm);padding:.65rem 1rem;font-size:13px;display:flex;align-items:center;gap:8px;margin-top:.5rem}
+.sync-status.lagrer{background:var(--surface2);color:var(--text2)}
+.sync-status.ok{background:var(--green-light);color:var(--green-dark)}
+.sync-status.feil{background:#FCEBEB;color:#A32D2D}
+.sync-spinner{width:13px;height:13px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--text2);border-radius:50%;animation:sync-spin .7s linear infinite;flex-shrink:0}
+@keyframes sync-spin{to{transform:rotate(360deg)}}
+.sync-retry-btn{background:none;border:none;color:#A32D2D;font:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:0;margin-left:4px}
+
 .edit-mode-banner{background:var(--amber-light);border:1px solid rgba(186,117,23,.3);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--amber);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
 
 .gpx-map{width:100%;height:220px;border-radius:var(--radius);overflow:hidden;margin-top:.75rem;border:1px solid var(--border)}
@@ -247,8 +255,9 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.18</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.20</div>
   <div style="display:flex;align-items:center;gap:6px">
+    <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
     <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
     <button class="lang-btn" data-lang="es" onclick="byttSpraak('es')">ES</button>
@@ -471,7 +480,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.18';
+const APP_VERSION = 'v0.4.20';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -505,6 +514,10 @@ const TEKST = {
     steg_sporsmal: 'Spørsmål', steg_usynlig: 'For alle', steg_rapport: 'Rapport',
     steg_neste_usynlig: 'Neste: Tilrettelegging →',
     valider_navn_type: 'Fyll inn navn og velg type før du går videre.',
+    sync_lagrer: 'Lagrer i database...',
+    sync_ok: 'Lagret i database',
+    sync_feil: 'Kunne ikke lagre i database — sjekk nettforbindelsen.',
+    sync_prov_igjen: 'Prøv igjen',
     okt_gjenopprettet: '💾 Påbegynt kartlegging gjenopprettet automatisk.',
     okt_forkast: 'Forkast og start på nytt',
     // Steg 1 — Sted
@@ -560,6 +573,7 @@ const TEKST = {
     adresse_label: 'Adresse / sted',
     adresse_ph: 'Adresse, postnummer, sted eller GPS-koordinat',
     destinasjon_label: 'Destinasjonsselskap',
+    dashboard_lenke: 'Dashboard',
     kartlegger_org_label: 'Kartleggerorganisasjon',
     kartlegger_org_ph: 'f.eks. INKLU Valdres, NTC eller Visit Valdres',
     destinasjon_ph: 'f.eks. Visit Valdres',
@@ -713,6 +727,10 @@ const TEKST = {
     steg_sporsmal: 'Questions', steg_usynlig: 'For all', steg_rapport: 'Report',
     steg_neste_usynlig: 'Next: Accessibility for all →',
     valider_navn_type: 'Enter a name and select a type before continuing.',
+    sync_lagrer: 'Saving to database...',
+    sync_ok: 'Saved to database',
+    sync_feil: 'Could not save to database — check your connection.',
+    sync_prov_igjen: 'Try again',
     okt_gjenopprettet: '💾 Unfinished mapping restored automatically.',
     okt_forkast: 'Discard and start over',
     // Step 1 — Location
@@ -768,6 +786,7 @@ const TEKST = {
     adresse_label: 'Address / location',
     adresse_ph: 'Address, postal code, city or GPS coordinates',
     destinasjon_label: 'Destination organisation',
+    dashboard_lenke: 'Dashboard',
     kartlegger_org_label: 'Mapping organisation',
     kartlegger_org_ph: 'e.g. INKLU Valdres, NTC or Visit Valdres',
     destinasjon_ph: 'e.g. Visit Valdres',
@@ -917,6 +936,10 @@ const TEKST = {
     steg_sporsmal: 'Preguntas', steg_usynlig: 'Para todos', steg_rapport: 'Informe',
     steg_neste_usynlig: 'Siguiente: Accesibilidad →',
     valider_navn_type: 'Introduzca un nombre y seleccione un tipo antes de continuar.',
+    sync_lagrer: 'Guardando en la base de datos...',
+    sync_ok: 'Guardado en la base de datos',
+    sync_feil: 'No se pudo guardar — comprueba tu conexión.',
+    sync_prov_igjen: 'Reintentar',
     okt_gjenopprettet: '💾 Inspección en curso restaurada automáticamente.',
     okt_forkast: 'Descartar y empezar de nuevo',
     // Paso 1 — Lugar
@@ -998,6 +1021,7 @@ const TEKST = {
     adresse_label: 'Dirección / lugar',
     adresse_ph: 'Dirección, código postal, ciudad o coordenadas GPS',
     destinasjon_label: 'Organización de destino',
+    dashboard_lenke: 'Panel',
     kartlegger_org_label: 'Organización cartógrafa',
     kartlegger_org_ph: 'p. ej. INKLU Valdres, NTC o Visit Valdres',
     destinasjon_ph: 'p.ej. Visit Valdres',
@@ -2740,6 +2764,7 @@ async function buildGuide() {
     '<button class="godkjenn-btn" onclick="godkjennGuide()">'+T('rapport_godkjenn_btn')+'</button>' +
     '</div>' +
     '<div class="godkjent-badge" id="godkjent-badge" style="display:none"></div>' +
+    '<div class="sync-status" id="sync-status" style="display:none"></div>' +
 
     '<div class="guide-download-bar">' +
     '<button class="guide-btn-dl" onclick="downloadGuideHTML()">'+T('last_ned_html')+'</button>' +
@@ -3119,12 +3144,52 @@ async function sendTilAPI(payload) {
     if (res.ok) {
       var data = await res.json();
       if (data.bilder) lastOppBilder(data.bilder);
-      return data.kartlegging_id || null;
+      return { ok: true, id: data.kartlegging_id || null };
     }
+    var feilTekst = '';
+    try { var feilData = await res.json(); feilTekst = feilData.error || ''; } catch(e2) {}
+    console.warn('API-lagring feilet, status', res.status, feilTekst);
+    return { ok: false, status: res.status };
   } catch(e) {
-    console.warn('API-lagring feilet (prototype-modus):', e.message);
+    console.warn('API-lagring feilet (nettverksfeil):', e.message);
+    return { ok: false, status: null };
   }
-  return null;
+}
+
+// v0.4.20: viser tydelig lagringsstatus i UI — appen ga tidligere ingen synlig
+// tilbakemelding ved suksess eller feil, kun en konsoll-logg.
+var _sisteGodkjentePayload = null;
+
+function visSyncStatus(tilstand, statusKode) {
+  var el = document.getElementById('sync-status');
+  if (!el) return;
+  el.style.display = 'flex';
+  el.className = 'sync-status ' + tilstand;
+  if (tilstand === 'lagrer') {
+    el.innerHTML = '<span class="sync-spinner"></span><span>' + T('sync_lagrer') + '</span>';
+  } else if (tilstand === 'ok') {
+    el.innerHTML = '✅ <span>' + T('sync_ok') + '</span>';
+  } else {
+    el.innerHTML = '⚠️ <span>' + T('sync_feil') + (statusKode ? ' (' + statusKode + ')' : '') + '</span>' +
+      '<button class="sync-retry-btn" onclick="provLagreIgjen()">' + T('sync_prov_igjen') + '</button>';
+  }
+}
+
+function lagreOgVisStatus(payload) {
+  _sisteGodkjentePayload = payload;
+  visSyncStatus('lagrer');
+  sendTilAPI(payload).then(function(resultat) {
+    if (resultat.ok) {
+      visSyncStatus('ok');
+      if (resultat.id) console.log('Kartlegging lagret med ID:', resultat.id);
+    } else {
+      visSyncStatus('feil', resultat.status);
+    }
+  });
+}
+
+function provLagreIgjen() {
+  if (_sisteGodkjentePayload) lagreOgVisStatus(_sisteGodkjentePayload);
 }
 
 function godkjennGuide() {
@@ -3134,9 +3199,7 @@ function godkjennGuide() {
   godkjentTidspunkt = new Date();
 
   var payload = byggKartleggingPayload(navn);
-  sendTilAPI(payload).then(function(kartleggingId) {
-    if (kartleggingId) console.log('Kartlegging lagret med ID:', kartleggingId);
-  });
+  lagreOgVisStatus(payload);
 
   // Vis godkjent-badge
   try { localStorage.removeItem(OKT_KEY); } catch(e) {}
