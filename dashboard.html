@@ -22,6 +22,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .topbar-logo{font-size:17px;font-weight:700;color:#fff}
 .topbar-logo span{color:var(--green)}
 .topbar-org{font-size:12px;color:rgba(255,255,255,.4);margin-top:1px}
+.topbar-nav{display:flex;align-items:center;gap:14px}
+.topbar-link{font-size:13px;color:rgba(255,255,255,.5);cursor:pointer;text-decoration:none;background:none;border:none;font-family:inherit}
+.topbar-link:hover{color:rgba(255,255,255,.85)}
 
 .content{padding:1.25rem 1rem 6rem;max-width:600px;margin:0 auto}
 
@@ -116,7 +119,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="topbar-logo">Access<span>Norway</span></div>
     <div class="topbar-org" id="topbar-org">Dashboard</div>
   </div>
-  <span style="font-size:13px;color:rgba(255,255,255,.35);cursor:pointer">Logg ut</span>
+  <div class="topbar-nav">
+    <a class="topbar-link" href="velkommen.html">← Forside</a>
+    <button class="topbar-link" onclick="byttOrganisasjon()">Bytt organisasjon</button>
+  </div>
 </div>
 
 <div class="org-velger-wrap" id="org-velger-wrap" style="display:none">
@@ -195,6 +201,15 @@ var DEMO = {
 // å falle tilbake til demo uten varsel — samme forbedring som ble gjort i
 // kartleggingsappen (index.html) etter at nettopp denne stille fallbacken
 // skapte lang forvirring under feilsøking av tokens tidligere.
+function byttOrganisasjon() {
+  // Fjerner org_id fra URL-en og viser orgvelgeren på nytt, uten full omlasting av siden.
+  window.history.replaceState({}, '', 'dashboard.html');
+  document.getElementById('dashboard-innhold').style.display = 'none';
+  document.getElementById('feil-banner-wrap').innerHTML = '';
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('org-velger-wrap').style.display = 'block';
+}
+
 function velgOrgOgLast() {
   var valgt = document.getElementById('org-velger-select').value;
   window.location.href = 'dashboard.html?org_id=' + encodeURIComponent(valgt);
