@@ -255,7 +255,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.22</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.23</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
@@ -329,7 +329,11 @@ textarea{resize:vertical;min-height:80px}
       </div>
       <div class="field"><label class="field-label" data-i18n="adresse_label">Adresse / sted</label><input type="text" id="biz-address" data-i18n-ph="adresse_ph" placeholder="Adresse, postnummer, sted eller GPS-koordinat"/></div>
       <div class="field"><label class="field-label" data-i18n="destinasjon_label">Destinasjonsselskap</label><input type="text" id="biz-dest" data-i18n-ph="destinasjon_ph" placeholder="f.eks. Visit Valdres"/></div>
-      <div class="field"><label class="field-label" data-i18n="kartlegger_org_label">Kartleggerorganisasjon</label><input type="text" id="biz-kartlegger-org" data-i18n-ph="kartlegger_org_ph" placeholder="f.eks. INKLU Valdres, NTC eller Visit Valdres"/></div>
+      <div class="field"><label class="field-label" data-i18n="kartlegger_org_label">Kartleggerorganisasjon</label>
+      <select id="biz-kartlegger-org">
+        <option value="INKLU Valdres">INKLU Valdres</option>
+        <option value="NTC">NTC</option>
+      </select></div>
       <div class="field">
         <label class="field-label" data-i18n="geo_label">Geografisk tilhørighet</label>
         <button type="button" id="gps-btn" onclick="hentPosisjon()" style="width:100%;background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:13px 16px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -480,7 +484,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.22';
+const APP_VERSION = 'v0.4.23';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -3809,13 +3813,10 @@ downloadProfile = function() {
 // Start
 buildSteps();
 gjenopprettOkt();
-// v0.4.21: forhåndsutfyll kartleggerorganisasjon under intern testfase — reduserer
-// risiko for feilstaving som gjør at kartlegginger ikke kobles til riktig org
-// hos Ole. Fjernes/erstattes naturlig når bedriftsportalen (fase 2) er på plass.
-(function() {
-  var felt = document.getElementById('biz-kartlegger-org');
-  if (felt && !felt.value) felt.value = 'INKLU Valdres';
-})();
+// v0.4.23: kartleggerorganisasjon er nå en nedtrekksmeny (fast liste) i stedet
+// for fritekst, siden fritekst ga skjøre koblinger mot Oles org-tabell
+// (feilstaving/mellomrom knakk matchingen). Trenger derfor ingen
+// forhåndsutfylling — <select> har alltid en gyldig verdi fra første steg.
 setupOrgAutoSave();
 lastStedsprofil();
 </script>
