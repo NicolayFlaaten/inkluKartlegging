@@ -255,7 +255,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.23</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.25</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
@@ -484,7 +484,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.23';
+const APP_VERSION = 'v0.4.25';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -518,9 +518,10 @@ const TEKST = {
     steg_sporsmal: 'Spørsmål', steg_usynlig: 'For alle', steg_rapport: 'Rapport',
     steg_neste_usynlig: 'Neste: Tilrettelegging →',
     valider_navn_type: 'Fyll inn navn og velg type før du går videre.',
-    sync_lagrer: 'Lagrer i database...',
+    sync_lagrer: 'Lagrer og laster opp bilder...',
     sync_ok: 'Lagret i database',
     sync_feil: 'Kunne ikke lagre i database — sjekk nettforbindelsen.',
+    sync_delvis: 'Lagret, men {feilet} av {totalt} bilder kunne ikke lastes opp.',
     sync_prov_igjen: 'Prøv igjen',
     okt_gjenopprettet: '💾 Påbegynt kartlegging gjenopprettet automatisk.',
     okt_forkast: 'Forkast og start på nytt',
@@ -731,9 +732,10 @@ const TEKST = {
     steg_sporsmal: 'Questions', steg_usynlig: 'For all', steg_rapport: 'Report',
     steg_neste_usynlig: 'Next: Accessibility for all →',
     valider_navn_type: 'Enter a name and select a type before continuing.',
-    sync_lagrer: 'Saving to database...',
+    sync_lagrer: 'Saving and uploading images...',
     sync_ok: 'Saved to database',
     sync_feil: 'Could not save to database — check your connection.',
+    sync_delvis: 'Saved, but {feilet} of {totalt} images could not be uploaded.',
     sync_prov_igjen: 'Try again',
     okt_gjenopprettet: '💾 Unfinished mapping restored automatically.',
     okt_forkast: 'Discard and start over',
@@ -940,9 +942,10 @@ const TEKST = {
     steg_sporsmal: 'Preguntas', steg_usynlig: 'Para todos', steg_rapport: 'Informe',
     steg_neste_usynlig: 'Siguiente: Accesibilidad →',
     valider_navn_type: 'Introduzca un nombre y seleccione un tipo antes de continuar.',
-    sync_lagrer: 'Guardando en la base de datos...',
+    sync_lagrer: 'Guardando y subiendo imágenes...',
     sync_ok: 'Guardado en la base de datos',
     sync_feil: 'No se pudo guardar — comprueba tu conexión.',
+    sync_delvis: 'Guardado, pero {feilet} de {totalt} imágenes no se pudieron subir.',
     sync_prov_igjen: 'Reintentar',
     okt_gjenopprettet: '💾 Inspección en curso restaurada automáticamente.',
     okt_forkast: 'Descartar y empezar de nuevo',
@@ -2444,9 +2447,15 @@ async function genererSoneTekster() {
         .then(function(data){
           if (data.content && data.content[0] && data.content[0].text) {
             var tekst = data.content[0].text;
-            var m = tekst.match(/STATUS:(GRONN|GUL|ROD)/);
+            // v0.4.25: Haiku skriver ofte "STATUS: GUL" (med mellomrom) selv om prompten
+// ber om "STATUS:GUL" uten — det er naturlig skrivemåte for en språkmodell.
+// Forrige regex krevde eksakt ingen mellomrom, så treffet uteble av og til,
+// status ble aldri satt (falt til 'ukjent'/null), OG teksten ble ikke
+// strippet — "STATUS: GUL" ble stående synlig i gjesteteksten (rapportert
+// av Ole). Ny regex tåler valgfritt mellomrom og case.
+var m = tekst.match(/STATUS:\s*(GRONN|GUL|ROD)/i);
             state.soneTekster[idx] = {
-              tekst: tekst.replace(/STATUS:(GRONN|GUL|ROD)/,'').trim(),
+              tekst: tekst.replace(/STATUS:\s*(GRONN|GUL|ROD)/i,'').trim(),
               status: m ? m[1].toLowerCase() : 'ukjent'
             };
           }
@@ -3123,27 +3132,45 @@ function dataUrlTilBlob(dataUrl) {
   return new Blob([arr], { type: mime });
 }
 
-// v0.4.18: laster opp bilder til Supabase Storage via signerte URL-er fra
-// ingest-svaret. Matcher på (sone_id, rekkefolge) — rekkefolge er indeksen
-// bildet hadde i sonens bilder-array ved sending. Kjøres i bakgrunnen uten
-// å blokkere UI. Signerte URL-er trenger ingen egen nøkkel (avtalt med Ole).
-async function lastOppBilder(bilderSvar) {
-  if (!Array.isArray(bilderSvar)) return;
-  for (var i = 0; i < bilderSvar.length; i++) {
-    var b = bilderSvar[i];
-    if (!b || !b.upload_url) continue;
-    var sone = state.zones.filter(function(z){ return z.id === b.sone_id; })[0];
-    if (!sone || !sone.images[b.rekkefolge] || !sone.images[b.rekkefolge].dataUrl) continue;
-    try {
-      await fetch(b.upload_url, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'image/jpeg' },
-        body: dataUrlTilBlob(sone.images[b.rekkefolge].dataUrl)
-      });
-    } catch(e) {
-      console.warn('Bildeopplasting feilet for sone', b.sone_id, 'bilde', b.rekkefolge, e.message);
+// v0.4.24: bildeopplasting gjort robust etter at Ole rapporterte at kun 12 av
+// 19 bilder faktisk kom frem til Storage. Årsaken: forrige versjon lastet opp
+// sekvensielt (ett om gangen) UTEN å bli ventet på (fire-and-forget) — lukket
+// noen fanen rett etter «Lagret i database» (naturlig, siden den meldingen kom
+// FØR opplastingen var ferdig), ble resten av bildene i køen aldri sendt.
+// Nå: parallell opplasting, automatiske nye forsøk ved feil, og hele
+// operasjonen ventes på før «ferdig» vises — se lagreOgVisStatus.
+async function lastOppEttBilde(url, dataUrl, forsokNr) {
+  forsokNr = forsokNr || 1;
+  try {
+    var res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'image/jpeg' },
+      body: dataUrlTilBlob(dataUrl)
+    });
+    if (res.ok) return true;
+    throw new Error('status ' + res.status);
+  } catch(e) {
+    if (forsokNr < 3) {
+      await new Promise(function(r){ setTimeout(r, 500 * forsokNr); });
+      return lastOppEttBilde(url, dataUrl, forsokNr + 1);
     }
+    console.warn('Bildeopplasting feilet etter 3 forsøk:', e.message);
+    return false;
   }
+}
+
+async function lastOppBilder(bilderSvar) {
+  if (!Array.isArray(bilderSvar) || bilderSvar.length === 0) return { totalt: 0, feilet: 0 };
+  var oppgaver = bilderSvar.map(function(b) {
+    if (!b || !b.upload_url) return Promise.resolve(true); // ingen opplasting ventet — ikke tell som feil
+    var sone = state.zones.filter(function(z){ return z.id === b.sone_id; })[0];
+    var bilde = sone && sone.images[b.rekkefolge];
+    if (!bilde || !bilde.dataUrl) return Promise.resolve(true); // fantes ikke lokalt — ikke tell som feil
+    return lastOppEttBilde(b.upload_url, bilde.dataUrl);
+  });
+  var resultater = await Promise.all(oppgaver);
+  var feilet = resultater.filter(function(ok){ return !ok; }).length;
+  return { totalt: oppgaver.length, feilet: feilet };
 }
 
 async function sendTilAPI(payload) {
@@ -3155,8 +3182,12 @@ async function sendTilAPI(payload) {
     });
     if (res.ok) {
       var data = await res.json();
-      if (data.bilder) lastOppBilder(data.bilder);
-      return { ok: true, id: data.kartlegging_id || null };
+      // v0.4.24: venter nå på at ALLE bilder faktisk er ferdig lastet opp
+      // (med automatiske nye forsøk) før operasjonen regnes som fullført —
+      // se lastOppBilder. Tidligere ble dette aldri ventet på.
+      var bildeResultat = { totalt: 0, feilet: 0 };
+      if (data.bilder) bildeResultat = await lastOppBilder(data.bilder);
+      return { ok: true, id: data.kartlegging_id || null, bilder: bildeResultat };
     }
     var feilTekst = '';
     try { var feilData = await res.json(); feilTekst = feilData.error || ''; } catch(e2) {}
@@ -3172,7 +3203,7 @@ async function sendTilAPI(payload) {
 // tilbakemelding ved suksess eller feil, kun en konsoll-logg.
 var _sisteGodkjentePayload = null;
 
-function visSyncStatus(tilstand, statusKode) {
+function visSyncStatus(tilstand, statusKode, bildeResultat) {
   var el = document.getElementById('sync-status');
   if (!el) return;
   el.style.display = 'flex';
@@ -3181,6 +3212,9 @@ function visSyncStatus(tilstand, statusKode) {
     el.innerHTML = '<span class="sync-spinner"></span><span>' + T('sync_lagrer') + '</span>';
   } else if (tilstand === 'ok') {
     el.innerHTML = '✅ <span>' + T('sync_ok') + '</span>';
+  } else if (tilstand === 'delvis') {
+    el.innerHTML = '⚠️ <span>' + T('sync_delvis').replace('{feilet}', bildeResultat.feilet).replace('{totalt}', bildeResultat.totalt) + '</span>' +
+      '<button class="sync-retry-btn" onclick="provLagreIgjen()">' + T('sync_prov_igjen') + '</button>';
   } else {
     el.innerHTML = '⚠️ <span>' + T('sync_feil') + (statusKode ? ' (' + statusKode + ')' : '') + '</span>' +
       '<button class="sync-retry-btn" onclick="provLagreIgjen()">' + T('sync_prov_igjen') + '</button>';
@@ -3192,7 +3226,11 @@ function lagreOgVisStatus(payload) {
   visSyncStatus('lagrer');
   sendTilAPI(payload).then(function(resultat) {
     if (resultat.ok) {
-      visSyncStatus('ok');
+      if (resultat.bilder && resultat.bilder.feilet > 0) {
+        visSyncStatus('delvis', null, resultat.bilder);
+      } else {
+        visSyncStatus('ok');
+      }
       if (resultat.id) console.log('Kartlegging lagret med ID:', resultat.id);
     } else {
       visSyncStatus('feil', resultat.status);
