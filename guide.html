@@ -73,6 +73,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .kart-wrapper{width:100%;height:200px;border-radius:var(--radius);overflow:hidden;margin-bottom:.75rem;border:1px solid var(--border);background:var(--surface2)}
 
 .erfaring-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.625rem}
+.stem-btn{margin-top:.625rem;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.stem-btn:hover{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
+.stem-btn.stemt{background:var(--green-light);border-color:var(--green);color:var(--green-dark);cursor:default}
 .erfaring-topp{display:flex;align-items:center;gap:8px;margin-bottom:.5rem}
 .erfaring-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--surface2);color:var(--text3)}
 .erfaring-dato{font-size:11px;color:var(--text3);margin-left:auto}
@@ -429,8 +432,75 @@ function lagErfaringHTML(e) {
   if (e.tekst) h += '<div class="erfaring-tekst">' + escHtml(e.tekst) + '</div>';
   if (e.stemmer_med_info === true) h += '<div class="erfaring-stemmer">✓ Bekrefter at info stemmer</div>';
   if (e.stemmer_med_info === false) h += '<div class="erfaring-stemmer nei">⚠ Rapporterer avvik fra beskrivelsen</div>';
+  if (e.id) h += lagStemKnappHTML(e);
   h += '</div>';
   return h;
+}
+
+// ── Stemme på erfaringer (v-erfaring) ────────────────────────────────────
+// Anonym velger_id lagres lokalt i nettleseren — ikke personopplysninger,
+// kun et tilfeldig tall for å hindre at samme nettleser stemmer flere
+// ganger på samme erfaring. Oles database håndhever dette også server-side
+// (unique constraint på erfaring_id + velger_id).
+function hentVelgerId() {
+  try {
+    var id = localStorage.getItem('accessnorway_velger_id');
+    if (!id) {
+      id = 'v-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random());
+      localStorage.setItem('accessnorway_velger_id', id);
+    }
+    return id;
+  } catch(e) { return 'v-' + Date.now(); }
+}
+
+function harAlleredeStemt(erfaringId) {
+  try {
+    var stemt = JSON.parse(localStorage.getItem('accessnorway_stemt') || '[]');
+    return stemt.indexOf(erfaringId) >= 0;
+  } catch(e) { return false; }
+}
+
+function merkSomStemt(erfaringId) {
+  try {
+    var stemt = JSON.parse(localStorage.getItem('accessnorway_stemt') || '[]');
+    if (stemt.indexOf(erfaringId) < 0) stemt.push(erfaringId);
+    localStorage.setItem('accessnorway_stemt', JSON.stringify(stemt));
+  } catch(e) {}
+}
+
+function lagStemKnappHTML(e) {
+  var alleredeStemt = harAlleredeStemt(e.id);
+  var antall = e.stemmer || 0;
+  var klasse = alleredeStemt ? 'stem-btn stemt' : 'stem-btn';
+  var tekst = alleredeStemt ? '✓ Du har stemt' : '👍 Dette stemmer for meg også';
+  return '<button class="' + klasse + '" id="stem-btn-' + e.id + '" ' +
+    (alleredeStemt ? 'disabled' : 'onclick="stemPaErfaring(&quot;' + e.id + '&quot;)"') + '>' +
+    tekst + ' <span id="stem-antall-' + e.id + '">(' + antall + ')</span></button>';
+}
+
+async function stemPaErfaring(erfaringId) {
+  if (harAlleredeStemt(erfaringId)) return;
+  var knapp = document.getElementById('stem-btn-' + erfaringId);
+  if (knapp) knapp.disabled = true;
+  try {
+    var res = await fetch(API_BASE + '/api/erfaring/' + erfaringId + '/stem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ velger_id: hentVelgerId() })
+    });
+    if (res.ok) {
+      var data = await res.json();
+      merkSomStemt(erfaringId);
+      if (knapp) {
+        knapp.className = 'stem-btn stemt';
+        knapp.innerHTML = '✓ Du har stemt <span>(' + (data.stemmer || 0) + ')</span>';
+      }
+    } else if (knapp) {
+      knapp.disabled = false;
+    }
+  } catch(e) {
+    if (knapp) knapp.disabled = false;
+  }
 }
 
 function formaterDato(str) {

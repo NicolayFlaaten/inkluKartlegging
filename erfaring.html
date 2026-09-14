@@ -235,6 +235,18 @@ function sjekkSubmit() {
   document.getElementById('submit-btn').disabled = !ok;
 }
 
+// v-erfaring: Oles database krever ikke-tom 'tekst' (kaster feil ellers).
+// Fritekstfeltet er fortsatt valgfritt for gjesten — genererer en kort
+// standardtekst av ja/nei-svarene hvis feltet står tomt, så innsendingen
+// alltid har gyldig tekst uten å tvinge gjesten til å skrive noe.
+function byggErfaringTekst() {
+  var fritekst = document.getElementById('erfaring-tekst').value.trim();
+  if (fritekst) return fritekst;
+  var stemmerTekst = svar.stemmer === 'ja' ? 'Ja' : svar.stemmer === 'nei' ? 'Nei' : 'Vet ikke';
+  var anbefalerTekst = svar.anbefaler === 'ja' ? 'Ja' : 'Nei';
+  return 'Stemmer med tilgjengelighetsbeskrivelsen: ' + stemmerTekst + '. Anbefaler stedet: ' + anbefalerTekst + '.';
+}
+
 async function sendInn() {
   document.getElementById('form-body').style.display = 'none';
   document.getElementById('feil-banner').style.display = 'none';
@@ -243,10 +255,8 @@ async function sendInn() {
   var body = {
     enhet_id: enhetId,
     stemmer_med_info: svar.stemmer === 'ja' ? true : svar.stemmer === 'nei' ? false : null,
-    anbefaler: svar.anbefaler === 'ja',
-    erfaring_tekst: document.getElementById('erfaring-tekst').value.trim() || null,
-    forfatter_type: svar.forf,
-    offentlig: false
+    tekst: byggErfaringTekst(),
+    forfatter_type: svar.forf
   };
 
   try {
