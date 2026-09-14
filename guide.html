@@ -128,6 +128,62 @@ var params = new URLSearchParams(window.location.search);
 var enhetId = params.get('enhet_id');
 var demoMode = !enhetId;
 
+// Sone-ikon-oppslag: Ole sender ikke ikon (frontend eier dette, avtalt v0.4-guide).
+// Samme id -> ikon-mønster som index.html sine TYPE_CONFIG-soner.
+var SONE_IKON = {
+  inngang:'🚪', parkering:'🅿️', resepsjon:'🛎️', mottakelse:'🛎️', bad:'🚿',
+  sanitaer:'🚿', hotellrom:'🛏️', soverom:'🛏️', stue:'🛋️', kjokken:'🍳',
+  spisesal:'🍽️', spisebord:'🍽️', bar:'🍷', konferanse:'📋', skilting:'🔤',
+  heis:'🛗', garderobe:'👕', terreng:'🌿', underlag:'👟', loype:'⛷️',
+  aktivitetsomrade:'🏃', adkomst:'🚶', motepunkt:'📍', startpunkt:'📍',
+  utleiested:'🏠', oversikt:'📸', innsjosett:'🌊', selve_stedet:'🏔️'
+};
+
+// Oversettelse av rå svar-nøkler til ikon + lesbart utsagn (kun 'ja'-svar
+// vises). Gjenbruker samme tekster som index.html sin ALL_QUESTIONS, siden
+// frontend eier denne oversettelsen (avtalt med Ole — unngår at to fasiter
+// må holdes i sync).
+var SVAR_TEKST = {
+  q_allergi:{ikon:'🌿',tekst:'Allergivennlige alternativer er tilgjengelig'},
+  q_parfyme:{ikon:'🌸',tekst:'Rom kan bestilles med parfymefrie produkter'},
+  q_meny:{ikon:'📋',tekst:'Menyen er tilgjengelig digitalt, i storskrift og med allergenmerkinger'},
+  q_skriftlig:{ikon:'💬',tekst:'Gjester kan kommunisere skriftlig via SMS eller e-post'},
+  q_opplaering:{ikon:'👨‍🏫',tekst:'Ansatte og guider har fått opplæring i inkluderende service'},
+  q_teleslynge:{ikon:'🔊',tekst:'Teleslyngeanlegg er installert i resepsjon og fellesarealer'},
+  q_ledsager:{ikon:'👥',tekst:'Ledsagerbevis godtas — ledsager får gratis eller redusert billett'},
+  q_evakuering:{ikon:'🚨',tekst:'Det finnes evakueringsplan som ivaretar gjester med funksjonsnedsettelse'},
+  q_tilpassetutstyr:{ikon:'🎒',tekst:'Tilpasset utstyr er tilgjengelig — spør personalet for detaljer'},
+  q_sti_rullestol:{ikon:'♿',tekst:'Stien er fremkommelig med rullestol eller rullator'},
+  q_sti_barnevogn:{ikon:'🍼',tekst:'Stien er fremkommelig med barnevogn'},
+  q_sti_merking:{ikon:'🗺️',tekst:'Stien er tydelig merket med skilt, stikker og kart'},
+  q_sti_belysning:{ikon:'💡',tekst:'Det er belysning langs stien'},
+  q_hc_wc:{ikon:'🚻',tekst:'HC-toalett er tilgjengelig i nærheten'},
+  q_badeplass_rampe:{ikon:'🏊',tekst:'Det er rampe eller tilrettelagt adkomst til vannet'},
+  q_hvileplasser:{ikon:'🪑',tekst:'Det finnes sittebenker og hvileplasser underveis'},
+  q_hvileplasser_avstand:{ikon:'🪑',tekst:'Hvileplass finnes for hver 500 meter eller kortere'},
+  q_luminans:{ikon:'👁️',tekst:'God luminanskontrast på skilt og skranker — egnet for svaksynte'},
+  q_taktil:{ikon:'🦯',tekst:'Taktile og visuelle markeringer finnes ved trapper og nivåforskjeller'},
+  q_taxi_buss:{ikon:'🚌',tekst:'Det er av- og påstigningsmulighet for buss og taxi nær inngangen'},
+  q_regulerbar_seng:{ikon:'🛏️',tekst:'Regulerbar seng er tilgjengelig på forespørsel'},
+  q_lading_el:{ikon:'🔋',tekst:'Lading av elektrisk rullestol er mulig på rommet om natten'},
+  q_visuell_brannalarm:{ikon:'🔔',tekst:'Visuell brannalarm er installert på rommene'},
+  q_alarm_resepsjon:{ikon:'🆘',tekst:'Rommet har alarm som kobler direkte til resepsjon'},
+  q_garderobe_tilrettelagt:{ikon:'👕',tekst:'Tilrettelagt garderobe og dusj er tilgjengelig for bevegelseshemmede'}
+};
+
+// Usynlige behov — kun 'ja'-svar vises, samme 15 spørsmål som i index.html.
+var UB_TEKST = {
+  ub_stoy:'Lavt støynivå i fellesarealer', ub_stille:'Stille soner eller lavstimulerte arealer finnes',
+  ub_lys:'Jevn belysning uten flimmer', ub_lukt:'Fritt for sterke lukter i fellesarealer',
+  ub_skilting:'Tydelig skilting gjennom anlegget', ub_forhaand:'Informasjon om besøket tilgjengelig på forhånd',
+  ub_spraak:'Informasjonen er skrevet i enkelt språk', ub_merking:'Toalett, utganger og sitteplasser er tydelig merket',
+  ub_wc:'Toalett lett tilgjengelig fra alle aktivitetsarealer', ub_hvile:'Hvilerom eller stille plass finnes',
+  ub_sitte:'Sitteplasser tilgjengelig underveis', ub_avbryte:'Gjester kan avbryte en aktivitet uten å forklare seg',
+  ub_opplaering:'Ansatte har fått opplæring i å møte gjester med ulike behov',
+  ub_medisinsk:'Ansatte vet hva de skal gjøre ved en medisinsk hendelse',
+  ub_diskret:'Enkelt for gjester å diskret be om hjelp'
+};
+
 var DEMO_DATA = {
   enhet: {
     id: 'demo-bhss',
@@ -200,6 +256,24 @@ async function lastData() {
   }
 }
 
+function byggTilleggsFraSvar(svar) {
+  if (!svar) return [];
+  var ut = [];
+  Object.keys(svar).forEach(function(id) {
+    if (svar[id] === 'ja' && SVAR_TEKST[id]) ut.push(SVAR_TEKST[id]);
+  });
+  return ut;
+}
+
+function byggUsynligeFraSvar(svarUsynlig) {
+  if (!svarUsynlig) return [];
+  var ut = [];
+  Object.keys(svarUsynlig).forEach(function(id) {
+    if (svarUsynlig[id] === 'ja' && UB_TEKST[id]) ut.push(UB_TEKST[id]);
+  });
+  return ut;
+}
+
 function visGuide(data) {
   var enhet = data.enhet;
   document.title = enhet.navn + ' — Tilgjengelighetsguide';
@@ -243,11 +317,24 @@ function visGuide(data) {
     html += lagGpxHTML(data.gpx);
   }
 
-  if ((data.tilleggstjenester||[]).length) {
+  // v-guide: Ole sender rå svar/svar_usynlig (ikke ferdig tilleggstjenester) —
+  // frontend eier oversettelsen, se SVAR_TEKST/UB_TEKST over.
+  var tilleggsListe = data.tilleggstjenester || byggTilleggsFraSvar(data.svar);
+  if (tilleggsListe.length) {
     html += '<div class="seksjon-hd">Tilleggstjenester</div>';
     html += '<div class="tillegg-grid">';
-    data.tilleggstjenester.forEach(function(t){
+    tilleggsListe.forEach(function(t){
       html += '<div class="tillegg-kort"><span class="tillegg-ikon">' + t.ikon + '</span><span class="tillegg-tekst">' + t.tekst + '</span></div>';
+    });
+    html += '</div>';
+  }
+
+  var ubListe = byggUsynligeFraSvar(data.svar_usynlig);
+  if (ubListe.length) {
+    html += '<div class="seksjon-hd">Tilrettelegging for alle</div>';
+    html += '<div class="tillegg-grid">';
+    ubListe.forEach(function(tekst){
+      html += '<div class="tillegg-kort"><span class="tillegg-ikon">✅</span><span class="tillegg-tekst">' + tekst + '</span></div>';
     });
     html += '</div>';
   }
@@ -297,7 +384,7 @@ function lagSoneHTML(s) {
   var statusLabel = s.status==='gronn'?'✅ Tilgjengelig':s.status==='gul'?'🟡 Delvis':s.status==='rod'?'🔴 Begrenset':'';
   var h = '<div class="sone-kort">';
   h += '<div class="sone-topp">';
-  h += '<div class="sone-ikon">' + (s.ikon||'📋') + '</div>';
+  h += '<div class="sone-ikon">' + (s.ikon || SONE_IKON[s.id] || '📋') + '</div>';
   h += '<div class="sone-navn">' + s.label + '</div>';
   if (s.status && s.status !== 'ukjent') h += '<span class="status-pill ' + statusClass + '">' + statusLabel + '</span>';
   h += '</div>';
