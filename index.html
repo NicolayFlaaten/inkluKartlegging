@@ -136,6 +136,12 @@ textarea{resize:vertical;min-height:80px}
 .guide-sone-ikon{font-size:20px}
 .guide-sone-navn{font-size:14px;font-weight:600;color:var(--text);flex:1}
 .guide-sone-tekst{font-size:13px;color:var(--text2);line-height:1.5}
+.guide-sone-tekst p,.sone-tekst p,.ai-text p{margin:0 0 8px}
+.guide-sone-tekst p:last-child,.sone-tekst p:last-child,.ai-text p:last-child{margin-bottom:0}
+.guide-heading{font-size:14px;font-weight:700;color:var(--text);margin:10px 0 4px}
+.guide-heading:first-child{margin-top:0}
+.guide-sublabel{font-size:11px;font-weight:700;color:var(--green-dark);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 2px}
+.guide-sublabel:first-child{margin-top:0}
 .guide-sone-maal{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .guide-sone-maal-chip{background:var(--surface2);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text2)}
 .guide-bilder{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
@@ -255,7 +261,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.26</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.27</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
@@ -484,7 +490,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.26';
+const APP_VERSION = 'v0.4.27';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -2222,6 +2228,59 @@ function renderZones() {
   document.getElementById('zones-container').innerHTML = html;
 }
 
+// v0.4.27 — felles tekstformatering for AI-generert tekst (gjeste_tekst, helhetsinntrykk, bildeanalyse).
+// Tidligere ble kun **fet**->stÆrk og \n->br håndtert (eller ingenting i det hele tatt for gjeste_tekst),
+// slik at markdown-overskrifter (# / ##) og "**Label:**"-mønstre fra AI-svar ble vist som rå tegn for
+// både kartlegger og gjest. Denne funksjonen bygger ordentlige overskrifter og avsnitt av samme tekst.
+function mdEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function mdInlineBold(s) {
+  return mdEsc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+function mdTilHtml(raw) {
+  if (!raw) return '';
+  var txt = String(raw).trim();
+  // Tving frem linjeskift foran overskrifter og "**Label:**"-blokker, selv om AI-svaret
+  // kun har mellomrom (ikke ekte linjeskift) mellom seksjonene — dette skjer ofte i praksis.
+  txt = txt.replace(/\s*(#{1,4}\s)/g, '\n$1');
+  txt = txt.replace(/\s*(\*\*[^*\n]+?:\*\*)/g, '\n$1');
+  var linjer = txt.split(/\n+/);
+  var out = '';
+  var buffer = [];
+  function renderAvsnitt(chunk) {
+    // Del opp på "**Label:**"-mønster (f.eks. "**Inngang og entré:** Døren er ...")
+    var deler = chunk.split(/\*\*([^*\n]+?):\*\*/);
+    var html = '';
+    if (deler[0] && deler[0].trim()) html += '<p>' + mdInlineBold(deler[0].trim()) + '</p>';
+    for (var i = 1; i < deler.length; i += 2) {
+      var label = deler[i];
+      var innhold = (deler[i+1] || '').trim();
+      html += '<div class="guide-sublabel">' + mdEsc(label) + '</div>';
+      if (innhold) html += '<p>' + mdInlineBold(innhold) + '</p>';
+    }
+    return html;
+  }
+  function flushBuffer() {
+    if (!buffer.length) return;
+    var chunk = buffer.join(' ').trim();
+    buffer = [];
+    if (chunk) out += renderAvsnitt(chunk);
+  }
+  for (var li = 0; li < linjer.length; li++) {
+    var m = linjer[li].match(/^(#{1,4})\s+(.*)/);
+    if (m) {
+      flushBuffer();
+      var tag = m[1].length <= 2 ? 'h4' : 'h5';
+      out += '<' + tag + ' class="guide-heading">' + mdEsc(m[2].trim()) + '</' + tag + '>';
+    } else {
+      buffer.push(linjer[li]);
+    }
+  }
+  flushBuffer();
+  return out;
+}
+
 function renderZoneCard(zone, idx) {
   var previewHtml = '';
   for (var i = 0; i < zone.images.length; i++) {
@@ -2260,7 +2319,7 @@ function renderZoneCard(zone, idx) {
     '<div class="upload-hint">'+T('upload_hint')+'</div></div>' +
     (zone.images.length ? '<div class="image-preview">'+previewHtml+'</div>' : '') +
     (combinedAnalysis ? '<div class="ai-box visible"><div class="ai-header"><span>'+T('ai_analyse_label')+' ('+analyses.length+' '+(analyses.length>1?T('bilde_plural'):T('bilde_singular'))+')</span></div>' +
-      '<div class="ai-text">'+combinedAnalysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div></div>' : '') +
+      '<div class="ai-text">'+mdTilHtml(combinedAnalysis)+'</div></div>' : '') +
     '<div class="ai-box" id="ai-loading-'+idx+'" style="display:none"><div class="ai-header"><div class="ai-spinner on"></div><span>'+T('analyserer_bilde')+'</span></div></div>' +
     (zone.extraFields.length ? '<div style="margin-top:1rem">'+extraFieldsHtml+'</div>' : '') +
     '<div class="field" style="margin-top:.75rem"><label class="field-label">'+T('notat_label')+'</label>' +
@@ -2592,7 +2651,7 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
   h += '<div id="guide-sone-status-'+idx+'">'+statusSpan+'</div>';
   h += '<button class="sone-edit-btn" id="edit-btn-'+idx+'" onclick="toggleEditSone('+idx+')">'+T('sone_rediger')+'</button>';
   h += '</div>';
-  h += '<div id="guide-sone-tekst-'+idx+'" class="guide-sone-tekst">'+sd.gjesteTekst+'</div>';
+  h += '<div id="guide-sone-tekst-'+idx+'" class="guide-sone-tekst">'+mdTilHtml(sd.gjesteTekst)+'</div>';
   if (malChips) h += '<div class="guide-sone-maal">'+malChips+'</div>';
   if (bilderHtml) h += '<div class="guide-bilder">'+bilderHtml+'</div>';
   h += '<div id="edit-sone-'+idx+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
@@ -2713,7 +2772,7 @@ async function buildGuide() {
     var tekstDiv = document.createElement('div');
     tekstDiv.className = 'guide-sone-tekst';
     tekstDiv.id = 'guide-sone-tekst-' + hIdx;
-    tekstDiv.innerHTML = hTekst.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    tekstDiv.innerHTML = mdTilHtml(hTekst);
     hDiv.appendChild(tekstDiv);
 
     // Rediger-panel
@@ -2911,11 +2970,11 @@ async function buildAnalyse() {
     var statusIkon = s.status==='gronn'?'✅':s.status==='gul'?'🟡':s.status==='rod'?'🔴':'⬜';
     var analyseHtml = s.zone.images.filter(function(img){return img.analysis;}).map(function(img){
       return '<div style="margin-top:.5rem;background:var(--surface2);border-radius:8px;padding:.75rem;font-size:13px;color:var(--text2);line-height:1.6">'+
-        img.analysis.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')+'</div>';
+        mdTilHtml(img.analysis)+'</div>';
     }).join('');
     return '<div class="sone-kort"><div class="sone-topp"><div class="sone-ikon">'+s.zone.icon+'</div><h3 class=\"sone-navn\">'+TL(s.zone.label)+'</h3>' +
       '<div class="status-badge '+s.status+'">'+statusIkon+' '+s.statusTekst+'</div></div>' +
-      (s.gjesteTekst?'<div class="sone-tekst">'+s.gjesteTekst+'</div>':'') +
+      (s.gjesteTekst?'<div class="sone-tekst">'+mdTilHtml(s.gjesteTekst)+'</div>':'') +
       (s.faktaRader?'<div class="sone-fakta">'+s.faktaRader+'</div>':'') +
       analyseHtml+'</div>';
   }).join('');
@@ -3086,7 +3145,7 @@ function saveAndClose(idx) {
   var tekst = document.getElementById('edit-tekst-'+idx);
   var status = (guideRedigert[idx]||{}).status || '';
   if (tekst && status) saveEditSone(idx, tekst.value, status);
-  else if (tekst) { guideRedigert[idx] = guideRedigert[idx]||{}; guideRedigert[idx].tekst = tekst.value; var t = document.getElementById('guide-sone-tekst-'+idx); if(t) t.textContent = tekst.value; }
+  else if (tekst) { guideRedigert[idx] = guideRedigert[idx]||{}; guideRedigert[idx].tekst = tekst.value; var t = document.getElementById('guide-sone-tekst-'+idx); if(t) t.innerHTML = mdTilHtml(tekst.value); }
   toggleEditSone(idx);
 }
 
@@ -3104,7 +3163,7 @@ function saveEditSone(idx, newTekst, newStatus) {
   // Oppdater visningen
   var tekstEl = document.getElementById('guide-sone-tekst-'+idx);
   var statusEl = document.getElementById('guide-sone-status-'+idx);
-  if (tekstEl) tekstEl.textContent = newTekst;
+  if (tekstEl) tekstEl.innerHTML = mdTilHtml(newTekst);
   if (statusEl) {
     var ikon = newStatus==='gronn'?'✅':newStatus==='gul'?'🟡':newStatus==='rod'?'🔴':'';
     var label = newStatus==='gronn'?'Tilgjengelig':newStatus==='gul'?'Delvis tilgjengelig':newStatus==='rod'?'Begrenset':'';
