@@ -255,7 +255,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.25</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.26</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
@@ -307,10 +307,10 @@ textarea{resize:vertical;min-height:80px}
             <option value="annet_a" data-i18n-label-val="Annet (bygg)">Annet (bygg)</option>
           </optgroup>
           <optgroup data-i18n-label="type_gruppe_b" label="B — Naturbaserte aktivitetsbedrifter">
-            <option value="guidet_friluft" data-i18n-label-val="B1 — Guidet tur / friluftsliv">B1 — Guidet tur / friluftsliv</option>
-            <option value="vannsport" data-i18n-label-val="B2 — Vannsport og padling">B2 — Vannsport og padling</option>
-            <option value="kjoretoy_dyr" data-i18n-label-val="B3 — Kjøretøy og dyr">B3 — Kjøretøy og dyr (sykkel, ridning, hundespann)</option>
-            <option value="tilpasset_natur" data-i18n-label-val="B4 — Tilpassede naturopplevelser">B4 — Tilpassede naturopplevelser</option>
+            <option value="guidet_friluft" data-i18n-label-val="Guidet tur / friluftsliv">Guidet tur / friluftsliv</option>
+            <option value="vannsport" data-i18n-label-val="Vannsport og padling">Vannsport og padling</option>
+            <option value="kjoretoy_dyr" data-i18n-label-val="Kjøretøy og dyr">Kjøretøy og dyr (sykkel, ridning, hundespann)</option>
+            <option value="tilpasset_natur" data-i18n-label-val="Tilpassede naturopplevelser">Tilpassede naturopplevelser</option>
           </optgroup>
           <optgroup data-i18n-label="type_gruppe_c" label="C — Fellesgoder og felles rom">
             <option value="tursti" data-i18n-label-val="Tursti / natursti">Tursti / natursti</option>
@@ -484,7 +484,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.25';
+const APP_VERSION = 'v0.4.26';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -1212,10 +1212,10 @@ var LABEL_MAP = {
     'Restaurant / servering':'Restaurant / café','Aktivitetsbedrift':'Activity provider',
     'Idrettsanlegg':'Sports facility','Camping':'Camping',
     'Annet (bygg)':'Other (building)','Annet (fellesgode)':'Other (public asset)',
-    'B1 — Guidet tur / friluftsliv':'B1 — Guided tour / outdoor',
-    'B2 — Vannsport og padling':'B2 — Water sports / paddling',
-    'B3 — Kjøretøy og dyr':'B3 — Vehicle and animal activities',
-    'B4 — Tilpassede naturopplevelser':'B4 — Adapted nature experiences',
+    'Guidet tur / friluftsliv':'Guided tour / outdoor',
+    'Vannsport og padling':'Water sports / paddling',
+    'Kjøretøy og dyr':'Vehicle and animal activities',
+    'Tilpassede naturopplevelser':'Adapted nature experiences',
     'Tursti / natursti':'Hiking trail','Sykkelløype':'Cycling route',
     'Skiløype':'Ski trail','Badeplass':'Swimming area',
     'Utsiktspunkt / attraksjon':'Viewpoint / attraction',
@@ -1282,10 +1282,10 @@ var LABEL_MAP = {
     'Restaurant / servering':'Restaurante / cafetería','Aktivitetsbedrift':'Proveedor de actividades',
     'Idrettsanlegg':'Instalación deportiva','Camping':'Camping',
     'Annet (bygg)':'Otro (edificio)','Annet (fellesgode)':'Otro (bien público)',
-    'B1 — Guidet tur / friluftsliv':'B1 — Tour guiado / exterior',
-    'B2 — Vannsport og padling':'B2 — Deportes acuáticos / piragüismo',
-    'B3 — Kjøretøy og dyr':'B3 — Vehículos y animales',
-    'B4 — Tilpassede naturopplevelser':'B4 — Experiencias naturales adaptadas',
+    'Guidet tur / friluftsliv':'Tour guiado / exterior',
+    'Vannsport og padling':'Deportes acuáticos / piragüismo',
+    'Kjøretøy og dyr':'Vehículos y animales',
+    'Tilpassede naturopplevelser':'Experiencias naturales adaptadas',
     'Tursti / natursti':'Sendero','Sykkelløype':'Ruta ciclista',
     'Skiløype':'Pista de esquí','Badeplass':'Zona de baño',
     'Utsiktspunkt / attraksjon':'Mirador / atracción',
@@ -1541,7 +1541,7 @@ var TYPE_CONFIG = {
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
     extraOptions:['Parkering','Rom','Sal','Kiosk','Fellesareal'],
     questions:['q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil']},
-  guidet_friluft:{label:'B1 — Guidet tur / friluftsliv',group:'B',pageTitle:'Guidet tur / friluftsliv',pageDesc:'Vandring, fjelltur, ski, truger og naturguiding. Last opp bilder og evt. GPX.',
+  guidet_friluft:{label:'Guidet tur / friluftsliv',group:'B',pageTitle:'Guidet tur / friluftsliv',pageDesc:'Vandring, fjelltur, ski, truger og naturguiding. Last opp bilder og evt. GPX.',
     defaultZones:[
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
@@ -1551,7 +1551,7 @@ var TYPE_CONFIG = {
     extraOptions:['Hvilepunkt','Serveringssted','Transport til start','Krevende parti','Utsiktspunkt'],
     questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_hvile_under','q_samband','q_tilpassetutstyr','q_allergi','q_hvileplasser','q_hc_wc','q_ledsager','q_guide_opplaering','q_feedback_system']},
 
-  vannsport:{label:'B2 — Vannsport og padling',group:'B',pageTitle:'Vannsport og padling',pageDesc:'Kajakkpadling, kano, båttur, fisketurer. Last opp bilder og evt. GPX-rute.',
+  vannsport:{label:'Vannsport og padling',group:'B',pageTitle:'Vannsport og padling',pageDesc:'Kajakkpadling, kano, båttur, fisketurer. Last opp bilder og evt. GPX-rute.',
     defaultZones:[
       {id:'utleiested',label:'Utleiested / base',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'innsjosett',label:'Inn/ut av vannet',icon:'🌊',extraFields:[],optional:false},
@@ -1561,7 +1561,7 @@ var TYPE_CONFIG = {
     extraOptions:['Rolig vann','Krevende parti','Rasteplass på land','Rasteplass på vann'],
     questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_tilpasset_flyte','q_ledsager_krav','q_samband','q_allergi','q_hc_wc','q_ledsager','q_guide_opplaering','q_feedback_system']},
 
-  kjoretoy_dyr:{label:'B3 — Kjøretøy og dyr',group:'B',pageTitle:'Kjøretøy og dyr',pageDesc:'Sykling, ridning, hundespann og slede. Last opp bilder og evt. GPX-rute.',
+  kjoretoy_dyr:{label:'Kjøretøy og dyr',group:'B',pageTitle:'Kjøretøy og dyr',pageDesc:'Sykling, ridning, hundespann og slede. Last opp bilder og evt. GPX-rute.',
     defaultZones:[
       {id:'utleiested',label:'Utleiested / stall / base',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'startpunkt',label:'Startpunkt',icon:'📍',extraFields:[],optional:false},
@@ -1572,7 +1572,7 @@ var TYPE_CONFIG = {
     extraOptions:['Hvilepunkt','Krevende parti','Serveringssted','Stall / dyrehold'],
     questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_tilpasset_sykkel','q_tilpassetutstyr','q_ledsager_krav','q_allergi','q_hc_wc','q_hvileplasser','q_ledsager','q_guide_opplaering','q_feedback_system']},
 
-  tilpasset_natur:{label:'B4 — Tilpassede naturopplevelser',group:'B',pageTitle:'Tilpassede naturopplevelser',pageDesc:'Sit-ski, handbike, amfistol og spesialtilrettelagte turer. Last opp bilder.',
+  tilpasset_natur:{label:'Tilpassede naturopplevelser',group:'B',pageTitle:'Tilpassede naturopplevelser',pageDesc:'Sit-ski, handbike, amfistol og spesialtilrettelagte turer. Last opp bilder.',
     defaultZones:[
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
       {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
@@ -1661,6 +1661,19 @@ var Q_TEXT = {
     q_visuell_brannalarm: 'Is there a visual fire alarm in the rooms?',
     q_alarm_resepsjon: 'Is there an alarm or alert system connecting the room to reception?',
     q_garderobe_tilrettelagt: 'Is there an accessible changing room or shower for people with reduced mobility?',
+    q_guide_hel: 'Is the guide with the guest throughout the whole activity?',
+    q_avbryte: 'Can the guest withdraw from the activity without having to explain themselves?',
+    q_sesong: 'Is accessibility season-dependent (e.g. snow, water level, trail conditions)?',
+    q_instruksjon: 'Is clear instruction and a safety briefing given before the activity starts?',
+    q_hvile_forberedelse: 'Is there an opportunity to rest or prepare before the activity starts?',
+    q_hvile_under: 'Is there an opportunity to rest during the activity?',
+    q_samband: 'Does the guide carry a radio or other communication equipment in case of an emergency?',
+    q_tilpasset_flyte: 'Is adapted flotation equipment or a life jacket available for people with disabilities?',
+    q_ledsager_krav: 'Does the activity require the guest to bring their own companion to take part?',
+    q_hjelpemiddelsentral: 'Can equipment be borrowed or ordered via an assistive-technology service or similar scheme?',
+    q_tilpasset_sykkel: 'Is an adapted bicycle available (e.g. handcycle, tandem or tricycle)?',
+    q_guide_opplaering: 'Has the guide received training in guiding guests with diverse needs?',
+    q_feedback_system: 'Is there a system for collecting guest feedback after the activity?',
   },
   es: {
     q_allergi: '¿Hay alternativas aptas para alérgicos disponibles?',
@@ -1688,6 +1701,19 @@ var Q_TEXT = {
     q_visuell_brannalarm: '¿Hay alarma de incendio visual en las habitaciones?',
     q_alarm_resepsjon: '¿Hay un sistema de alarma o alerta que conecte la habitación con recepción?',
     q_garderobe_tilrettelagt: '¿Hay vestuario o ducha accesible para personas con movilidad reducida?',
+    q_guide_hel: '¿El guía acompaña al huésped durante toda la actividad?',
+    q_avbryte: '¿Puede el huésped abandonar la actividad sin tener que dar explicaciones?',
+    q_sesong: '¿La accesibilidad depende de la temporada (p. ej. nieve, nivel del agua, estado del sendero)?',
+    q_instruksjon: '¿Se ofrece una instrucción clara y una charla de seguridad antes de empezar la actividad?',
+    q_hvile_forberedelse: '¿Hay posibilidad de descansar o prepararse antes de que empiece la actividad?',
+    q_hvile_under: '¿Hay posibilidad de descansar durante la actividad?',
+    q_samband: '¿El guía lleva radio u otro equipo de comunicación por si hay una emergencia?',
+    q_tilpasset_flyte: '¿Hay equipo de flotación adaptado o chaleco salvavidas para personas con discapacidad?',
+    q_ledsager_krav: '¿La actividad exige que el huésped venga con su propio acompañante para participar?',
+    q_hjelpemiddelsentral: '¿Se puede pedir prestado o encargar material a través de un servicio de ayudas técnicas o similar?',
+    q_tilpasset_sykkel: '¿Hay bicicleta adaptada disponible (p. ej. handbike, tándem o triciclo)?',
+    q_guide_opplaering: '¿El guía ha recibido formación para guiar a huéspedes con necesidades diversas?',
+    q_feedback_system: '¿Existe un sistema para recoger comentarios de los huéspedes después de la actividad?',
   }
 };
 
@@ -1704,6 +1730,16 @@ var Q_CTX = {
     q_regulerbar_seng: 'Important for guests with mobility challenges',
     q_ledsager: 'Companion for a person with disability',
     q_visuell_brannalarm: 'Important for hearing impaired',
+    q_avbryte: 'Important for guests with varying levels of ability or invisible needs',
+    q_sesong: 'Snow, water level, ice or vegetation can change how passable the route is through the year',
+    q_instruksjon: 'Important for guests who need more time or simple information',
+    q_hvile_forberedelse: 'E.g. seating, shelter or time to prepare',
+    q_hvile_under: 'Breaks or rest points along the route or trip',
+    q_samband: 'Important for unforeseen events or when quick assistance is needed',
+    q_tilpasset_flyte: 'E.g. specially adapted vests or flotation cushions',
+    q_ledsager_krav: 'Check this before booking',
+    q_hjelpemiddelsentral: 'E.g. sit-ski, all-terrain wheelchair or handbike',
+    q_feedback_system: 'Used to improve accessibility over time',
   },
   es: {
     q_allergi: 'Sin plumas, perfume, mascotas',
@@ -1717,6 +1753,16 @@ var Q_CTX = {
     q_regulerbar_seng: 'Importante para huéspedes con dificultades de movilidad',
     q_ledsager: 'Acompañante para persona con discapacidad',
     q_visuell_brannalarm: 'Importante para personas con discapacidad auditiva',
+    q_avbryte: 'Importante para huéspedes con distintos niveles de capacidad o necesidades no visibles',
+    q_sesong: 'La nieve, el nivel del agua, el hielo o la vegetación pueden cambiar el acceso a lo largo del año',
+    q_instruksjon: 'Importante para huéspedes que necesitan más tiempo o información sencilla',
+    q_hvile_forberedelse: 'P. ej. asientos, refugio o tiempo para prepararse',
+    q_hvile_under: 'Pausas o puntos de descanso a lo largo de la ruta o el recorrido',
+    q_samband: 'Importante ante imprevistos o cuando se necesita asistencia rápida',
+    q_tilpasset_flyte: 'P. ej. chalecos especialmente adaptados o cojines flotantes',
+    q_ledsager_krav: 'Confírmelo antes de reservar',
+    q_hjelpemiddelsentral: 'P. ej. sit-ski, silla de ruedas todoterreno o handbike',
+    q_feedback_system: 'Se usa para mejorar la accesibilidad con el tiempo',
   }
 };
 
@@ -1747,6 +1793,19 @@ var Q_UTSAGN = {
     q_visuell_brannalarm:'Visual fire alarm installed in rooms',
     q_alarm_resepsjon:'Room alarm connects directly to reception',
     q_garderobe_tilrettelagt:'Accessible changing room and shower available for people with reduced mobility',
+    q_guide_hel:'Guide accompanies the guest throughout the whole activity',
+    q_avbryte:'Guest can withdraw from the activity without having to explain themselves',
+    q_sesong:'Accessibility may vary by season — check conditions before your visit',
+    q_instruksjon:'Clear instruction and safety briefing given before the activity starts',
+    q_hvile_forberedelse:'Opportunity to rest and prepare available before the activity starts',
+    q_hvile_under:'Opportunity to rest available during the activity',
+    q_samband:'Guide carries radio/communication equipment in case of emergency',
+    q_tilpasset_flyte:'Adapted flotation equipment/life jacket available for people with disabilities',
+    q_ledsager_krav:'Activity requires the guest to bring their own companion',
+    q_hjelpemiddelsentral:'Equipment can be borrowed or ordered via an assistive-technology service or similar scheme',
+    q_tilpasset_sykkel:'Adapted bicycle available (e.g. handcycle, tandem or tricycle)',
+    q_guide_opplaering:'Guide has received training in guiding guests with diverse needs',
+    q_feedback_system:'A system exists for collecting guest feedback afterwards',
   },
   es: {
     q_allergi:'Hay alternativas aptas para alérgicos disponibles',
@@ -1774,6 +1833,19 @@ var Q_UTSAGN = {
     q_visuell_brannalarm:'Alarma de incendio visual instalada en las habitaciones',
     q_alarm_resepsjon:'La alarma de la habitación conecta directamente con recepción',
     q_garderobe_tilrettelagt:'Vestuario y ducha accesibles disponibles para personas con movilidad reducida',
+    q_guide_hel:'El guía acompaña al huésped durante toda la actividad',
+    q_avbryte:'El huésped puede abandonar la actividad sin tener que dar explicaciones',
+    q_sesong:'La accesibilidad puede variar según la temporada — compruebe las condiciones antes de la visita',
+    q_instruksjon:'Se ofrece una instrucción clara y una charla de seguridad antes de empezar la actividad',
+    q_hvile_forberedelse:'Hay posibilidad de descansar y prepararse antes de que empiece la actividad',
+    q_hvile_under:'Hay posibilidad de descansar durante la actividad',
+    q_samband:'El guía lleva radio/equipo de comunicación por si hay una emergencia',
+    q_tilpasset_flyte:'Equipo de flotación adaptado/chaleco salvavidas disponible para personas con discapacidad',
+    q_ledsager_krav:'La actividad exige que el huésped venga con su propio acompañante',
+    q_hjelpemiddelsentral:'El material se puede pedir prestado o encargar a través de un servicio de ayudas técnicas o similar',
+    q_tilpasset_sykkel:'Bicicleta adaptada disponible (p. ej. handbike, tándem o triciclo)',
+    q_guide_opplaering:'El guía ha recibido formación para guiar a huéspedes con necesidades diversas',
+    q_feedback_system:'Existe un sistema para recoger comentarios de los huéspedes después',
   }
 };
 
@@ -1836,7 +1908,21 @@ var ALL_QUESTIONS = {
   q_lading_el:{text:'Er det mulighet for lading av elektrisk rullestol på rom om natten?',ctx:'',utsagn:'Lading av elektrisk rullestol er mulig på rommet om natten',ikon:'🔋'},
   q_visuell_brannalarm:{text:'Er det visuell brannalarm på rommene?',ctx:'Viktig for hørselshemmede',utsagn:'Visuell brannalarm er installert på rommene',ikon:'🔔'},
   q_alarm_resepsjon:{text:'Er det alarm eller varslingssystem som kobler rommet til resepsjon?',ctx:'',utsagn:'Rommet har alarm som kobler direkte til resepsjon',ikon:'🆘'},
-  q_garderobe_tilrettelagt:{text:'Er det tilrettelagt garderobe eller dusj for bevegelseshemmede?',ctx:'Eget avkledningsrom, benk, snuplass, tilpasset dusj',utsagn:'Tilrettelagt garderobe og dusj er tilgjengelig for bevegelseshemmede',ikon:'👕'}
+  q_garderobe_tilrettelagt:{text:'Er det tilrettelagt garderobe eller dusj for bevegelseshemmede?',ctx:'Eget avkledningsrom, benk, snuplass, tilpasset dusj',utsagn:'Tilrettelagt garderobe og dusj er tilgjengelig for bevegelseshemmede',ikon:'👕'},
+  // v0.4.26 — manglende spørsmålsdefinisjoner for gruppe B (B1–B4) lagt til
+  q_guide_hel:{text:'Er guiden/turlederen med gjesten gjennom hele aktiviteten?',ctx:'',utsagn:'Guide/turleder følger gjesten gjennom hele aktiviteten',ikon:'🧭'},
+  q_avbryte:{text:'Kan gjesten avbryte aktiviteten underveis uten å måtte forklare seg?',ctx:'Viktig for gjester med varierende funksjonsnivå eller usynlige behov',utsagn:'Gjesten kan avbryte aktiviteten underveis uten å måtte forklare seg',ikon:'✋'},
+  q_sesong:{text:'Er tilgjengeligheten sesongavhengig (f.eks. snø, vannstand, føre)?',ctx:'Snømengde, vannstand, is eller vegetasjon kan endre fremkommeligheten gjennom året',utsagn:'Tilgjengeligheten kan variere med sesong — sjekk forholdene før besøket',ikon:'🗓️'},
+  q_instruksjon:{text:'Gis det tydelig instruksjon og sikkerhetsgjennomgang før aktiviteten starter?',ctx:'Viktig for gjester som trenger mer tid eller enkel informasjon',utsagn:'Tydelig instruksjon og sikkerhetsgjennomgang gis før aktiviteten starter',ikon:'📢'},
+  q_hvile_forberedelse:{text:'Er det mulighet for hvile eller forberedelse før aktiviteten starter?',ctx:'F.eks. sitteplass, ly eller tid til å forberede seg',utsagn:'Det er mulighet for hvile og forberedelse før aktiviteten starter',ikon:'🪑'},
+  q_hvile_under:{text:'Er det mulighet for hvile underveis i aktiviteten?',ctx:'Pauser eller hvilepunkt langs løypen eller turen',utsagn:'Det er mulighet for hvile underveis i aktiviteten',ikon:'⏸️'},
+  q_samband:{text:'Har guiden samband eller kommunikasjonsutstyr i tilfelle en nødsituasjon?',ctx:'Viktig ved uforutsette hendelser eller behov for rask assistanse',utsagn:'Guiden har samband/kommunikasjonsutstyr i tilfelle nødsituasjon',ikon:'📻'},
+  q_tilpasset_flyte:{text:'Finnes det tilpasset flyteutstyr eller redningsvest for personer med nedsatt funksjonsevne?',ctx:'F.eks. spesialtilpassede vester eller flyteputer',utsagn:'Tilpasset flyteutstyr/redningsvest er tilgjengelig for personer med nedsatt funksjonsevne',ikon:'🦺'},
+  q_ledsager_krav:{text:'Krever aktiviteten at gjesten har med egen ledsager for å delta?',ctx:'Avklar dette før bestilling',utsagn:'Aktiviteten krever at gjesten har med egen ledsager',ikon:'👥'},
+  q_hjelpemiddelsentral:{text:'Kan hjelpemidler lånes eller bestilles via hjelpemiddelsentral eller lignende ordning?',ctx:'F.eks. sit-ski, terrengrullestol eller handbike',utsagn:'Hjelpemidler kan lånes eller bestilles via hjelpemiddelsentral eller lignende ordning',ikon:'🦽'},
+  q_tilpasset_sykkel:{text:'Finnes det tilpasset sykkel tilgjengelig (f.eks. hånd-sykkel, tandem eller trehjulssykkel)?',ctx:'',utsagn:'Tilpasset sykkel er tilgjengelig (f.eks. hånd-sykkel, tandem eller trehjulssykkel)',ikon:'🚲'},
+  q_guide_opplaering:{text:'Har guiden/turlederen fått opplæring i å veilede gjester med ulike behov?',ctx:'',utsagn:'Guiden/turlederen har fått opplæring i å veilede gjester med ulike behov',ikon:'👨‍🏫'},
+  q_feedback_system:{text:'Finnes det et system for å samle tilbakemeldinger fra gjester i etterkant av aktiviteten?',ctx:'Brukes til å forbedre tilgjengeligheten over tid',utsagn:'Det finnes et system for å samle tilbakemeldinger fra gjester i etterkant',ikon:'📝'}
 };
 
 var EXTRA_FIELDS = {
