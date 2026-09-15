@@ -484,7 +484,7 @@ function lagGpxHTML(gpx) {
 }
 
 function lagErfaringHTML(e) {
-  var tag = e.forfatter_type==='bruker'?'♿ Bruker':e.forfatter_type==='ledsager'?'🤝 Ledsager':'🧳 Gjest';
+  var tag = e.forfatter_type==='ansatt'?'👔 Ansatt':e.forfatter_type==='ledsager'?'🤝 Ledsager':'🧳 Gjest';
   var h = '<div class="erfaring-kort">';
   h += '<div class="erfaring-topp"><span class="erfaring-tag">' + tag + '</span><span class="erfaring-dato">' + formaterDato(e.dato) + '</span></div>';
   if (e.tekst) h += '<div class="erfaring-tekst">' + escHtml(e.tekst) + '</div>';

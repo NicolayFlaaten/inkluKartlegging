@@ -98,6 +98,13 @@ textarea:focus{border-color:var(--green)}
 
   <div id="form-body">
 
+    <div class="card">
+      <div class="card-title">Fortell gjerne mer</div>
+      <div class="card-desc">Hva fungerte bra? Hva kunne vært bedre? Konkrete detaljer hjelper andre å planlegge.</div>
+      <textarea id="erfaring-tekst" maxlength="500" placeholder="F.eks.: Badet var godt tilrettelagt, men terskelen inn var høyere enn beskrevet..." oninput="oppdaterChar()"></textarea>
+      <div class="char-count"><span id="char-count">0</span> / 500</div>
+    </div>
+
     <div class="seksjon-hd">Ditt besøk</div>
 
     <div class="card">
@@ -121,24 +128,17 @@ textarea:focus{border-color:var(--green)}
     <div class="seksjon-hd">Valgfritt</div>
 
     <div class="card">
-      <div class="card-title">Fortell gjerne mer</div>
-      <div class="card-desc">Hva fungerte bra? Hva kunne vært bedre? Konkrete detaljer hjelper andre å planlegge.</div>
-      <textarea id="erfaring-tekst" maxlength="500" placeholder="F.eks.: Badet var godt tilrettelagt, men terskelen inn var høyere enn beskrevet..." oninput="oppdaterChar()"></textarea>
-      <div class="char-count"><span id="char-count">0</span> / 500</div>
-    </div>
-
-    <div class="card">
       <div class="card-title">Hvem er du?</div>
       <div class="card-desc">Hjelper oss å forstå erfaringen bedre. Ingen persondata lagres — du er alltid anonym.</div>
       <div class="forf-grid">
         <button class="forf-btn" id="f-gjest" onclick="velgForf('gjest')">
           <span class="forf-ikon">🧳</span>Gjest
         </button>
-        <button class="forf-btn" id="f-bruker" onclick="velgForf('bruker')">
-          <span class="forf-ikon">♿</span>Bruker
-        </button>
         <button class="forf-btn" id="f-ledsager" onclick="velgForf('ledsager')">
           <span class="forf-ikon">🤝</span>Ledsager
+        </button>
+        <button class="forf-btn" id="f-ansatt" onclick="velgForf('ansatt')">
+          <span class="forf-ikon">👔</span>Ansatt
         </button>
       </div>
     </div>
@@ -219,7 +219,7 @@ function velg(felt, val) {
 
 function velgForf(val) {
   svar.forf = val;
-  ['gjest','bruker','ledsager'].forEach(function(v) {
+  ['gjest','ledsager','ansatt'].forEach(function(v) {
     document.getElementById('f-' + v).classList.remove('active');
   });
   document.getElementById('f-' + val).classList.add('active');
