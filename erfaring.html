@@ -98,13 +98,6 @@ textarea:focus{border-color:var(--green)}
 
   <div id="form-body">
 
-    <div class="card">
-      <div class="card-title">Fortell gjerne mer</div>
-      <div class="card-desc">Hva fungerte bra? Hva kunne vært bedre? Konkrete detaljer hjelper andre å planlegge.</div>
-      <textarea id="erfaring-tekst" maxlength="500" placeholder="F.eks.: Badet var godt tilrettelagt, men terskelen inn var høyere enn beskrevet..." oninput="oppdaterChar()"></textarea>
-      <div class="char-count"><span id="char-count">0</span> / 500</div>
-    </div>
-
     <div class="seksjon-hd">Ditt besøk</div>
 
     <div class="card">
@@ -115,6 +108,13 @@ textarea:focus{border-color:var(--green)}
         <button class="yn-btn" id="stemmer-nei" onclick="velg('stemmer','nei')">❌ Nei, avviker</button>
         <button class="yn-btn" id="stemmer-vk" onclick="velg('stemmer','vet_ikke')">— Vet ikke</button>
       </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Fortell gjerne mer</div>
+      <div class="card-desc">Hva fungerte bra? Hva kunne vært bedre? Konkrete detaljer hjelper andre å planlegge.</div>
+      <textarea id="erfaring-tekst" maxlength="500" placeholder="F.eks.: Badet var godt tilrettelagt, men terskelen inn var høyere enn beskrevet..." oninput="oppdaterChar()"></textarea>
+      <div class="char-count"><span id="char-count">0</span> / 500</div>
     </div>
 
     <div class="card">
