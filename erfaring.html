@@ -61,6 +61,7 @@ textarea:focus{border-color:var(--green)}
 
 /* Takk-visning */
 .takk{display:none;text-align:center;padding:3rem 1rem}
+.takk-feedback-btn{display:inline-block;margin:1.25rem 0;background:transparent;color:var(--green-dark);border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:12px 22px;font-size:14px;font-family:inherit;font-weight:700;text-decoration:none}
 .takk-ikon{font-size:56px;margin-bottom:1rem}
 .takk-title{font-size:24px;font-weight:800;color:var(--text);margin-bottom:.5rem;letter-spacing:-.3px}
 .takk-desc{font-size:15px;color:var(--text2);line-height:1.6;max-width:320px;margin:0 auto 1.5rem}
@@ -162,7 +163,8 @@ textarea:focus{border-color:var(--green)}
     <div class="takk-ikon">✅</div>
     <h2 class="takk-title">Tusen takk!</h2>
     <div class="takk-desc">Din erfaring hjelper andre med å planlegge besøket. Tilbakemeldingen sendes til bedriften for gjennomgang.</div>
-    <a class="takk-link" id="takk-link" href="#">&#8592; Tilbake til tilgjengelighetsguiden</a>
+    <div><a class="takk-feedback-btn" id="takk-feedback-link" href="feedback.html?fra=erfaring">💬 Gi tilbakemelding på skjemaet (testfase)</a></div>
+    <div><a class="takk-link" id="takk-link" href="#">&#8592; Tilbake til tilgjengelighetsguiden</a></div>
   </div>
 
 </main>
@@ -195,6 +197,7 @@ function hentParams() {
 
   if (enhetId) {
     document.getElementById('takk-link').href = 'guide.html?enhet_id=' + enhetId;
+    document.getElementById('takk-feedback-link').href = 'feedback.html?fra=erfaring&enhet=' + encodeURIComponent(enhetNavn || '');
   }
 }
 

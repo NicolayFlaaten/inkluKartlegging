@@ -20,9 +20,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .topbar{background:#1a1a18;padding:0 1rem;display:flex;align-items:center;justify-content:space-between;height:54px;position:sticky;top:0;z-index:100}
 .topbar-logo{font-size:17px;font-weight:700;color:#fff}
 .topbar-logo span{color:var(--green)}
-.lang-btn{background:none;border:1px solid rgba(255,255,255,.2);border-radius:6px;color:rgba(255,255,255,.4);font-size:11px;font-weight:600;padding:3px 7px;cursor:pointer;font-family:inherit;transition:all .15s}
-.lang-btn.active{background:rgba(29,158,117,.25);border-color:rgba(29,158,117,.5);color:#4fd1a5}
-.lang-btn:hover:not(.active){border-color:rgba(255,255,255,.35);color:rgba(255,255,255,.65)}
+.lang-flag-btn{background:none;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:16px;line-height:1;transition:all .15s}
+.lang-flag-btn:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.06)}
+.lang-flag-btn:active{transform:scale(.92)}
 .api-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px}
 .progress-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.625rem 1rem;position:sticky;top:54px;z-index:90}
 .steps-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
@@ -261,13 +261,11 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.4</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.6</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
-    <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
-    <button class="lang-btn" data-lang="en" onclick="byttSpraak('en')">EN</button>
-    <button class="lang-btn" data-lang="es" onclick="byttSpraak('es')">ES</button>
+    <button class="lang-flag-btn" id="lang-flag-btn" onclick="syklSpraak()" title="Bytt språk" aria-label="Bytt språk. Nåværende: Norsk">🇳🇴</button>
     <div style="display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.4);margin-left:4px">
       <span class="api-dot"></span><span id="ai-status-txt">AI aktiv</span>
     </div>
@@ -492,7 +490,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.4';
+const APP_VERSION = 'v0.5.6';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -1198,13 +1196,24 @@ function oppdaterI18n() {
 }
 
 // Sett aktivt språk og re-render gjeldende steg
+var LANG_FLAGG = { no:'🇳🇴', en:'🇬🇧', es:'🇪🇸' };
+var LANG_NAVN  = { no:'Norsk', en:'English', es:'Español' };
+var LANG_NESTE = { no:'en', en:'es', es:'no' };
+
+function syklSpraak() {
+  byttSpraak(LANG_NESTE[state.lang || 'no']);
+}
+
 function byttSpraak(lang) {
   state.lang = lang;
   document.documentElement.setAttribute('lang', lang);
-  // Oppdater språkknapper
-  document.querySelectorAll('.lang-btn').forEach(function(btn) {
-    btn.classList.toggle('active', btn.dataset.lang === lang);
-  });
+  // Oppdater språk-flagget
+  var flaggBtn = document.getElementById('lang-flag-btn');
+  if (flaggBtn) {
+    flaggBtn.textContent = LANG_FLAGG[lang];
+    flaggBtn.setAttribute('aria-label', 'Bytt språk. Nåværende: ' + LANG_NAVN[lang]);
+    flaggBtn.title = 'Bytt språk (' + LANG_NAVN[lang] + ')';
+  }
   // Oppdater statisk HTML via data-i18n
   oppdaterI18n();
   // Re-render gjeldende steg
@@ -2957,6 +2966,11 @@ async function buildGuide() {
     '<button class="godkjenn-btn" onclick="godkjennGuide()">'+T('rapport_godkjenn_btn')+'</button>' +
     '</div>' +
     '<div class="godkjent-badge" id="godkjent-badge" style="display:none"></div>' +
+    '<div class="ferdig-feedback" id="ferdig-feedback" style="display:none;margin-top:1rem;background:var(--green-light);border:1.5px solid var(--green);border-radius:var(--radius);padding:1.25rem;text-align:center">' +
+    '<div style="font-size:15px;font-weight:700;color:var(--green-dark);margin-bottom:.4rem">🎉 Kartleggingen er fullført!</div>' +
+    '<div style="font-size:13px;color:var(--text2);margin-bottom:1rem">Vi er i testfasen — vil du fortelle oss hvordan det gikk å kartlegge dette stedet?</div>' +
+    '<a href="feedback.html?fra=kartlegging" id="ferdig-feedback-link" style="display:inline-block;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:12px 24px;font-size:14px;font-weight:700;text-decoration:none">💬 Gi tilbakemelding</a>' +
+    '</div>' +
     '<div class="sync-status" id="sync-status" style="display:none"></div>' +
 
     '<div class="guide-download-bar">' +
@@ -3437,6 +3451,9 @@ function godkjennGuide() {
   document.getElementById('godkjent-badge').style.display = 'flex';
   document.getElementById('godkjent-badge').innerHTML =
     '✅ <strong>'+T('godkjent_av_prefix')+navn+'</strong> · '+godkjentTidspunkt.toLocaleString('nb-NO');
+  document.getElementById('ferdig-feedback').style.display = 'block';
+  var stedNavn = document.getElementById('biz-name').value || '';
+  document.getElementById('ferdig-feedback-link').href = 'feedback.html?fra=kartlegging&enhet=' + encodeURIComponent(stedNavn);
   // Skjul alle rediger-knapper
   var editBtns = document.querySelectorAll('.sone-edit-btn');
   editBtns.forEach(function(btn) { btn.style.display='none'; });
