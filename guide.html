@@ -373,6 +373,7 @@ function visGuide(data) {
   html += 'AccessNorway Tilgjengelighetsguide';
   if (enhet.sist_bekreftet) html += '<br>Bekreftet av bedriften ' + formaterDato(enhet.sist_bekreftet);
   html += '<br>accessnorway.no';
+  html += '<br><a href="feedback.html?fra=guide&enhet=' + encodeURIComponent(enhet.navn || '') + '" style="color:var(--text3);text-decoration:underline">💬 Gi tilbakemelding på denne guiden (testfase)</a>';
   html += '</div>';
 
   var el = document.getElementById('main-content');
