@@ -261,7 +261,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.4.27</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.0</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
@@ -309,6 +309,7 @@ textarea{resize:vertical;min-height:80px}
             <option value="restaurant" data-i18n-label-val="Restaurant / servering">Restaurant / servering</option>
             <option value="aktivitet" data-i18n-label-val="Aktivitetsbedrift">Aktivitetsbedrift (innendørs)</option>
             <option value="idrett" data-i18n-label-val="Idrettsanlegg">Idrettsanlegg</option>
+            <option value="alpinanlegg" data-i18n-label-val="Alpinanlegg / skiheis">Alpinanlegg / skiheis</option>
             <option value="camping" data-i18n-label-val="Camping">Camping</option>
             <option value="annet_a" data-i18n-label-val="Annet (bygg)">Annet (bygg)</option>
           </optgroup>
@@ -490,7 +491,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.4.27';
+const APP_VERSION = 'v0.5.0';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -1217,6 +1218,10 @@ var LABEL_MAP = {
     'Hotell':'Hotel','Hytte / leilighet':'Cabin / apartment',
     'Restaurant / servering':'Restaurant / café','Aktivitetsbedrift':'Activity provider',
     'Idrettsanlegg':'Sports facility','Camping':'Camping',
+    'Alpinanlegg / skiheis':'Alpine ski facility','Alpinanlegget':'The alpine ski facility',
+    'Billettluke':'Ticket booth','Adkomst til heisstasjon':'Access to lift station',
+    'Heisstasjon':'Lift station','Utleie av tilpasset utstyr':'Adapted equipment rental',
+    'Last opp bilder av alpinanlegget, heisen og utleie av utstyr.':'Upload images of the alpine facility, the lift, and equipment rental.',
     'Annet (bygg)':'Other (building)','Annet (fellesgode)':'Other (public asset)',
     'Guidet tur / friluftsliv':'Guided tour / outdoor',
     'Vannsport og padling':'Water sports / paddling',
@@ -1287,6 +1292,10 @@ var LABEL_MAP = {
     'Hotell':'Hotel','Hytte / leilighet':'Cabaña / apartamento',
     'Restaurant / servering':'Restaurante / cafetería','Aktivitetsbedrift':'Proveedor de actividades',
     'Idrettsanlegg':'Instalación deportiva','Camping':'Camping',
+    'Alpinanlegg / skiheis':'Instalación de esquí alpino','Alpinanlegget':'La instalación de esquí alpino',
+    'Billettluke':'Taquilla','Adkomst til heisstasjon':'Acceso a la estación del telesilla',
+    'Heisstasjon':'Estación del telesilla','Utleie av tilpasset utstyr':'Alquiler de equipo adaptado',
+    'Last opp bilder av alpinanlegget, heisen og utleie av utstyr.':'Sube fotos de la instalación, el telesilla y el alquiler de material.',
     'Annet (bygg)':'Otro (edificio)','Annet (fellesgode)':'Otro (bien público)',
     'Guidet tur / friluftsliv':'Tour guiado / exterior',
     'Vannsport og padling':'Deportes acuáticos / piragüismo',
@@ -1531,6 +1540,16 @@ var TYPE_CONFIG = {
       {id:'garderobe',label:'Tilrettelagt garderobe',icon:'👕',extraFields:['bad_dor_cm','snuplass_cm','handstotte_dusj','benk_dusj','visuell_brannalarm'],optional:true}],
     extraOptions:['Kiosk','Tribune','Svømmebasseng','Treningssenter'],
     questions:['q_teleslynge','q_ledsager','q_opplaering','q_evakuering','q_skriftlig','q_luminans','q_taktil','q_garderobe_tilrettelagt']},
+  alpinanlegg:{label:'Alpinanlegg / skiheis',group:'A',pageTitle:'Alpinanlegget',pageDesc:'Last opp bilder av alpinanlegget, heisen og utleie av utstyr.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'billettluke',label:'Billettluke',icon:'🎫',extraFields:['disk_cm'],optional:false},
+      {id:'adkomst_heis',label:'Adkomst til heisstasjon',icon:'🚶',extraFields:['stigningsgrad'],optional:false},
+      {id:'heisstasjon',label:'Heisstasjon',icon:'🚡',extraFields:['heis_assistanse','heis_sittende'],optional:false},
+      {id:'utleie_utstyr',label:'Utleie av tilpasset utstyr',icon:'🎿',extraFields:['tilpasset_skiutstyr_utleie'],optional:true},
+      {id:'wc',label:'WC / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','handstotte_wc'],optional:false}],
+    extraOptions:['Kiosk','Skiskole','Utleie av vanlig skiutstyr','Solterrasse'],
+    questions:['q_ledsager','q_opplaering','q_evakuering','q_skriftlig','q_luminans','q_garderobe_tilrettelagt']},
   camping:{label:'Camping',group:'A',pageTitle:'Campingfasiliteter',pageDesc:'Last opp bilder av campingplassens fasiliteter.',
     defaultZones:[
       {id:'parkering',label:'Parkering / innkjøring',icon:'🅿️',extraFields:[],optional:false},
@@ -1867,7 +1886,10 @@ var EF_LABEL = {
     regulerbar_seng:'Adjustable bed',lading_el_rullestol:'Electric wheelchair charging in room',
     visuell_brannalarm:'Visual fire alarm',alarm_resepsjon:'Room alarm to reception',
     luminans_skilt:'Good luminance contrast (signs/counter)',
-    taktil_gangbane:'Tactile / visual path marking',taktil_trapp:'Marked stair edges and hazard zones'
+    taktil_gangbane:'Tactile / visual path marking',taktil_trapp:'Marked stair edges and hazard zones',
+    heis_assistanse:'Assistance available for boarding/alighting',
+    heis_sittende:'Seated lift (chairlift/gondola) available — not just a tow lift',
+    tilpasset_skiutstyr_utleie:'Adapted ski equipment rental (sit-ski, mono-ski)'
   },
   es: {
     terskel_mm:'Altura del umbral',dor_cm:'Anchura de puerta',seng_cm:'Altura de cama',
@@ -1879,7 +1901,10 @@ var EF_LABEL = {
     regulerbar_seng:'Cama ajustable',lading_el_rullestol:'Carga silla de ruedas eléctrica en habitación',
     visuell_brannalarm:'Alarma de incendio visual',alarm_resepsjon:'Alarma habitación a recepción',
     luminans_skilt:'Buen contraste de luminancia (señales/mostrador)',
-    taktil_gangbane:'Marcación táctil / visual de recorrido',taktil_trapp:'Bordes de escalón y zonas de peligro marcadas'
+    taktil_gangbane:'Marcación táctil / visual de recorrido',taktil_trapp:'Bordes de escalón y zonas de peligro marcadas',
+    heis_assistanse:'Asistencia disponible para subir/bajar',
+    heis_sittende:'Telesilla/góndola disponible — no solo telearrastre',
+    tilpasset_skiutstyr_utleie:'Alquiler de equipo de esquí adaptado (sit-ski, mono-esquí)'
   }
 };
 
@@ -1952,7 +1977,10 @@ var EXTRA_FIELDS = {
   alarm_resepsjon:{label:'Alarm til resepsjon fra rom',unit:'',ph:'',type:'yn'},
   luminans_skilt:{label:'God luminanskontrast (skilt/skranke)',unit:'',ph:'',type:'yn'},
   taktil_gangbane:{label:'Taktil / visuell gangbanemarkering',unit:'',ph:'',type:'yn'},
-  taktil_trapp:{label:'Markerte trappeneser og farefelt',unit:'',ph:'',type:'yn'}
+  taktil_trapp:{label:'Markerte trappeneser og farefelt',unit:'',ph:'',type:'yn'},
+  heis_assistanse:{label:'Assistanse ved på-/avstigning tilgjengelig',unit:'',ph:'',type:'yn'},
+  heis_sittende:{label:'Sittende heis (stolheis/gondol) tilgjengelig — ikke bare skitrekk/T-krok',unit:'',ph:'',type:'yn'},
+  tilpasset_skiutstyr_utleie:{label:'Utleie av tilpasset skiutstyr (sit-ski, mono-ski)',unit:'',ph:'',type:'yn'}
 };
 
 var ZONE_PROMPTS = {

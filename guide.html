@@ -105,15 +105,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </head>
 <body>
 
-<div class="topbar">
+<header class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-</div>
+</header>
 
 <div class="hero" id="hero">
   <div class="hero-bg" id="hero-bg"></div>
   <div class="hero-content">
     <div class="hero-badge">&#9855; Tilgjengelighetsguide</div>
-    <div class="hero-name" id="hero-name">Laster...</div>
+    <h1 class="hero-name" id="hero-name">Laster...</h1>
     <div class="hero-type" id="hero-type"></div>
     <div class="hero-meta" id="hero-meta"></div>
   </div>
@@ -123,12 +123,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   ✓ Informasjonen er bekreftet av bedriften — <span id="bekreftet-dato"></span>
 </div>
 
-<div class="content" id="main-content">
+<main class="content" id="main-content">
   <div class="spinner" id="spinner">
     <div class="spinner-ring"></div>
     Henter tilgjengelighetsguide...
   </div>
-</div>
+</main>
 
 <script>
 var API_BASE = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
@@ -314,11 +314,11 @@ function visGuide(data) {
   var opphold = (data.soner||[]).filter(function(s){return ankomstIds.indexOf(s.id)<0;});
 
   if (ankomst.length) {
-    html += '<div class="seksjon-hd">Ankomst og adkomst</div>';
+    html += '<h2 class="seksjon-hd">Ankomst og adkomst</h2>';
     ankomst.forEach(function(s){ html += lagSoneHTML(s); });
   }
   if (opphold.length) {
-    html += '<div class="seksjon-hd">Under oppholdet</div>';
+    html += '<h2 class="seksjon-hd">Under oppholdet</h2>';
     opphold.forEach(function(s){ html += lagSoneHTML(s); });
   }
 
@@ -330,7 +330,7 @@ function visGuide(data) {
   // frontend eier oversettelsen, se SVAR_TEKST/UB_TEKST over.
   var tilleggsListe = data.tilleggstjenester || byggTilleggsFraSvar(data.svar);
   if (tilleggsListe.length) {
-    html += '<div class="seksjon-hd">Tilleggstjenester</div>';
+    html += '<h2 class="seksjon-hd">Tilleggstjenester</h2>';
     html += '<div class="tillegg-grid">';
     tilleggsListe.forEach(function(t){
       html += '<div class="tillegg-kort"><span class="tillegg-ikon">' + t.ikon + '</span><span class="tillegg-tekst">' + t.tekst + '</span></div>';
@@ -340,7 +340,7 @@ function visGuide(data) {
 
   var ubListe = byggUsynligeFraSvar(data.svar_usynlig);
   if (ubListe.length) {
-    html += '<div class="seksjon-hd">Tilrettelegging for alle</div>';
+    html += '<h2 class="seksjon-hd">Tilrettelegging for alle</h2>';
     html += '<div class="tillegg-grid">';
     ubListe.forEach(function(tekst){
       html += '<div class="tillegg-kort"><span class="tillegg-ikon">✅</span><span class="tillegg-tekst">' + tekst + '</span></div>';
@@ -348,7 +348,7 @@ function visGuide(data) {
     html += '</div>';
   }
 
-  html += '<div class="seksjon-hd">Erfaringer fra gjester</div>';
+  html += '<h2 class="seksjon-hd">Erfaringer fra gjester</h2>';
   var erfaringer = data.erfaringer || [];
   if (erfaringer.length === 0) {
     html += '<div class="erfaring-tom">Ingen erfaringer registrert ennå.<br>Vær den første til å dele!</div>';
@@ -446,7 +446,7 @@ function lagSoneHTML(s) {
   var h = '<div class="sone-kort">';
   h += '<div class="sone-topp">';
   h += '<div class="sone-ikon">' + (s.ikon || SONE_IKON[s.id] || '📋') + '</div>';
-  h += '<div class="sone-navn">' + s.label + '</div>';
+  h += '<h3 class="sone-navn">' + s.label + '</h3>';
   if (s.status && s.status !== 'ukjent') h += '<span class="status-pill ' + statusClass + '">' + statusLabel + '</span>';
   h += '</div>';
   h += '<div class="sone-tekst">' + mdTilHtml(s.gjeste_tekst||'') + '</div>';
@@ -460,7 +460,7 @@ function lagSoneHTML(s) {
   if ((s.bilder||[]).length) {
     h += '<div class="sone-bilder">';
     s.bilder.forEach(function(b){
-      h += '<div class="sone-bilde"><img src="' + b.url + '" alt="' + s.label + '" loading="lazy"/></div>';
+      h += '<div class="sone-bilde"><img src="' + b.url + '" alt="Bilde av ' + s.label + '" loading="lazy"/></div>';
     });
     h += '</div>';
   }
@@ -469,9 +469,9 @@ function lagSoneHTML(s) {
 }
 
 function lagGpxHTML(gpx) {
-  var h = '<div class="seksjon-hd">Ruteinformasjon</div>';
+  var h = '<h2 class="seksjon-hd">Ruteinformasjon</h2>';
   h += '<div class="gpx-kort">';
-  h += '<div class="gpx-title">🗺️ GPX-analyse</div>';
+  h += '<h3 class="gpx-title">🗺️ GPX-analyse</h3>';
   h += '<div class="gpx-stats">';
   h += '<div class="gpx-stat"><div class="gpx-val">' + gpx.lengde_km + ' km</div><div class="gpx-lbl">Distanse</div></div>';
   h += '<div class="gpx-stat"><div class="gpx-val">↑' + gpx.stigning_opp_m + ' m</div><div class="gpx-lbl">Stigning opp</div></div>';
@@ -573,7 +573,7 @@ function escHtml(str) {
 }
 
 function visFeil() {
-  document.getElementById('main-content').innerHTML = '<div class="feil-kort">Kunne ikke hente tilgjengelighetsguide. Sjekk at enhet_id er korrekt.</div>';
+  document.getElementById('main-content').innerHTML = '<div class="feil-kort" role="alert">Kunne ikke hente tilgjengelighetsguide. Sjekk at enhet_id er korrekt.</div>';
 }
 
 lastData();

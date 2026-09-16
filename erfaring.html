@@ -81,63 +81,63 @@ textarea:focus{border-color:var(--green)}
 </head>
 <body>
 
-<div class="topbar">
+<header class="topbar">
   <div class="topbar-logo">Access<span>Norway</span></div>
-</div>
+</header>
 
 <div class="hero" id="hero">
   <div class="hero-badge">&#128172; Del din erfaring</div>
-  <div class="hero-name" id="hero-name">Laster...</div>
+  <h1 class="hero-name" id="hero-name">Laster...</h1>
   <div class="hero-type" id="hero-type"></div>
   <div class="hero-meta" id="hero-meta"></div>
 </div>
 
-<div class="content">
+<main class="content">
 
-  <div id="feil-banner" class="feil-banner">Noe gikk galt. Prøv igjen eller kontakt oss.</div>
+  <div id="feil-banner" class="feil-banner" role="alert">Noe gikk galt. Prøv igjen eller kontakt oss.</div>
 
   <div id="form-body">
 
-    <div class="seksjon-hd">Ditt besøk</div>
+    <h2 class="seksjon-hd">Ditt besøk</h2>
 
     <div class="card">
-      <div class="card-title">Stemmer tilgjengelighetsbeskrivelsen med det du opplevde? <span style="color:var(--red);font-size:13px">*</span></div>
+      <h3 class="card-title" id="stemmer-heading">Stemmer tilgjengelighetsbeskrivelsen med det du opplevde? <span style="color:var(--red);font-size:13px">*</span></h3>
       <div class="card-desc">Ikke hva du forventet — hva du faktisk fant på stedet.</div>
-      <div class="yn-group">
-        <button class="yn-btn" id="stemmer-ja" onclick="velg('stemmer','ja')">✅ Ja, stemmer</button>
-        <button class="yn-btn" id="stemmer-nei" onclick="velg('stemmer','nei')">❌ Nei, avviker</button>
-        <button class="yn-btn" id="stemmer-vk" onclick="velg('stemmer','vet_ikke')">— Vet ikke</button>
+      <div class="yn-group" role="group" aria-labelledby="stemmer-heading">
+        <button class="yn-btn" id="stemmer-ja" aria-pressed="false" onclick="velg('stemmer','ja')">✅ Ja, stemmer</button>
+        <button class="yn-btn" id="stemmer-nei" aria-pressed="false" onclick="velg('stemmer','nei')">❌ Nei, avviker</button>
+        <button class="yn-btn" id="stemmer-vk" aria-pressed="false" onclick="velg('stemmer','vet_ikke')">— Vet ikke</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">Fortell gjerne mer</div>
+      <h3 class="card-title" id="fortell-heading">Fortell gjerne mer</h3>
       <div class="card-desc">Hva fungerte bra? Hva kunne vært bedre? Konkrete detaljer hjelper andre å planlegge.</div>
-      <textarea id="erfaring-tekst" maxlength="500" placeholder="F.eks.: Badet var godt tilrettelagt, men terskelen inn var høyere enn beskrevet..." oninput="oppdaterChar()"></textarea>
+      <textarea id="erfaring-tekst" maxlength="500" aria-labelledby="fortell-heading" placeholder="F.eks.: Badet var godt tilrettelagt, men terskelen inn var høyere enn beskrevet..." oninput="oppdaterChar()"></textarea>
       <div class="char-count"><span id="char-count">0</span> / 500</div>
     </div>
 
     <div class="card">
-      <div class="card-title">Vil du anbefale stedet til andre med lignende behov? <span style="color:var(--red);font-size:13px">*</span></div>
-      <div class="yn-group">
-        <button class="yn-btn" id="anbefaler-ja" onclick="velg('anbefaler','ja')">👍 Ja</button>
-        <button class="yn-btn" id="anbefaler-nei" onclick="velg('anbefaler','nei')">👎 Nei</button>
+      <h3 class="card-title" id="anbefaler-heading">Vil du anbefale stedet til andre med lignende behov? <span style="color:var(--red);font-size:13px">*</span></h3>
+      <div class="yn-group" role="group" aria-labelledby="anbefaler-heading">
+        <button class="yn-btn" id="anbefaler-ja" aria-pressed="false" onclick="velg('anbefaler','ja')">👍 Ja</button>
+        <button class="yn-btn" id="anbefaler-nei" aria-pressed="false" onclick="velg('anbefaler','nei')">👎 Nei</button>
       </div>
     </div>
 
-    <div class="seksjon-hd">Valgfritt</div>
+    <h2 class="seksjon-hd">Valgfritt</h2>
 
     <div class="card">
-      <div class="card-title">Hvem er du?</div>
+      <h3 class="card-title" id="hvemerdu-heading">Hvem er du?</h3>
       <div class="card-desc">Hjelper oss å forstå erfaringen bedre. Ingen persondata lagres — du er alltid anonym.</div>
-      <div class="forf-grid">
-        <button class="forf-btn" id="f-gjest" onclick="velgForf('gjest')">
+      <div class="forf-grid" role="group" aria-labelledby="hvemerdu-heading">
+        <button class="forf-btn" id="f-gjest" aria-pressed="false" onclick="velgForf('gjest')">
           <span class="forf-ikon">🧳</span>Gjest
         </button>
-        <button class="forf-btn" id="f-ledsager" onclick="velgForf('ledsager')">
+        <button class="forf-btn" id="f-ledsager" aria-pressed="false" onclick="velgForf('ledsager')">
           <span class="forf-ikon">🤝</span>Ledsager
         </button>
-        <button class="forf-btn" id="f-ansatt" onclick="velgForf('ansatt')">
+        <button class="forf-btn" id="f-ansatt" aria-pressed="false" onclick="velgForf('ansatt')">
           <span class="forf-ikon">👔</span>Ansatt
         </button>
       </div>
@@ -153,19 +153,19 @@ textarea:focus{border-color:var(--green)}
 
   </div>
 
-  <div class="loader" id="loader">
+  <div class="loader" id="loader" role="status" aria-live="polite">
     <div class="loader-ring"></div>
     <div style="font-size:14px;color:var(--text3)">Sender inn...</div>
   </div>
 
-  <div class="takk" id="takk">
+  <div class="takk" id="takk" role="status" aria-live="polite">
     <div class="takk-ikon">✅</div>
-    <div class="takk-title">Tusen takk!</div>
+    <h2 class="takk-title">Tusen takk!</h2>
     <div class="takk-desc">Din erfaring hjelper andre med å planlegge besøket. Tilbakemeldingen sendes til bedriften for gjennomgang.</div>
     <a class="takk-link" id="takk-link" href="#">&#8592; Tilbake til tilgjengelighetsguiden</a>
   </div>
 
-</div>
+</main>
 
 <script>
 var API_BASE = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
@@ -200,16 +200,18 @@ function hentParams() {
 
 function velg(felt, val) {
   svar[felt] = val;
+  var idSuffiks = { ja:'ja', nei:'nei', vet_ikke:'vk' };
   var grupper = {
     stemmer: ['ja','nei','vk'],
     anbefaler: ['ja','nei']
   };
-  grupper[felt].forEach(function(v) {
-    var el = document.getElementById(felt + '-' + v);
-    if (el) el.classList.remove('active-yes','active-no','active-na');
+  grupper[felt].forEach(function(suf) {
+    var el = document.getElementById(felt + '-' + suf);
+    if (el) { el.classList.remove('active-yes','active-no','active-na'); el.setAttribute('aria-pressed','false'); }
   });
-  var el = document.getElementById(felt + '-' + val);
+  var el = document.getElementById(felt + '-' + idSuffiks[val]);
   if (el) {
+    el.setAttribute('aria-pressed','true');
     if (val === 'ja') el.classList.add('active-yes');
     else if (val === 'nei') el.classList.add('active-no');
     else el.classList.add('active-na');
@@ -220,9 +222,13 @@ function velg(felt, val) {
 function velgForf(val) {
   svar.forf = val;
   ['gjest','ledsager','ansatt'].forEach(function(v) {
-    document.getElementById('f-' + v).classList.remove('active');
+    var el = document.getElementById('f-' + v);
+    el.classList.remove('active');
+    el.setAttribute('aria-pressed','false');
   });
-  document.getElementById('f-' + val).classList.add('active');
+  var valgt = document.getElementById('f-' + val);
+  valgt.classList.add('active');
+  valgt.setAttribute('aria-pressed','true');
 }
 
 function oppdaterChar() {
