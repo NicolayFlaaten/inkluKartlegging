@@ -261,7 +261,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.0</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.3</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-btn active" data-lang="no" onclick="byttSpraak('no')">NO</button>
@@ -314,9 +314,9 @@ textarea{resize:vertical;min-height:80px}
             <option value="annet_a" data-i18n-label-val="Annet (bygg)">Annet (bygg)</option>
           </optgroup>
           <optgroup data-i18n-label="type_gruppe_b" label="B — Naturbaserte aktivitetsbedrifter">
-            <option value="guidet_friluft" data-i18n-label-val="Guidet tur / friluftsliv">Guidet tur / friluftsliv</option>
+            <option value="guidet_friluft" data-i18n-label-val="Vandring, fjelltur og skiguiding">Vandring, fjelltur og skiguiding</option>
             <option value="vannsport" data-i18n-label-val="Vannsport og padling">Vannsport og padling</option>
-            <option value="kjoretoy_dyr" data-i18n-label-val="Kjøretøy og dyr">Kjøretøy og dyr (sykkel, ridning, hundespann)</option>
+            <option value="kjoretoy_dyr" data-i18n-label-val="Sykling, ridning og hundekjøring">Sykling, ridning og hundekjøring</option>
             <option value="tilpasset_natur" data-i18n-label-val="Tilpassede naturopplevelser">Tilpassede naturopplevelser</option>
           </optgroup>
           <optgroup data-i18n-label="type_gruppe_c" label="C — Fellesgoder og felles rom">
@@ -491,7 +491,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.0';
+const APP_VERSION = 'v0.5.3';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -1223,9 +1223,9 @@ var LABEL_MAP = {
     'Heisstasjon':'Lift station','Utleie av tilpasset utstyr':'Adapted equipment rental',
     'Last opp bilder av alpinanlegget, heisen og utleie av utstyr.':'Upload images of the alpine facility, the lift, and equipment rental.',
     'Annet (bygg)':'Other (building)','Annet (fellesgode)':'Other (public asset)',
-    'Guidet tur / friluftsliv':'Guided tour / outdoor',
+    'Vandring, fjelltur og skiguiding':'Hiking, mountain trips and ski touring',
     'Vannsport og padling':'Water sports / paddling',
-    'Kjøretøy og dyr':'Vehicle and animal activities',
+    'Sykling, ridning og hundekjøring':'Cycling, riding and dog sledding',
     'Tilpassede naturopplevelser':'Adapted nature experiences',
     'Tursti / natursti':'Hiking trail','Sykkelløype':'Cycling route',
     'Skiløype':'Ski trail','Badeplass':'Swimming area',
@@ -1258,8 +1258,8 @@ var LABEL_MAP = {
     'Hotellfasiliteter':'Hotel facilities','Hytte / leilighetsfasiliteter':'Cabin / apartment facilities',
     'Restaurantfasiliteter':'Restaurant facilities','Aktivitetsfasiliteter':'Activity facilities',
     'Idrettsanlegget':'Sports facility','Campingfasiliteter':'Camping facilities',
-    'Fasiliteter':'Facilities','Guidet tur / friluftsliv':'Guided tour / outdoor',
-    'Vannsport og padling':'Water sports and paddling','Kjøretøy og dyr':'Vehicle and animal activities',
+    'Fasiliteter':'Facilities','Vandring, fjelltur og skiguiding':'Hiking, mountain trips and ski touring',
+    'Vannsport og padling':'Water sports and paddling','Sykling, ridning og hundekjøring':'Cycling, riding and dog sledding',
     'Tilpassede naturopplevelser':'Adapted nature experiences',
     'Tursti':'Hiking trail','Sykkelløype':'Cycling route','Skiløype':'Ski trail',
     'Badeplass':'Swimming area','Utsiktspunkt':'Viewpoint',
@@ -1272,9 +1272,9 @@ var LABEL_MAP = {
     'Last opp bilder av idrettsanlegget.':'Upload images of the sports facility.',
     'Last opp bilder av campingplassens fasiliteter.':'Upload images of the camping facilities.',
     'Last opp bilder av stedet.':'Upload images of the location.',
-    'Vandring, fjelltur, ski, truger og naturguiding. Last opp bilder og evt. GPX.':'Hiking, mountain trips, skiing, snowshoeing and nature guiding. Upload images and GPX if available.',
-    'Kajakkpadling, kano, båttur, fisketurer. Last opp bilder og evt. GPX-rute.':'Kayaking, canoeing, boat trips, fishing. Upload images and GPX route if available.',
-    'Sykling, ridning, hundespann og slede. Last opp bilder og evt. GPX-rute.':'Cycling, horse riding, dog sledding and sled. Upload images and GPX route if available.',
+    'Vandring, fjelltur, ski, truger, naturguiding og lignende opplevelser til fots. Last opp bilder og evt. GPX.':'Hiking, mountain trips, skiing, snowshoeing, nature guiding and similar on-foot experiences. Upload images and GPX if available.',
+    'Kajakkpadling, kano, pacraft, båttur, fisketurer og lignende vannaktiviteter. Last opp bilder og evt. GPX-rute.':'Kayaking, canoeing, packrafting, boat trips, fishing and similar water activities. Upload images and GPX route if available.',
+    'Sykling, ridning, hundespann, slede og lignende aktiviteter med kjøretøy eller dyr. Last opp bilder og evt. GPX-rute.':'Cycling, horse riding, dog sledding, sled and similar activities with a vehicle or animal. Upload images and GPX route if available.',
     'Sit-ski, handbike, amfistol og spesialtilrettelagte turer. Last opp bilder.':'Sit-ski, handbike, amfistol and specially adapted tours. Upload images.',
     'Last opp bilder og GPX-fil for stien.':'Upload images and GPX file for the trail.',
     'Last opp bilder og GPX-fil.':'Upload images and GPX file.',
@@ -1297,9 +1297,9 @@ var LABEL_MAP = {
     'Heisstasjon':'Estación del telesilla','Utleie av tilpasset utstyr':'Alquiler de equipo adaptado',
     'Last opp bilder av alpinanlegget, heisen og utleie av utstyr.':'Sube fotos de la instalación, el telesilla y el alquiler de material.',
     'Annet (bygg)':'Otro (edificio)','Annet (fellesgode)':'Otro (bien público)',
-    'Guidet tur / friluftsliv':'Tour guiado / exterior',
+    'Vandring, fjelltur og skiguiding':'Senderismo, excursiones de montaña y esquí de travesía',
     'Vannsport og padling':'Deportes acuáticos / piragüismo',
-    'Kjøretøy og dyr':'Vehículos y animales',
+    'Sykling, ridning og hundekjøring':'Ciclismo, equitación y trineo con perros',
     'Tilpassede naturopplevelser':'Experiencias naturales adaptadas',
     'Tursti / natursti':'Sendero','Sykkelløype':'Ruta ciclista',
     'Skiløype':'Pista de esquí','Badeplass':'Zona de baño',
@@ -1334,8 +1334,8 @@ var LABEL_MAP = {
     'Hotellfasiliteter':'Instalaciones del hotel','Hytte / leilighetsfasiliteter':'Instalaciones de cabaña / apartamento',
     'Restaurantfasiliteter':'Instalaciones del restaurante','Aktivitetsfasiliteter':'Instalaciones de actividades',
     'Idrettsanlegget':'Instalación deportiva','Campingfasiliteter':'Instalaciones de camping',
-    'Fasiliteter':'Instalaciones','Guidet tur / friluftsliv':'Tour guiado / exterior',
-    'Vannsport og padling':'Deportes acuáticos y piragüismo','Kjøretøy og dyr':'Vehículos y animales',
+    'Fasiliteter':'Instalaciones','Vandring, fjelltur og skiguiding':'Senderismo, excursiones de montaña y esquí de travesía',
+    'Vannsport og padling':'Deportes acuáticos y piragüismo','Sykling, ridning og hundekjøring':'Ciclismo, equitación y trineo con perros',
     'Tilpassede naturopplevelser':'Experiencias naturales adaptadas',
     'Tursti':'Sendero','Sykkelløype':'Ruta ciclista','Skiløype':'Pista de esquí',
     'Badeplass':'Zona de baño','Utsiktspunkt':'Mirador',
@@ -1348,9 +1348,9 @@ var LABEL_MAP = {
     'Last opp bilder av idrettsanlegget.':'Suba imágenes de la instalación deportiva.',
     'Last opp bilder av campingplassens fasiliteter.':'Suba imágenes de las instalaciones del camping.',
     'Last opp bilder av stedet.':'Suba imágenes del lugar.',
-    'Vandring, fjelltur, ski, truger og naturguiding. Last opp bilder og evt. GPX.':'Senderismo, excursiones de montaña, esquí y guía de naturaleza. Suba imágenes y GPX si dispone.',
-    'Kajakkpadling, kano, båttur, fisketurer. Last opp bilder og evt. GPX-rute.':'Kayak, canoa, paseos en bote, pesca. Suba imágenes y ruta GPX si dispone.',
-    'Sykling, ridning, hundespann og slede. Last opp bilder og evt. GPX-rute.':'Ciclismo, equitación, trineo con perros y trineo. Suba imágenes y ruta GPX si dispone.',
+    'Vandring, fjelltur, ski, truger, naturguiding og lignende opplevelser til fots. Last opp bilder og evt. GPX.':'Senderismo, excursiones de montaña, esquí, raquetas de nieve, guía de naturaleza y experiencias similares a pie. Suba imágenes y GPX si dispone.',
+    'Kajakkpadling, kano, pacraft, båttur, fisketurer og lignende vannaktiviteter. Last opp bilder og evt. GPX-rute.':'Kayak, canoa, packraft, paseos en bote, pesca y actividades acuáticas similares. Suba imágenes y ruta GPX si dispone.',
+    'Sykling, ridning, hundespann, slede og lignende aktiviteter med kjøretøy eller dyr. Last opp bilder og evt. GPX-rute.':'Ciclismo, equitación, trineo con perros, trineo y actividades similares con vehículo o animal. Suba imágenes y ruta GPX si dispone.',
     'Sit-ski, handbike, amfistol og spesialtilrettelagte turer. Last opp bilder.':'Sit-ski, handbike, amfistol y tours adaptados. Suba imágenes.',
     'Last opp bilder og GPX-fil for stien.':'Suba imágenes y archivo GPX del sendero.',
     'Last opp bilder og GPX-fil.':'Suba imágenes y archivo GPX.',
@@ -1490,7 +1490,7 @@ async function analyzeProfilbilde() {
 var TYPE_CONFIG = {
   hotell:{label:'Hotell',group:'A',pageTitle:'Hotellfasiliteter',pageDesc:'Last opp bilder av hotellets fasiliteter.',
     defaultZones:[
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm','taktil_trapp','luminans_skilt'],optional:false},
       {id:'resepsjon',label:'Resepsjon',icon:'🛎️',extraFields:['disk_cm','luminans_skilt','taktil_gangbane'],optional:false},
       {id:'spisesal',label:'Spisesal',icon:'🍽️',extraFields:[],optional:false},
@@ -1504,7 +1504,7 @@ var TYPE_CONFIG = {
     questions:['q_allergi','q_parfyme','q_meny','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_evakuering','q_luminans','q_taktil','q_regulerbar_seng','q_lading_el','q_visuell_brannalarm','q_alarm_resepsjon']},
   hytte:{label:'Hytte / leilighet',group:'A',ubSkip:['ub_medisinsk','ub_diskret'],pageTitle:'Hytte / leilighetsfasiliteter',pageDesc:'Last opp bilder. Legg til flere rom ved behov.',
     defaultZones:[
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'stue',label:'Stue',icon:'🛋️',extraFields:[],optional:false},
       {id:'kjokken',label:'Kjøkken',icon:'🍳',extraFields:[],optional:false},
@@ -1514,7 +1514,7 @@ var TYPE_CONFIG = {
     questions:['q_allergi','q_parfyme','q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil','q_regulerbar_seng','q_lading_el']},
   restaurant:{label:'Restaurant / servering',group:'A',ubSkip:['ub_avbryte'],pageTitle:'Restaurantfasiliteter',pageDesc:'Last opp bilder av restaurantens tilgjengelighet.',
     defaultZones:[
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm','taktil_trapp'],optional:false},
       {id:'mottakelse',label:'Mottakelse',icon:'🛎️',extraFields:['luminans_skilt'],optional:false},
       {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
@@ -1524,7 +1524,7 @@ var TYPE_CONFIG = {
     questions:['q_meny','q_allergi','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_luminans','q_taktil','q_taxi_buss']},
   aktivitet:{label:'Aktivitetsbedrift',group:'A',pageTitle:'Aktivitetsfasiliteter',pageDesc:'Last opp bilder fra aktivitetsbedriften.',
     defaultZones:[
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'resepsjon',label:'Mottakelse / resepsjon',icon:'🛎️',extraFields:[],optional:false},
       {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
@@ -1533,7 +1533,7 @@ var TYPE_CONFIG = {
     questions:['q_allergi','q_tilpassetutstyr','q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil']},
   idrett:{label:'Idrettsanlegg',group:'A',pageTitle:'Idrettsanlegget',pageDesc:'Last opp bilder av idrettsanlegget.',
     defaultZones:[
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false},
       {id:'aktivitetsomrade',label:'Aktivitetsområde',icon:'🏅',extraFields:[],optional:false},
       {id:'wc',label:'WC / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','snuplass_rekt','handstotte_wc'],optional:false},
@@ -1542,7 +1542,7 @@ var TYPE_CONFIG = {
     questions:['q_teleslynge','q_ledsager','q_opplaering','q_evakuering','q_skriftlig','q_luminans','q_taktil','q_garderobe_tilrettelagt']},
   alpinanlegg:{label:'Alpinanlegg / skiheis',group:'A',pageTitle:'Alpinanlegget',pageDesc:'Last opp bilder av alpinanlegget, heisen og utleie av utstyr.',
     defaultZones:[
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'billettluke',label:'Billettluke',icon:'🎫',extraFields:['disk_cm'],optional:false},
       {id:'adkomst_heis',label:'Adkomst til heisstasjon',icon:'🚶',extraFields:['stigningsgrad'],optional:false},
       {id:'heisstasjon',label:'Heisstasjon',icon:'🚡',extraFields:['heis_assistanse','heis_sittende'],optional:false},
@@ -1552,7 +1552,7 @@ var TYPE_CONFIG = {
     questions:['q_ledsager','q_opplaering','q_evakuering','q_skriftlig','q_luminans','q_garderobe_tilrettelagt']},
   camping:{label:'Camping',group:'A',pageTitle:'Campingfasiliteter',pageDesc:'Last opp bilder av campingplassens fasiliteter.',
     defaultZones:[
-      {id:'parkering',label:'Parkering / innkjøring',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering / innkjøring',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'inngang',label:'Inngang / resepsjon',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'sanitaer',label:'Sanitæranlegg',icon:'🚿',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
       {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
@@ -1566,33 +1566,33 @@ var TYPE_CONFIG = {
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
     extraOptions:['Parkering','Rom','Sal','Kiosk','Fellesareal'],
     questions:['q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil']},
-  guidet_friluft:{label:'Guidet tur / friluftsliv',group:'B',pageTitle:'Guidet tur / friluftsliv',pageDesc:'Vandring, fjelltur, ski, truger og naturguiding. Last opp bilder og evt. GPX.',
+  guidet_friluft:{label:'Vandring, fjelltur og skiguiding',group:'B',pageTitle:'Vandring, fjelltur og skiguiding',pageDesc:'Vandring, fjelltur, ski, truger, naturguiding og lignende opplevelser til fots. Last opp bilder og evt. GPX.',
     defaultZones:[
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'terreng',label:'Terreng / underlag',icon:'🌿',extraFields:['stigningsgrad','sti_bredde_cm'],optional:false},
       {id:'utstyr',label:'Utstyr',icon:'🎒',extraFields:[],optional:false},
       {id:'wc',label:'Toalett underveis',icon:'🚻',extraFields:[],optional:true}],
     extraOptions:['Hvilepunkt','Serveringssted','Transport til start','Krevende parti','Utsiktspunkt'],
     questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_hvile_under','q_samband','q_tilpassetutstyr','q_allergi','q_hvileplasser','q_hc_wc','q_ledsager','q_guide_opplaering','q_feedback_system']},
 
-  vannsport:{label:'Vannsport og padling',group:'B',pageTitle:'Vannsport og padling',pageDesc:'Kajakkpadling, kano, båttur, fisketurer. Last opp bilder og evt. GPX-rute.',
+  vannsport:{label:'Vannsport og padling',group:'B',pageTitle:'Vannsport og padling',pageDesc:'Kajakkpadling, kano, pacraft, båttur, fisketurer og lignende vannaktiviteter. Last opp bilder og evt. GPX-rute.',
     defaultZones:[
       {id:'utleiested',label:'Utleiested / base',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'innsjosett',label:'Inn/ut av vannet',icon:'🌊',extraFields:[],optional:false},
       {id:'utstyr',label:'Utstyr og tilpasning',icon:'🚣',extraFields:[],optional:false},
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'wc',label:'Toalett',icon:'🚻',extraFields:[],optional:true}],
     extraOptions:['Rolig vann','Krevende parti','Rasteplass på land','Rasteplass på vann'],
     questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_tilpasset_flyte','q_ledsager_krav','q_samband','q_allergi','q_hc_wc','q_ledsager','q_guide_opplaering','q_feedback_system']},
 
-  kjoretoy_dyr:{label:'Kjøretøy og dyr',group:'B',pageTitle:'Kjøretøy og dyr',pageDesc:'Sykling, ridning, hundespann og slede. Last opp bilder og evt. GPX-rute.',
+  kjoretoy_dyr:{label:'Sykling, ridning og hundekjøring',group:'B',pageTitle:'Sykling, ridning og hundekjøring',pageDesc:'Sykling, ridning, hundespann, slede og lignende aktiviteter med kjøretøy eller dyr. Last opp bilder og evt. GPX-rute.',
     defaultZones:[
       {id:'utleiested',label:'Utleiested / stall / base',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'startpunkt',label:'Startpunkt',icon:'📍',extraFields:[],optional:false},
       {id:'terreng',label:'Terreng / løype / underlag',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
       {id:'utstyr',label:'Utstyr og dyr',icon:'🎒',extraFields:[],optional:false},
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'wc',label:'Toalett',icon:'🚻',extraFields:[],optional:true}],
     extraOptions:['Hvilepunkt','Krevende parti','Serveringssted','Stall / dyrehold'],
     questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_tilpasset_sykkel','q_tilpassetutstyr','q_ledsager_krav','q_allergi','q_hc_wc','q_hvileplasser','q_ledsager','q_guide_opplaering','q_feedback_system']},
@@ -1602,14 +1602,14 @@ var TYPE_CONFIG = {
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
       {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
       {id:'utstyr',label:'Tilpasset spesialutstyr',icon:'♿',extraFields:[],optional:false},
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'wc',label:'Tilpasset toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true}],
     extraOptions:['Hvilepunkt','Transport til start','Serveringssted','Ekstra assistanse'],
     questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_hvile_under','q_samband','q_hjelpemiddelsentral','q_tilpassetutstyr','q_ledsager_krav','q_allergi','q_hc_wc','q_hvileplasser','q_ledsager','q_guide_opplaering','q_feedback_system']},
   tursti:{label:'Tursti / natursti',group:'C',pageTitle:'Tursti',pageDesc:'Last opp bilder og GPX-fil for stien.',
     defaultZones:[
       {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
-      {id:'parkering',label:'Parkering ved start',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering ved start',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'underlag',label:'Underlag og sti',icon:'👟',extraFields:['sti_bredde_cm','stigningsgrad'],optional:false},
       {id:'wc',label:'Toalett ved start',icon:'🚻',extraFields:[],optional:true}],
     extraOptions:['Hvileplass','Bratt parti','Krevende underlag','Utsiktspunkt'],
@@ -1617,20 +1617,20 @@ var TYPE_CONFIG = {
   sykkelsti:{label:'Sykkelløype',group:'C',pageTitle:'Sykkelløype',pageDesc:'Last opp bilder og GPX-fil.',
     defaultZones:[
       {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'underlag',label:'Underlag og løype',icon:'🚲',extraFields:['stigningsgrad'],optional:false}],
     extraOptions:['Hvileplass','Krevende parti','Serveringssted','WC'],
     questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_hvileplasser','q_ledsager']},
   skiloype:{label:'Skiløype',group:'C',pageTitle:'Skiløype',pageDesc:'Last opp bilder og GPX-fil.',
     defaultZones:[
       {id:'startpunkt',label:'Startpunkt',icon:'🟢',extraFields:[],optional:false},
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'loype',label:'Løypetrase',icon:'⛷️',extraFields:['stigningsgrad'],optional:false}],
     extraOptions:['Hvileplass','Krevende bakke','Serveringssted'],
     questions:['q_sti_merking','q_hc_wc','q_hvileplasser','q_ledsager','q_opplaering']},
   badeplass:{label:'Badeplass',group:'C',pageTitle:'Badeplass',pageDesc:'Last opp bilder av badeplassen.',
     defaultZones:[
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'adkomst',label:'Adkomst til vannet',icon:'🌊',extraFields:[],optional:false},
       {id:'wc',label:'Toalett / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
@@ -1638,14 +1638,14 @@ var TYPE_CONFIG = {
     questions:['q_hc_wc','q_badeplass_rampe','q_ledsager','q_opplaering']},
   utsiktspunkt:{label:'Utsiktspunkt / attraksjon',group:'C',pageTitle:'Utsiktspunkt',pageDesc:'Last opp bilder av stedet og adkomsten.',
     defaultZones:[
-      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:['stigningsgrad'],optional:false},
       {id:'selve_stedet',label:'Selve utsiktspunktet',icon:'🏔️',extraFields:[],optional:false}],
     extraOptions:['Informasjonsskilt','Sitteplasser','WC i nærheten'],
     questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_hvileplasser','q_ledsager']},
   hc_parkering:{label:'HC-parkering / toalett i utmark',group:'C',pageTitle:'HC-parkering / toalett',pageDesc:'Last opp bilder.',
     defaultZones:[
-      {id:'parkering',label:'HC-parkering',icon:'🅿️',extraFields:[],optional:false},
+      {id:'parkering',label:'HC-parkering',icon:'🅿️',extraFields:['hc_parkering_avstand_m'],optional:false},
       {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:true}],
     extraOptions:['Rampe','Skilting','Belysning'],
@@ -1889,7 +1889,9 @@ var EF_LABEL = {
     taktil_gangbane:'Tactile / visual path marking',taktil_trapp:'Marked stair edges and hazard zones',
     heis_assistanse:'Assistance available for boarding/alighting',
     heis_sittende:'Seated lift (chairlift/gondola) available — not just a tow lift',
-    tilpasset_skiutstyr_utleie:'Adapted ski equipment rental (sit-ski, mono-ski)'
+    tilpasset_skiutstyr_utleie:'Adapted ski equipment rental (sit-ski, mono-ski)',
+    hc_parkering_naer:'Dedicated accessible parking close to the facility',
+    hc_parkering_avstand_m:'Distance from accessible parking to the location'
   },
   es: {
     terskel_mm:'Altura del umbral',dor_cm:'Anchura de puerta',seng_cm:'Altura de cama',
@@ -1904,7 +1906,9 @@ var EF_LABEL = {
     taktil_gangbane:'Marcación táctil / visual de recorrido',taktil_trapp:'Bordes de escalón y zonas de peligro marcadas',
     heis_assistanse:'Asistencia disponible para subir/bajar',
     heis_sittende:'Telesilla/góndola disponible — no solo telearrastre',
-    tilpasset_skiutstyr_utleie:'Alquiler de equipo de esquí adaptado (sit-ski, mono-esquí)'
+    tilpasset_skiutstyr_utleie:'Alquiler de equipo de esquí adaptado (sit-ski, mono-esquí)',
+    hc_parkering_naer:'Aparcamiento accesible propio cerca de la instalación',
+    hc_parkering_avstand_m:'Distancia desde el aparcamiento accesible hasta el lugar'
   }
 };
 
@@ -1980,7 +1984,9 @@ var EXTRA_FIELDS = {
   taktil_trapp:{label:'Markerte trappeneser og farefelt',unit:'',ph:'',type:'yn'},
   heis_assistanse:{label:'Assistanse ved på-/avstigning tilgjengelig',unit:'',ph:'',type:'yn'},
   heis_sittende:{label:'Sittende heis (stolheis/gondol) tilgjengelig — ikke bare skitrekk/T-krok',unit:'',ph:'',type:'yn'},
-  tilpasset_skiutstyr_utleie:{label:'Utleie av tilpasset skiutstyr (sit-ski, mono-ski)',unit:'',ph:'',type:'yn'}
+  tilpasset_skiutstyr_utleie:{label:'Utleie av tilpasset skiutstyr (sit-ski, mono-ski)',unit:'',ph:'',type:'yn'},
+  hc_parkering_naer:{label:'Egen HC-parkering tett på anlegget',unit:'',ph:'',type:'yn'},
+  hc_parkering_avstand_m:{label:'Avstand fra HC-parkering til stedet',unit:'m',ph:'f.eks. 20'}
 };
 
 var ZONE_PROMPTS = {
