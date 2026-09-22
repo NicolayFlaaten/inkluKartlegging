@@ -207,9 +207,12 @@ textarea{resize:vertical;min-height:80px}
 /* REDIGERING */
 .sone-edit-btn{background:none;border:none;cursor:pointer;font-size:12px;color:var(--text3);padding:4px 8px;border-radius:6px;font-family:inherit}
 .sone-edit-btn:hover{background:var(--surface2);color:var(--text2)}
-.sone-edit-area{width:100%;border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);outline:none;resize:vertical;min-height:60px;margin-top:6px}
-.status-toggle{display:flex;gap:6px;margin-top:8px}
-.status-toggle-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:4px 12px;font-size:12px;font-family:inherit;cursor:pointer;color:var(--text2)}
+.sone-edit-area{width:100%;border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:12px 14px;font-size:15px;line-height:1.55;font-family:inherit;color:var(--text);background:var(--surface);outline:none;resize:vertical;min-height:180px;margin-top:6px}
+.status-toggle{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.status-edit-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 10px}
+.status-edit-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.03em}
+.status-edit-row .status-toggle{margin-top:0}
+.status-toggle-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:8px 14px;min-height:38px;font-size:13px;font-family:inherit;cursor:pointer;color:var(--text2)}
 .status-toggle-btn.active-gronn{background:var(--green-light);border-color:var(--green);color:var(--green-dark);font-weight:600}
 .status-toggle-btn.active-gul{background:var(--amber-light);border-color:var(--amber);color:var(--amber);font-weight:600}
 .status-toggle-btn.active-rod{background:var(--red-light);border-color:var(--red);color:var(--red);font-weight:600}
@@ -261,7 +264,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.6</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.7</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -490,7 +493,14 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.6';
+const APP_VERSION = 'v0.5.7';
+// v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
+// kreve at modellen er tillatt i workerens ALLOWED_MODELS)
+const AI_MODEL_BILDE = 'claude-haiku-4-5';
+const AI_MODEL_TEKST = 'claude-haiku-4-5';
+const AI_MODEL_CHAT  = 'claude-haiku-4-5';
+const BILDE_REGLER = 'Regler: (1) Størrelser og mål er kun anslag og skal merkes «anslag» og oppgis grovt (f.eks. «ca. 80–100 cm»). Oppgi bare tall hvis målebånd eller tydelig referanse er synlig i bildet; ellers beskriv kvalitativt (bred, smal, trang) og skriv hva som må måles. (2) Hvis noe ikke er synlig, skriv «ikke synlig i bildet» — ikke «nei». (3) Ikke gjett og ikke finn på detaljer. (4) Ikke omtal personer eller registreringsskilt.';
+const CHAT_SYSTEM = 'Du er en tilgjengelighetsassistent for gjester som planlegger et besøk. Bruk kun informasjonen som er gitt. Ikke gi medisinske eller juridiske råd, ikke gjett, og skill mellom målte opplysninger og anslag fra bilder. Hvis du ikke vet, si det og foreslå å kontakte virksomheten. Svar kort og konkret.';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -1480,12 +1490,12 @@ async function analyzeProfilbilde() {
   if (!state.profilbilde) return;
   var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'es' ? 'español' : 'norsk';
   try {
-    var compressed = await compressImage(state.profilbilde.dataUrl);
+    var compressed = await compressImage(state.profilbilde.dataUrl, 1600, 0.8);
     var base64 = compressed.split(',')[1];
     var type = document.getElementById('biz-type').value;
-    var prompt = 'Dette er et profilbilde av stedet. Beskriv stedet kort og nøkternt — hva slags sted er det, og hva gir bildet av inntrykk av tilgjengelighet. Unngå karakterer og dommer. **Helhetsinntrykk:** [kort beskrivelse av stedet og stemning] **Tilgjengelighet:** [hva bildet viser av adkomst, underlag og nivåer]. Svar på ' + spraakNavn + '.';
+    var prompt = 'Dette er et profilbilde av stedet. Beskriv stedet kort og nøkternt — hva slags sted er det og hva bildet viser. Ikke vurder hvor tilgjengelig stedet er ut fra dette ene bildet. Unngå karakterer og dommer. **Helhetsinntrykk:** [kort beskrivelse av stedet og stemning] **Tilgjengelighet:** [kun det bildet faktisk viser av adkomst, underlag og nivåer; skriv «ikke synlig i bildet» hvis det ikke vises]. ' + BILDE_REGLER + ' Svar på ' + spraakNavn + '.';
     var res = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:[
+      body:JSON.stringify({model:AI_MODEL_BILDE,max_tokens:400,messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},
         {type:'text',text:prompt}
       ]}]})});
@@ -2023,6 +2033,17 @@ var ZONE_PROMPTS = {
   stue:'Beskriv stuen nøkternt. Beskriv: bevegelsesrom mellom møbler, terskler (ja/nei), møblering og plass. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   kjokken:'Beskriv kjøkkenet nøkternt. Beskriv: benkehøyde (estimert), plass under benk (ja/nei), bevegelsesrom. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   soverom:'Beskriv soverommet nøkternt. Beskriv: sengehøyde (estimert), plass på siden av sengen, snuplass (estimert). Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  mottakelse:'Beskriv mottakelsen nøkternt. Beskriv: skrankehøyde (om synlig), plass foran skranken, synlig teleslynge-skilt (ja/nei/ikke synlig), bevegelsesrom, kontrast på skilt. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  spisebord:'Beskriv spisebordene nøkternt. Beskriv: bordtype og høyde (om synlig), plass under bord (ja/nei), avstand mellom bord og stoler, stoler med/uten armlener, bevegelsesrom. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  skilting:'Beskriv skiltingen nøkternt. Beskriv: skriftstørrelse og kontrast mot bakgrunn, plassering og høyde, taktil skrift eller punktskrift (ja/nei/ikke synlig), belysning, om skiltene er lette å finne. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  bar:'Beskriv baren nøkternt. Beskriv: høyde på disk og evt. senket del, sittemuligheter, bevegelsesrom, terskler. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  konferanse:'Beskriv konferanserommet nøkternt. Beskriv: adkomst og terskel/dørbredde (anslag), plass for rullestol mellom stoler og bord, synlig teleslynge-skilt, sittemuligheter. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  garderobe:'Beskriv garderoben nøkternt. Beskriv: terskler, snuplass (anslag), benk, knagger/skap og høyde, dusj eller omkledningsrom (ja/nei/ikke synlig). Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  loype:'Beskriv løypen nøkternt. Dette er friluft — ikke sammenlign med bygg-standarder. Beskriv: underlag/preparering, estimert bredde, synlig stigning, hindringer og sporforhold. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  billettluke:'Beskriv billettluken/skranken nøkternt. Beskriv: høyde på luke eller skranke, plass foran, synlig teleslynge-skilt (ja/nei/ikke synlig), om informasjon er lesbar (kontrast og skriftstørrelse). Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  heisstasjon:'Beskriv heisstasjonen nøkternt. Beskriv: adkomst og underlag frem til stasjonen, trinn og nivåforskjeller, hvordan man kommer om bord (plattform, stol, gondol), synlig assistanse eller hjelpemidler. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  adkomst_heis:'Beskriv adkomsten til heisen nøkternt. Beskriv: underlag, synlig stigning og nivåforskjeller, bredde, trapper eller ramper, hindringer. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  utleie_utstyr:'Beskriv utleiestedet for utstyr nøkternt. Beskriv: adkomst og terskel, plass inne (anslag), synlig tilpasset utstyr, hvordan utstyret er lagret og tilgjengelig. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   aktivitetsomrade:'Beskriv aktivitetsområdet nøkternt. Beskriv: underlag, terskler (ja/nei), bevegelsesrom, adkomst. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]'
 };
 var DEFAULT_PROMPT = 'Beskriv bildet nøkternt med fokus på tilgjengelighet. Beskriv hva du ser av underlag, nivåforskjeller, bredde og hindringer. Unngå karakterer og dommer — la gjesten vurdere om det passer for dem. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]';
@@ -2470,13 +2491,13 @@ async function analyzeSpecificImage(idx, imgIdx) {
   var zone = state.zones[idx];
   var loadingBox = document.getElementById('ai-loading-'+idx);
   if (loadingBox) loadingBox.style.display = 'block';
-  var compressed = await compressImage(zone.images[imgIdx].dataUrl);
+  var compressed = await compressImage(zone.images[imgIdx].dataUrl, 1600, 0.8);
   var base64 = compressed.split(',')[1];
   var spraakNavn = state.lang === 'en' ? 'English' : state.lang === 'es' ? 'español' : 'norsk';
-  var prompt = (ZONE_PROMPTS[zone.id] || DEFAULT_PROMPT) + ' Svar på ' + spraakNavn + '.';
+  var prompt = (ZONE_PROMPTS[zone.id] || DEFAULT_PROMPT) + ' ' + BILDE_REGLER + ' Svar på ' + spraakNavn + '.';
   try {
     var res = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:500,messages:[{role:'user',content:[
+      body:JSON.stringify({model:AI_MODEL_BILDE,max_tokens:700,messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},
         {type:'text',text:prompt}
       ]}]})});
@@ -2628,10 +2649,10 @@ async function genererSoneTekster() {
       var malInfo = zone.extraFields.map(function(fid){var f=EXTRA_FIELDS[fid];var v=zone.measures[fid];return f&&v?f.label+': '+v+' '+f.unit:'';}).filter(Boolean).join(', ');
       if (!alleAnalyser && !malInfo && !zone.note) return;
       var kontekst = [alleAnalyser, malInfo?T('malte_data')+malInfo:'', zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
-      var prompt = 'Du skriver tilgjengelighetsprofil for "'+name+'" som gjester skal lese. Basert på: '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på '+spraakNavn+' som forteller gjesten konkret hva som finnes. Beskriv fakta — ikke vurder om det er bra eller dårlig. Unngå ord som "dessverre", "mangelfull", "ikke egnet". La gjesten selv avgjøre om det passer for dem. Avslutt med: STATUS:GRONN (fungerer for de fleste), STATUS:GUL (avhenger av behov) eller STATUS:ROD (begrenset — beskriv hva).';
+      var prompt = 'Du skriver tilgjengelighetsprofil for "'+name+'" som gjester skal lese. Basert på: '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på '+spraakNavn+' som forteller gjesten konkret hva som finnes. Beskriv fakta — ikke vurder om det er bra eller dårlig. Unngå ord som "dessverre", "mangelfull", "ikke egnet". La gjesten selv avgjøre om det passer for dem. Mål og opplysninger fra kartlegger (målte data og notater) går alltid foran bildeanalysen hvis de avviker. Ikke oppgi mål som ikke er oppgitt, og merk anslag fra bilder som «anslag». Hvis informasjonen er for tynn til å avgjøre, velg STATUS:GUL og skriv kort hva som bør avklares. Avslutt med: STATUS:GRONN (fungerer for de fleste), STATUS:GUL (avhenger av behov) eller STATUS:ROD (begrenset — beskriv hva).';
       jobs.push(
         fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:prompt}]})})
+          body:JSON.stringify({model:AI_MODEL_TEKST,max_tokens:450,messages:[{role:'user',content:prompt}]})})
         .then(function(res){ return res.json(); })
         .then(function(data){
           if (data.content && data.content[0] && data.content[0].text) {
@@ -2681,7 +2702,7 @@ async function buildRapport() {
 
 function lagSoneHTML(sd, idx, malChips, bilderHtml) {
   var zone = sd.zone;
-  var st = sd.status;
+  var st = (guideRedigert[idx] && guideRedigert[idx].status) ? guideRedigert[idx].status : sd.status;
   var statusFarge = st==='gronn'?'var(--green-dark)':st==='gul'?'var(--amber)':'var(--red)';
   var statusLabel = st==='gronn'?'Tilgjengelig':st==='gul'?'Delvis tilgjengelig':st==='rod'?'Begrenset':'';
   var statusSpan = st !== 'ukjent' ? '<span style="font-size:13px;font-weight:700;color:'+statusFarge+'">'+( st==='gronn'?'✅':st==='gul'?'🟡':'🔴')+' '+statusLabel+'</span>' : '';
@@ -2695,18 +2716,17 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
   h += '<div id="guide-sone-status-'+idx+'">'+statusSpan+'</div>';
   h += '<button class="sone-edit-btn" id="edit-btn-'+idx+'" onclick="toggleEditSone('+idx+')">'+T('sone_rediger')+'</button>';
   h += '</div>';
+  h += '<div class="status-edit-row"><span class="status-edit-label">Status</span><div class="status-toggle">';
+  h += '<button class="'+btnGronn+'" id="status-btn-'+idx+'-gronn" onclick="setStatusToggle('+idx+',&quot;gronn&quot;)">&#9989; Tilgjengelig</button>';
+  h += '<button class="'+btnGul+'" id="status-btn-'+idx+'-gul" onclick="setStatusToggle('+idx+',&quot;gul&quot;)">&#128993; Delvis</button>';
+  h += '<button class="'+btnRod+'" id="status-btn-'+idx+'-rod" onclick="setStatusToggle('+idx+',&quot;rod&quot;)">&#128308; Begrenset</button>';
+  h += '</div></div>';
   h += '<div id="guide-sone-tekst-'+idx+'" class="guide-sone-tekst">'+mdTilHtml(sd.gjesteTekst)+'</div>';
   if (malChips) h += '<div class="guide-sone-maal">'+malChips+'</div>';
   if (bilderHtml) h += '<div class="guide-bilder">'+bilderHtml+'</div>';
   h += '<div id="edit-sone-'+idx+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
   h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">'+T('sone_rediger_tekst')+'</div>';
-  h += '<textarea class="sone-edit-area" id="edit-tekst-'+idx+'" oninput="guideRedigert['+idx+']=guideRedigert['+idx+']||{};guideRedigert['+idx+'].tekst=this.value">'+sd.gjesteTekst+'</textarea>';
-  h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-top:10px;margin-bottom:6px">Status</div>';
-  h += '<div class="status-toggle">';
-  h += '<button class="'+btnGronn+'" id="status-btn-'+idx+'-gronn" onclick="setStatusToggle('+idx+',&quot;gronn&quot;)">&#9989; Tilgjengelig</button>';
-  h += '<button class="'+btnGul+'" id="status-btn-'+idx+'-gul" onclick="setStatusToggle('+idx+',&quot;gul&quot;)">&#128993; Delvis</button>';
-  h += '<button class="'+btnRod+'" id="status-btn-'+idx+'-rod" onclick="setStatusToggle('+idx+',&quot;rod&quot;)">&#128308; Begrenset</button>';
-  h += '</div>';
+  h += '<textarea class="sone-edit-area" id="edit-tekst-'+idx+'" rows="8" oninput="guideRedigert['+idx+']=guideRedigert['+idx+']||{};guideRedigert['+idx+'].tekst=this.value;autosizeTA(this)">'+mdEsc(sd.gjesteTekst)+'</textarea>';
   h += '<button style="margin-top:10px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px" onclick="saveAndClose('+idx+')">Lagre endringer</button>';
   h += '</div>';
   h += '</div>';
@@ -3078,19 +3098,19 @@ async function sendChat() {
   var msg = input.value.trim();
   if (!msg) return;
   input.value = '';
-  appendChatMsg(msg, 'user');
+  appendChatMsg(mdEsc(msg), 'user');
   var loadingId = 'loading-'+Date.now();
   appendChatMsg('<span class="chat-spinner"></span>Tenker...', 'bot', loadingId);
   state.chatHistory.push({role:'user',content:msg});
   try {
     var hist = state.chatHistory.map(function(m){return (m.role==='user'?'Gjest':'Assistent')+': '+m.content;}).join('\n');
     var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:300,messages:[{role:'user',content:(window._chatKontekst||'')+'\n\n'+hist}]})});
+      body:JSON.stringify({model:AI_MODEL_CHAT,max_tokens:500,system:CHAT_SYSTEM,messages:[{role:'user',content:(window._chatKontekst||'')+'\n\nGJELDENDE FASILITETSINFO (kartleggers redigeringer har forrang):\n'+aktuellSoneInfo()+'\n\n'+hist}]})});
     var data = await res.json();
     var el = document.getElementById(loadingId); if (el) el.remove();
     var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : T('chat_feil');
     state.chatHistory.push({role:'assistant',content:svar});
-    appendChatMsg(svar, 'bot');
+    appendChatMsg(mdEsc(svar), 'bot');
   } catch(err) {
     var el = document.getElementById(loadingId); if (el) el.remove();
     appendChatMsg('Beklager, noe gikk galt.', 'bot');
@@ -3105,7 +3125,7 @@ async function sendGuideChatMsg(msg) {
   if (!text) return;
   if (input) input.value = '';
   var msgs = document.getElementById('guide-chat-messages');
-  var uDiv = document.createElement('div'); uDiv.className='chat-msg user'; uDiv.innerHTML='<div class="chat-bubble">'+text+'</div>'; msgs.appendChild(uDiv);
+  var uDiv = document.createElement('div'); uDiv.className='chat-msg user'; uDiv.innerHTML='<div class="chat-bubble">'+mdEsc(text)+'</div>'; msgs.appendChild(uDiv);
   var loadId = 'gl-'+Date.now();
   var bDiv = document.createElement('div'); bDiv.className='chat-msg bot'; bDiv.id=loadId; bDiv.innerHTML='<div class="chat-bubble"><span class="chat-spinner"></span>Tenker...</div>'; msgs.appendChild(bDiv);
   msgs.scrollTop = msgs.scrollHeight;
@@ -3114,17 +3134,34 @@ async function sendGuideChatMsg(msg) {
   try {
     var hist = window._guideChatHistory.map(function(m){return (m.role==='user'?'Gjest':'Assistent')+': '+m.content;}).join('\n');
     var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:250,messages:[{role:'user',content:(window._guideChatKontekst||'')+'\n\n'+hist}]})});
+      body:JSON.stringify({model:AI_MODEL_CHAT,max_tokens:400,system:CHAT_SYSTEM,messages:[{role:'user',content:(window._guideChatKontekst||'')+'\n\nFASILITETSINFO (kartleggers redigeringer har forrang):\n'+aktuellSoneInfo()+'\n\n'+hist}]})});
     var data = await res.json();
     var el = document.getElementById(loadId); if (el) el.remove();
     var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : T('chat_feil');
     window._guideChatHistory.push({role:'assistant',content:svar});
-    var rDiv = document.createElement('div'); rDiv.className='chat-msg bot'; rDiv.innerHTML='<div class="chat-bubble">'+svar+'</div>'; msgs.appendChild(rDiv);
+    var rDiv = document.createElement('div'); rDiv.className='chat-msg bot'; rDiv.innerHTML='<div class="chat-bubble">'+mdEsc(svar)+'</div>'; msgs.appendChild(rDiv);
     msgs.scrollTop = msgs.scrollHeight;
   } catch(err) {
     var el = document.getElementById(loadId); if (el) el.remove();
     var eDiv = document.createElement('div'); eDiv.className='chat-msg bot'; eDiv.innerHTML='<div class="chat-bubble">Feil: '+err.message+'</div>'; msgs.appendChild(eDiv);
   }
+}
+
+// v0.5.7: samler gjeldende sonetekst/status/mål — redigeringer fra kartlegger har forrang
+function aktuellSoneInfo() {
+  var linjer = [];
+  for (var i = 0; i < state.zones.length; i++) {
+    var z = state.zones[i];
+    var mal = z.extraFields.map(function(fid){var f=EXTRA_FIELDS[fid];var v=z.measures[fid];return f&&v?f.label+': '+v+(f.unit?' '+f.unit:''):'';}).filter(Boolean).join(', ');
+    var st = state.soneTekster && state.soneTekster[i];
+    var red = guideRedigert[i] || {};
+    var tekst = red.tekst || (st && st.tekst) || z.note || '';
+    var status = red.status || (st && st.status) || 'ukjent';
+    if (!tekst && !mal) continue;
+    var stTxt = {gronn:'Tilgjengelig',gul:'Delvis tilgjengelig',rod:'Begrenset tilgjengelighet',ukjent:'Ikke vurdert'}[status] || 'Ikke vurdert';
+    linjer.push(z.label + ' (' + stTxt + '): ' + String(tekst).replace(/\s+/g,' ').trim() + (mal ? ' | Målt: ' + mal : ''));
+  }
+  return linjer.join('\n');
 }
 
 function appendChatMsg(text, role, id) {
@@ -3144,6 +3181,7 @@ function downloadGuideHTML() {
   // Fjern alt som ikke skal være med i gjeste-versjonen
   var fjern = [
     '.sone-edit-btn',       // rediger-knapper
+    '.status-edit-row',     // status-knapper (kun for kartlegger)
     '[id^="edit-sone-"]',   // rediger-paneler
     '.edit-mode-banner',    // gult banner
     '.godkjenn-bar',        // godkjenn-seksjon
@@ -3205,6 +3243,14 @@ function toggleEditSone(idx) {
   var isOpen = editDiv.style.display !== 'none';
   editDiv.style.display = isOpen ? 'none' : 'block';
   editBtn.textContent = isOpen ? T('sone_rediger') : T('sone_lukk');
+  if (!isOpen) { var ta = document.getElementById('edit-tekst-'+idx); if (ta) autosizeTA(ta); }
+}
+
+// v0.5.7: tekstfeltet vokser med innholdet (min. 180px) så hele AI-teksten er synlig
+function autosizeTA(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.max(el.scrollHeight + 4, 180) + 'px';
 }
 
 function saveEditSone(idx, newTekst, newStatus) {
