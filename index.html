@@ -264,7 +264,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.7</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.8</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -493,7 +493,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.7';
+const APP_VERSION = 'v0.5.8';
 // v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
 const AI_MODEL_BILDE = 'claude-haiku-4-5';
@@ -1515,9 +1515,9 @@ var TYPE_CONFIG = {
       {id:'resepsjon',label:'Resepsjon',icon:'🛎️',extraFields:['disk_cm','luminans_skilt','taktil_gangbane'],optional:false},
       {id:'spisesal',label:'Spisesal',icon:'🍽️',extraFields:[],optional:false},
       {id:'hotellrom',label:'Hotellrom',icon:'🛏️',extraFields:['dor_cm','seng_cm','regulerbar_seng','lading_el_rullestol','visuell_brannalarm','alarm_resepsjon'],optional:false},
-      {id:'bad',label:'Bad',icon:'🚿',extraFields:['bad_dor_cm','terskel_mm','snuplass_cm','snuplass_rekt','handstotte_wc','handstotte_dusj','benk_dusj'],optional:false},
+      {id:'bad',label:'Bad',icon:'🚿',extraFields:['bad_dor_cm','terskel_mm','snuplass_cm','wc_sideplass_cm','snuplass_rekt','handstotte_wc','handstotte_dusj','benk_dusj'],optional:false},
       {id:'skilting',label:'Skilting innendørs',icon:'🔤',extraFields:['luminans_skilt','taktil_gangbane'],optional:true},
-      {id:'heis',label:'Heis',icon:'🛗',extraFields:['heis_bredde_cm'],optional:true},
+      {id:'heis',label:'Heis',icon:'🛗',extraFields:['heis_dor_cm','heis_innvendig_cm'],optional:true},
       {id:'bar',label:'Bar',icon:'🍷',extraFields:[],optional:true},
       {id:'konferanse',label:'Konferanserom',icon:'📋',extraFields:[],optional:true}],
     extraOptions:['Treningssenter','Basseng','Spa','Butikk','Frokostrom','Garderobe'],
@@ -1528,7 +1528,7 @@ var TYPE_CONFIG = {
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'stue',label:'Stue',icon:'🛋️',extraFields:[],optional:false},
       {id:'kjokken',label:'Kjøkken',icon:'🍳',extraFields:[],optional:false},
-      {id:'bad',label:'Bad',icon:'🚿',extraFields:['bad_dor_cm','terskel_mm','snuplass_cm','snuplass_rekt','handstotte_wc','handstotte_dusj','benk_dusj'],optional:false},
+      {id:'bad',label:'Bad',icon:'🚿',extraFields:['bad_dor_cm','terskel_mm','snuplass_cm','wc_sideplass_cm','snuplass_rekt','handstotte_wc','handstotte_dusj','benk_dusj'],optional:false},
       {id:'soverom',label:'Soverom',icon:'🛏️',extraFields:['seng_cm','regulerbar_seng','lading_el_rullestol'],optional:false}],
     extraOptions:['Bad 2','Soverom 2','Soverom 3','TVstue','Vaskerom','Terrasse'],
     questions:['q_allergi','q_parfyme','q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil','q_regulerbar_seng','q_lading_el']},
@@ -1537,7 +1537,7 @@ var TYPE_CONFIG = {
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm','taktil_trapp'],optional:false},
       {id:'mottakelse',label:'Mottakelse',icon:'🛎️',extraFields:['luminans_skilt'],optional:false},
-      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:false},
       {id:'spisebord',label:'Spisebord',icon:'🍽️',extraFields:['bord_cm'],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
     extraOptions:['Uteplass','Bar','Buffet','Terrasse'],
@@ -1547,8 +1547,8 @@ var TYPE_CONFIG = {
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'resepsjon',label:'Mottakelse / resepsjon',icon:'🛎️',extraFields:[],optional:false},
-      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
-      {id:'aktivitetsomrade',label:'Aktivitetsområde',icon:'🏃',extraFields:[],optional:false}],
+      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:false},
+      {id:'aktivitetsomrade',label:'Aktivitetsområde',icon:'🏃',extraFields:['vanskelighetsgrad','varighet'],optional:false}],
     extraOptions:['Garderobe','Uteplass','Servering','Utstyr'],
     questions:['q_allergi','q_tilpassetutstyr','q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil']},
   idrett:{label:'Idrettsanlegg',group:'A',pageTitle:'Idrettsanlegget',pageDesc:'Last opp bilder av idrettsanlegget.',
@@ -1556,8 +1556,8 @@ var TYPE_CONFIG = {
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false},
       {id:'aktivitetsomrade',label:'Aktivitetsområde',icon:'🏅',extraFields:[],optional:false},
-      {id:'wc',label:'WC / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','snuplass_rekt','handstotte_wc'],optional:false},
-      {id:'garderobe',label:'Tilrettelagt garderobe',icon:'👕',extraFields:['bad_dor_cm','snuplass_cm','handstotte_dusj','benk_dusj','visuell_brannalarm'],optional:true}],
+      {id:'wc',label:'WC / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm','snuplass_rekt','handstotte_wc'],optional:false},
+      {id:'garderobe',label:'Tilrettelagt garderobe',icon:'👕',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm','handstotte_dusj','benk_dusj','visuell_brannalarm'],optional:true}],
     extraOptions:['Kiosk','Tribune','Svømmebasseng','Treningssenter'],
     questions:['q_teleslynge','q_ledsager','q_opplaering','q_evakuering','q_skriftlig','q_luminans','q_taktil','q_garderobe_tilrettelagt']},
   alpinanlegg:{label:'Alpinanlegg / skiheis',group:'A',pageTitle:'Alpinanlegget',pageDesc:'Last opp bilder av alpinanlegget, heisen og utleie av utstyr.',
@@ -1567,22 +1567,22 @@ var TYPE_CONFIG = {
       {id:'adkomst_heis',label:'Adkomst til heisstasjon',icon:'🚶',extraFields:['stigningsgrad'],optional:false},
       {id:'heisstasjon',label:'Heisstasjon',icon:'🚡',extraFields:['heis_assistanse','heis_sittende'],optional:false},
       {id:'utleie_utstyr',label:'Utleie av tilpasset utstyr',icon:'🎿',extraFields:['tilpasset_skiutstyr_utleie'],optional:true},
-      {id:'wc',label:'WC / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','handstotte_wc'],optional:false}],
+      {id:'wc',label:'WC / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm','handstotte_wc'],optional:false}],
     extraOptions:['Kiosk','Skiskole','Utleie av vanlig skiutstyr','Solterrasse'],
     questions:['q_ledsager','q_opplaering','q_evakuering','q_skriftlig','q_luminans','q_garderobe_tilrettelagt']},
   camping:{label:'Camping',group:'A',pageTitle:'Campingfasiliteter',pageDesc:'Last opp bilder av campingplassens fasiliteter.',
     defaultZones:[
       {id:'parkering',label:'Parkering / innkjøring',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'inngang',label:'Inngang / resepsjon',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
-      {id:'sanitaer',label:'Sanitæranlegg',icon:'🚿',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
-      {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'sanitaer',label:'Sanitæranlegg',icon:'🚿',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:false},
+      {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
     extraOptions:['Kiosk','Lekeplass','Badeplass'],
     questions:['q_allergi','q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_taxi_buss']},
   annet_a:{label:'Annet (bygg)',group:'A',pageTitle:'Fasiliteter',pageDesc:'Last opp bilder av stedet.',
     defaultZones:[
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
-      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true},
+      {id:'wc',label:'WC',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:true},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
     extraOptions:['Parkering','Rom','Sal','Kiosk','Fellesareal'],
     questions:['q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil']},
@@ -1590,7 +1590,7 @@ var TYPE_CONFIG = {
     defaultZones:[
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
-      {id:'terreng',label:'Terreng / underlag',icon:'🌿',extraFields:['stigningsgrad','sti_bredde_cm'],optional:false},
+      {id:'terreng',label:'Terreng / underlag',icon:'🌿',extraFields:['stigningsgrad','sti_bredde_cm','vanskelighetsgrad','varighet'],optional:false},
       {id:'utstyr',label:'Utstyr',icon:'🎒',extraFields:[],optional:false},
       {id:'wc',label:'Toalett underveis',icon:'🚻',extraFields:[],optional:true}],
     extraOptions:['Hvilepunkt','Serveringssted','Transport til start','Krevende parti','Utsiktspunkt'],
@@ -1600,7 +1600,7 @@ var TYPE_CONFIG = {
     defaultZones:[
       {id:'utleiested',label:'Utleiested / base',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'innsjosett',label:'Inn/ut av vannet',icon:'🌊',extraFields:[],optional:false},
-      {id:'utstyr',label:'Utstyr og tilpasning',icon:'🚣',extraFields:[],optional:false},
+      {id:'utstyr',label:'Utstyr og tilpasning',icon:'🚣',extraFields:['vanskelighetsgrad','varighet'],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'wc',label:'Toalett',icon:'🚻',extraFields:[],optional:true}],
     extraOptions:['Rolig vann','Krevende parti','Rasteplass på land','Rasteplass på vann'],
@@ -1610,7 +1610,7 @@ var TYPE_CONFIG = {
     defaultZones:[
       {id:'utleiested',label:'Utleiested / stall / base',icon:'🏠',extraFields:['terskel_mm','dor_cm'],optional:false},
       {id:'startpunkt',label:'Startpunkt',icon:'📍',extraFields:[],optional:false},
-      {id:'terreng',label:'Terreng / løype / underlag',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
+      {id:'terreng',label:'Terreng / løype / underlag',icon:'🌿',extraFields:['stigningsgrad','vanskelighetsgrad','varighet'],optional:false},
       {id:'utstyr',label:'Utstyr og dyr',icon:'🎒',extraFields:[],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'wc',label:'Toalett',icon:'🚻',extraFields:[],optional:true}],
@@ -1620,10 +1620,10 @@ var TYPE_CONFIG = {
   tilpasset_natur:{label:'Tilpassede naturopplevelser',group:'B',pageTitle:'Tilpassede naturopplevelser',pageDesc:'Sit-ski, handbike, amfistol og spesialtilrettelagte turer. Last opp bilder.',
     defaultZones:[
       {id:'motepunkt',label:'Møtepunkt / startsted',icon:'📍',extraFields:[],optional:false},
-      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad'],optional:false},
+      {id:'terreng',label:'Terreng',icon:'🌿',extraFields:['stigningsgrad','vanskelighetsgrad','varighet'],optional:false},
       {id:'utstyr',label:'Tilpasset spesialutstyr',icon:'♿',extraFields:[],optional:false},
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
-      {id:'wc',label:'Tilpasset toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true}],
+      {id:'wc',label:'Tilpasset toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:true}],
     extraOptions:['Hvilepunkt','Transport til start','Serveringssted','Ekstra assistanse'],
     questions:['q_guide_hel','q_avbryte','q_sesong','q_instruksjon','q_hvile_forberedelse','q_hvile_under','q_samband','q_hjelpemiddelsentral','q_tilpassetutstyr','q_ledsager_krav','q_allergi','q_hc_wc','q_hvileplasser','q_ledsager','q_guide_opplaering','q_feedback_system']},
   tursti:{label:'Tursti / natursti',group:'C',pageTitle:'Tursti',pageDesc:'Last opp bilder og GPX-fil for stien.',
@@ -1652,7 +1652,7 @@ var TYPE_CONFIG = {
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
       {id:'adkomst',label:'Adkomst til vannet',icon:'🌊',extraFields:[],optional:false},
-      {id:'wc',label:'Toalett / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:true},
+      {id:'wc',label:'Toalett / garderobe',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:true},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
     extraOptions:['Rampe til vann','Badestol / amfistol','Hvileplass'],
     questions:['q_hc_wc','q_badeplass_rampe','q_ledsager','q_opplaering']},
@@ -1666,7 +1666,7 @@ var TYPE_CONFIG = {
   hc_parkering:{label:'HC-parkering / toalett i utmark',group:'C',pageTitle:'HC-parkering / toalett',pageDesc:'Last opp bilder.',
     defaultZones:[
       {id:'parkering',label:'HC-parkering',icon:'🅿️',extraFields:['hc_parkering_avstand_m'],optional:false},
-      {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm'],optional:false},
+      {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:true}],
     extraOptions:['Rampe','Skilting','Belysning'],
     questions:['q_hc_wc','q_sti_merking','q_ledsager']},
@@ -1899,7 +1899,8 @@ var EF_LABEL = {
   en: {
     terskel_mm:'Threshold height',dor_cm:'Door width',seng_cm:'Bed height',
     bad_dor_cm:'Bathroom door width',snuplass_cm:'Turning space diameter',
-    snuplass_rekt:'Turning space rectangle (W × D)',heis_bredde_cm:'Lift width',
+    snuplass_rekt:'Turning space rectangle (W × D)',heis_dor_cm:'Lift door width',heis_innvendig_cm:'Lift interior width',
+    wc_sideplass_cm:'Clear space beside toilet',varighet:'Duration',
     disk_cm:'Counter height',bord_cm:'Table height',stigningsgrad:'Slope gradient',
     sti_bredde_cm:'Trail width',handstotte_wc:'Handrail at toilet',
     handstotte_dusj:'Handrail / handle in shower',benk_dusj:'Bench or chair in shower',
@@ -1911,12 +1912,14 @@ var EF_LABEL = {
     heis_sittende:'Seated lift (chairlift/gondola) available — not just a tow lift',
     tilpasset_skiutstyr_utleie:'Adapted ski equipment rental (sit-ski, mono-ski)',
     hc_parkering_naer:'Dedicated accessible parking close to the facility',
-    hc_parkering_avstand_m:'Distance from accessible parking to the location'
+    hc_parkering_avstand_m:'Distance from accessible parking to the location',
+    vanskelighetsgrad:'Difficulty level'
   },
   es: {
     terskel_mm:'Altura del umbral',dor_cm:'Anchura de puerta',seng_cm:'Altura de cama',
     bad_dor_cm:'Anchura puerta baño/aseo',snuplass_cm:'Diámetro zona de giro',
-    snuplass_rekt:'Zona de giro rectangular (A × F)',heis_bredde_cm:'Anchura ascensor',
+    snuplass_rekt:'Zona de giro rectangular (A × F)',heis_dor_cm:'Ancho puerta ascensor',heis_innvendig_cm:'Ancho interior ascensor',
+    wc_sideplass_cm:'Espacio libre junto al aseo',varighet:'Duración',
     disk_cm:'Altura mostrador',bord_cm:'Altura mesa',stigningsgrad:'Pendiente',
     sti_bredde_cm:'Anchura sendero',handstotte_wc:'Barandilla en el aseo',
     handstotte_dusj:'Barandilla / asa en la ducha',benk_dusj:'Banco o silla en la ducha',
@@ -1928,7 +1931,8 @@ var EF_LABEL = {
     heis_sittende:'Telesilla/góndola disponible — no solo telearrastre',
     tilpasset_skiutstyr_utleie:'Alquiler de equipo de esquí adaptado (sit-ski, mono-esquí)',
     hc_parkering_naer:'Aparcamiento accesible propio cerca de la instalación',
-    hc_parkering_avstand_m:'Distancia desde el aparcamiento accesible hasta el lugar'
+    hc_parkering_avstand_m:'Distancia desde el aparcamiento accesible hasta el lugar',
+    vanskelighetsgrad:'Nivel de dificultad'
   }
 };
 
@@ -1987,7 +1991,8 @@ var EXTRA_FIELDS = {
   bad_dor_cm:{label:'Dørbredde bad/WC',unit:'cm',ph:'f.eks. 85'},
   snuplass_cm:{label:'Snuplass diameter',unit:'cm',ph:'f.eks. 150'},
   snuplass_rekt:{label:'Snuplass rektangel (B × D)',unit:'cm',ph:'f.eks. 150 × 120'},
-  heis_bredde_cm:{label:'Heisbredde',unit:'cm',ph:'f.eks. 110'},
+  heis_dor_cm:{label:'Heis – dørbredde',unit:'cm',ph:'f.eks. 90'},
+  heis_innvendig_cm:{label:'Heis – innvendig bredde',unit:'cm',ph:'f.eks. 110'},
   disk_cm:{label:'Skrankehøyde',unit:'cm',ph:'f.eks. 80'},
   bord_cm:{label:'Bordhøyde',unit:'cm',ph:'f.eks. 72'},
   stigningsgrad:{label:'Stigningsgrad',unit:'%',ph:'f.eks. 8'},
@@ -2006,7 +2011,15 @@ var EXTRA_FIELDS = {
   heis_sittende:{label:'Sittende heis (stolheis/gondol) tilgjengelig — ikke bare skitrekk/T-krok',unit:'',ph:'',type:'yn'},
   tilpasset_skiutstyr_utleie:{label:'Utleie av tilpasset skiutstyr (sit-ski, mono-ski)',unit:'',ph:'',type:'yn'},
   hc_parkering_naer:{label:'Egen HC-parkering tett på anlegget',unit:'',ph:'',type:'yn'},
-  hc_parkering_avstand_m:{label:'Avstand fra HC-parkering til stedet',unit:'m',ph:'f.eks. 20'}
+  hc_parkering_avstand_m:{label:'Avstand fra HC-parkering til stedet',unit:'m',ph:'f.eks. 20'},
+  // v0.5.8 — fire nye/justerte felt etter gjennomgang av spørreskjema v1 (questions.xlsx)
+  wc_sideplass_cm:{label:'Fri plass ved siden av toalett',unit:'cm',ph:'f.eks. 90'},
+  vanskelighetsgrad:{label:'Vanskelighetsgrad',unit:'',ph:'',type:'valg',opts:[
+    {v:'lett',no:'Lett',en:'Easy',es:'Fácil'},
+    {v:'middels',no:'Middels',en:'Moderate',es:'Moderado'},
+    {v:'krevende',no:'Krevende',en:'Challenging',es:'Exigente'}
+  ]},
+  varighet:{label:'Varighet',unit:'',ph:'f.eks. 2–3 timer',type:'text'}
 };
 
 var ZONE_PROMPTS = {
@@ -2371,6 +2384,17 @@ function renderZoneCard(zone, idx) {
         + '<button class="yn-field-btn' + (cur==='nei' ? ' yn-nei-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="nei">'+T('nei')+'</button>'
         + '<button class="yn-field-btn' + (cur==='ukjent' ? ' yn-uk-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ukjent">'+T('vet_ikke_btn')+'</button>'
         + '</div></div>';
+    } else if (f.type === 'valg') {
+      var curV = zone.measures[fid] || '';
+      var optsHtml = '<option value="">–</option>' + f.opts.map(function(o){
+        var lbl = o[state.lang] || o.no;
+        return '<option value="' + o.v + '"' + (curV===o.v?' selected':'') + '>' + lbl + '</option>';
+      }).join('');
+      extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + '</label>'
+        + '<select class="measure-input" data-zi="' + idx + '" data-fid="' + fid + '">' + optsHtml + '</select></div>';
+    } else if (f.type === 'text') {
+      extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + '</label>'
+        + '<input type="text" placeholder="' + f.ph + '" value="' + (zone.measures[fid]||'') + '" data-zi="' + idx + '" data-fid="' + fid + '" class="measure-input"/></div>';
     } else {
       extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + (f.unit ? ' (' + f.unit + ')' : '') + '</label>'
         + '<div class="number-field"><input type="number" placeholder="' + f.ph + '" value="' + (zone.measures[fid]||'') + '" data-zi="' + idx + '" data-fid="' + fid + '" class="measure-input"/>'
@@ -2436,6 +2460,14 @@ document.addEventListener('click', function(e) {
 });
 document.addEventListener('input', function(e) {
   if (e.target.classList.contains('measure-input')) {
+    var zi = parseInt(e.target.dataset.zi);
+    var fid = e.target.dataset.fid;
+    if (!isNaN(zi) && fid) state.zones[zi].measures[fid] = e.target.value;
+  }
+});
+// v0.5.8: <select> (vanskelighetsgrad) trenger 'change', ikke bare 'input'
+document.addEventListener('change', function(e) {
+  if (e.target.tagName === 'SELECT' && e.target.classList.contains('measure-input')) {
     var zi = parseInt(e.target.dataset.zi);
     var fid = e.target.dataset.fid;
     if (!isNaN(zi) && fid) state.zones[zi].measures[fid] = e.target.value;
