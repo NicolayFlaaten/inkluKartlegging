@@ -219,7 +219,7 @@ textarea{resize:vertical;min-height:80px}
 .godkjenn-bar{background:var(--surface);border:2px solid var(--green);border-radius:var(--radius);padding:1.25rem;margin-top:1rem;margin-bottom:1rem}
 .samtykke-boks{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 14px;margin:.75rem 0}
 .samtykke-tekst{font-size:12px;color:var(--text3);line-height:1.5;margin-top:6px;margin-left:30px}
-.samtykke-label{display:flex;align-items:flex-start;gap:10px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer}
+.samtykke-label{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;font-weight:500;line-height:1.45;color:var(--text);cursor:pointer}
 .samtykke-label input[type=checkbox]{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--green);cursor:pointer}
 .godkjenn-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
 .godkjenn-desc{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.5}
@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.12</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.13</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -497,13 +497,15 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.12';
+const APP_VERSION = 'v0.5.13';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
 // gjort kort og lav-terskel siden vi fortsatt er i testfase.
 // v0.5.12: fjernet 6 dupliserte tilleggsspørsmål for hotell/hytte/restaurant (se TYPE_CONFIG).
-const SAMTYKKE_VERSJON = 'v3';
+// v0.5.13: kryssboksen sier nå fullt ut hva man godkjenner (offentlig visning + internt/
+// forskning/analyse) i selve etiketten, i stedet for en kort "OK for meg (valgfritt)".
+const SAMTYKKE_VERSJON = 'v4';
 // v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
 const AI_MODEL_BILDE = 'claude-haiku-4-5';
@@ -645,8 +647,8 @@ const TEKST = {
     guide_lagre: 'Lagre',
     feil_skriv_navn: 'Skriv inn ditt navn for å godkjenne.',
     feil_samtykke: 'Du må godkjenne lagring og bruk av tekst og bilder før du kan sende inn kartleggingen.',
-    samtykke_tekst: 'Vi er i en tidlig testfase. Resultatet kan vises for gjester (f.eks. på nettsiden), og INKLU bruker det internt til testing og forbedring — aldri til salg eller andre formål.',
-    samtykke_checkbox_label: 'OK for meg (valgfritt)',
+    samtykke_tekst: 'Vi er i en tidlig testfase. Informasjonen selges ikke og brukes ikke til andre formål enn dette.',
+    samtykke_checkbox_label: 'Jeg godkjenner at tekst og bilder lagres og vises offentlig, og brukes internt til forskning, analyse og forbedring av kartleggingsverktøyet.',
     gps_ikke_tilgjengelig: 'GPS er ikke tilgjengelig i denne nettleseren',
     gps_avslatt: 'Tilgang til posisjon ble avslått — fyll inn manuelt',
     gps_oppdater: 'Posisjon hentet — trykk for å oppdatere',
@@ -861,8 +863,8 @@ const TEKST = {
     guide_lagre: 'Save',
     feil_skriv_navn: 'Please enter your name to approve.',
     feil_samtykke: 'You must approve storage and use of the text and images before submitting the survey.',
-    samtykke_tekst: 'We\'re in an early test phase. The result may be shown to guests (e.g. on the website), and INKLU uses it internally for testing and improvement — never for sale or other purposes.',
-    samtykke_checkbox_label: 'OK with me (optional)',
+    samtykke_tekst: 'We\'re in an early test phase. The information is not sold and is not used for any other purpose than this.',
+    samtykke_checkbox_label: 'I approve that the text and photos are stored and shown publicly, and used internally for research, analysis and improving the survey tool.',
     gps_ikke_tilgjengelig: 'GPS is not available in this browser',
     gps_avslatt: 'Location access denied — please fill in manually',
     gps_oppdater: 'Location detected — tap to update',
@@ -1100,8 +1102,8 @@ const TEKST = {
     guide_lagre: 'Guardar',
     feil_skriv_navn: 'Por favor introduzca su nombre para aprobar.',
     feil_samtykke: 'Debe aprobar el almacenamiento y uso del texto y las imágenes antes de enviar el relevamiento.',
-    samtykke_tekst: 'Estamos en una fase de prueba temprana. El resultado puede mostrarse a los huéspedes (p. ej. en el sitio web), e INKLU lo usa internamente para pruebas y mejoras — nunca para la venta ni otros fines.',
-    samtykke_checkbox_label: 'De acuerdo (opcional)',
+    samtykke_tekst: 'Estamos en una fase de prueba temprana. La información no se vende ni se utiliza para ningún otro fin distinto de este.',
+    samtykke_checkbox_label: 'Apruebo que el texto y las imágenes se almacenen y se muestren públicamente, y se utilicen internamente para investigación, análisis y mejora de la herramienta de relevamiento.',
     gps_ikke_tilgjengelig: 'GPS no disponible en este navegador',
     gps_avslatt: 'Acceso a ubicación denegado — rellene manualmente',
     gps_oppdater: 'Ubicación detectada — toque para actualizar',
