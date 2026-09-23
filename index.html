@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.13</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.14</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -497,7 +497,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.13';
+const APP_VERSION = 'v0.5.14';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -505,6 +505,8 @@ const APP_VERSION = 'v0.5.13';
 // v0.5.12: fjernet 6 dupliserte tilleggsspørsmål for hotell/hytte/restaurant (se TYPE_CONFIG).
 // v0.5.13: kryssboksen sier nå fullt ut hva man godkjenner (offentlig visning + internt/
 // forskning/analyse) i selve etiketten, i stedet for en kort "OK for meg (valgfritt)".
+// v0.5.14: samtykke.tekst lagres nå i samme rekkefølge som vises på skjermen (Ole lener
+// seg på dette feltet), og server-ekko av samtykke logges i konsoll for testing.
 const SAMTYKKE_VERSJON = 'v4';
 // v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
@@ -3370,7 +3372,9 @@ function byggKartleggingPayload(godkjentAvNavn) {
   var samtykke = {
     godkjent: !!(samtykkeChk && samtykkeChk.checked),
     versjon: SAMTYKKE_VERSJON,
-    tekst: T('samtykke_tekst') + ' ' + T('samtykke_checkbox_label'),
+    // v0.5.14: rekkefølge rettet til å matche det som faktisk vises på skjermen
+    // (kryssboks-teksten først, deretter fotnoten) — Ole lagrer denne som dokumentasjon.
+    tekst: T('samtykke_checkbox_label') + ' ' + T('samtykke_tekst'),
     sprak: state.lang || 'no',
     tidspunkt: new Date().toISOString()
   };
@@ -3512,7 +3516,10 @@ async function sendTilAPI(payload) {
       // se lastOppBilder. Tidligere ble dette aldri ventet på.
       var bildeResultat = { totalt: 0, feilet: 0 };
       if (data.bilder) bildeResultat = await lastOppBilder(data.bilder);
-      return { ok: true, id: data.kartlegging_id || null, bilder: bildeResultat };
+      // v0.5.14: serveren ekko'er nå tilbake samtykket den lagret — logges i konsoll
+      // som en enkel måte å bekrefte i testfasen at det faktisk kom fram til basen.
+      if (data.samtykke) console.log('Samtykke bekreftet av server:', data.samtykke);
+      return { ok: true, id: data.kartlegging_id || null, bilder: bildeResultat, samtykke: data.samtykke || null };
     }
     var feilTekst = '';
     try { var feilData = await res.json(); feilTekst = feilData.error || ''; } catch(e2) {}
