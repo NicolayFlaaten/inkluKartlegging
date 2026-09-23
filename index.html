@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.11</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.12</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -497,11 +497,12 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.11';
+const APP_VERSION = 'v0.5.12';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
 // gjort kort og lav-terskel siden vi fortsatt er i testfase.
+// v0.5.12: fjernet 6 dupliserte tilleggsspørsmål for hotell/hytte/restaurant (se TYPE_CONFIG).
 const SAMTYKKE_VERSJON = 'v3';
 // v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
@@ -1539,7 +1540,10 @@ var TYPE_CONFIG = {
       {id:'bar',label:'Bar',icon:'🍷',extraFields:[],optional:true},
       {id:'konferanse',label:'Konferanserom',icon:'📋',extraFields:[],optional:true}],
     extraOptions:['Treningssenter','Basseng','Spa','Butikk','Frokostrom','Garderobe'],
-    questions:['q_allergi','q_parfyme','q_meny','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_evakuering','q_luminans','q_taktil','q_regulerbar_seng','q_lading_el','q_visuell_brannalarm','q_alarm_resepsjon']},
+    // v0.5.12: q_luminans/q_taktil (dekket av luminans_skilt/taktil_trapp på inngang/resepsjon/skilting-sonene)
+    // og q_regulerbar_seng/q_lading_el/q_visuell_brannalarm/q_alarm_resepsjon (dekket av sonefeltene på
+    // Hotellrom) fjernet — samme spørsmål ble stilt to ganger.
+    questions:['q_allergi','q_parfyme','q_meny','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_evakuering']},
   hytte:{label:'Hytte / leilighet',group:'A',ubSkip:['ub_medisinsk','ub_diskret'],pageTitle:'Hytte / leilighetsfasiliteter',pageDesc:'Last opp bilder. Legg til flere rom ved behov.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
@@ -1549,7 +1553,8 @@ var TYPE_CONFIG = {
       {id:'bad',label:'Bad',icon:'🚿',extraFields:['bad_dor_cm','terskel_mm','snuplass_cm','wc_sideplass_cm','snuplass_rekt','handstotte_wc','handstotte_dusj','benk_dusj'],optional:false},
       {id:'soverom',label:'Soverom',icon:'🛏️',extraFields:['seng_cm','regulerbar_seng','lading_el_rullestol'],optional:false}],
     extraOptions:['Bad 2','Soverom 2','Soverom 3','TVstue','Vaskerom','Terrasse'],
-    questions:['q_allergi','q_parfyme','q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil','q_regulerbar_seng','q_lading_el']},
+    // v0.5.12: q_regulerbar_seng/q_lading_el fjernet — dekket av sonefeltene på Soverom.
+    questions:['q_allergi','q_parfyme','q_skriftlig','q_opplaering','q_ledsager','q_evakuering','q_luminans','q_taktil']},
   restaurant:{label:'Restaurant / servering',group:'A',ubSkip:['ub_avbryte'],pageTitle:'Restaurantfasiliteter',pageDesc:'Last opp bilder av restaurantens tilgjengelighet.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
@@ -1559,7 +1564,8 @@ var TYPE_CONFIG = {
       {id:'spisebord',label:'Spisebord',icon:'🍽️',extraFields:['bord_cm'],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:false}],
     extraOptions:['Uteplass','Bar','Buffet','Terrasse'],
-    questions:['q_meny','q_allergi','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_luminans','q_taktil','q_taxi_buss']},
+    // v0.5.12: q_luminans/q_taktil fjernet — dekket av luminans_skilt (Mottakelse) / taktil_trapp (Inngang).
+    questions:['q_meny','q_allergi','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_taxi_buss']},
   aktivitet:{label:'Aktivitetsbedrift',group:'A',pageTitle:'Aktivitetsfasiliteter',pageDesc:'Last opp bilder fra aktivitetsbedriften.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
