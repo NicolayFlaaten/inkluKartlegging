@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.21</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.23</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -502,7 +502,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.21';
+const APP_VERSION = 'v0.5.23';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -567,6 +567,13 @@ const APP_VERSION = 'v0.5.21';
 // hun nevnte spesifikt (høyt støynivå, jevn belysning, informasjon om besøket
 // tilgjengelig på forhånd). Resten av spørsmålene har foreløpig ikke fått
 // tilsvarende hjelpetekst — venter på tilbakemelding om omfang.
+// v0.5.22: kort hjelpetekst lagt til på sone-nivå extraFields (luminans_skilt,
+// taktil_gangbane, taktil_trapp) — disse hadde ingen forklaring i det hele tatt,
+// en egen kode-vei fra spørsmålene som fikk hjelpetekst i v0.5.21. Tekstene er
+// holdt korte etter beskjed fra Nicolay (kun en idé om hva det handler om, ikke
+// en full forklaring). Samtidig fikset: ZONE_PROMPTS['underlag'] (delt av
+// Tursti/Sykkelløype/Torg) nevnte aldri taktile/visuelle markeringer i belegget —
+// derfor ble ledelinjer i torg-flis aldri fanget opp av AI-bildeanalysen.
 const SAMTYKKE_VERSJON = 'v4';
 // v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
@@ -1935,8 +1942,8 @@ var Q_CTX = {
     q_sti_merking: 'Signs, poles, map',
     q_hvileplasser: 'Important for elderly and people with limited walking ability',
     q_hvileplasser_avstand: 'Recommended to make the route accessible for elderly',
-    q_luminans: 'Luminance contrast is the difference in lightness (not just colour) between, e.g., text and its background, or a door frame and the wall behind it. High contrast makes edges and signs easier to see — important for people with low vision.',
-    q_taktil: 'Tactile markings can be felt with a foot or cane (e.g. raised studs or ribs in the surface). Visual markings are seen via contrast colour (e.g. a yellow edge on a step). Both signal level changes for people with visual impairment.',
+    q_luminans: 'Easy to tell text/signs apart from the background — important for low vision.',
+    q_taktil: 'Felt with foot/cane (e.g. studs in the surface) or seen via contrast colour — signals level changes.',
     q_regulerbar_seng: 'Important for guests with mobility challenges',
     q_ledsager: 'Companion for a person with disability',
     q_visuell_brannalarm: 'Important for hearing impaired',
@@ -1958,8 +1965,8 @@ var Q_CTX = {
     q_sti_merking: 'Señales, balizas, mapa',
     q_hvileplasser: 'Importante para mayores y personas con movilidad reducida',
     q_hvileplasser_avstand: 'Recomendado para hacer la ruta accesible para mayores',
-    q_luminans: 'El contraste de luminancia es la diferencia en claridad (no solo color) entre, por ejemplo, el texto y su fondo, o un marco de puerta y la pared detrás. Un buen contraste facilita ver bordes y señales — importante para personas con baja visión.',
-    q_taktil: 'Las marcas táctiles se sienten con el pie o el bastón (p. ej. relieves o nervaduras en la superficie). Las marcas visuales se ven por contraste de color (p. ej. un borde amarillo en un escalón). Ambas advierten de cambios de nivel a personas con discapacidad visual.',
+    q_luminans: 'Fácil distinguir texto/letreros del fondo — importante para baja visión.',
+    q_taktil: 'Se siente con pie/bastón (relieve en el suelo) o se ve por contraste de color — avisa cambios de nivel.',
     q_regulerbar_seng: 'Importante para huéspedes con dificultades de movilidad',
     q_ledsager: 'Acompañante para persona con discapacidad',
     q_visuell_brannalarm: 'Importante para personas con discapacidad auditiva',
@@ -2101,6 +2108,24 @@ var EF_LABEL = {
   }
 };
 
+var EF_CTX = {
+  en: {
+    luminans_skilt:'Easy to tell sign/counter apart from the background — important for low vision.',
+    taktil_gangbane:'E.g. tactile paving — ridged surface felt with a cane or foot, or a visible contrast colour.',
+    taktil_trapp:'Stair edge: the front of a step. Hazard strip: a tactile warning in the surface, e.g. at the top of stairs.'
+  },
+  es: {
+    luminans_skilt:'Fácil distinguir el letrero/mostrador del fondo — importante para baja visión.',
+    taktil_gangbane:'P. ej. pavimento táctil — superficie con relieve que se siente con bastón o pie, o color de contraste visible.',
+    taktil_trapp:'Borde de escalón: el frente del peldaño. Franja de peligro: aviso táctil en el suelo, p. ej. al inicio de una escalera.'
+  }
+};
+// v0.5.22: kort hjelpetekst for EXTRA_FIELDS — samme idé som ctx på ALL_QUESTIONS/UB_QUESTIONS.
+// v0.5.23: kortet ned de 5 hjelpetekstene fra v0.5.21 (q_luminans, q_taktil, ub_stoy, ub_lys, ub_forhaand) til samme korte stil som v0.5.22.
+function TEFCtx(fieldId) {
+  var lang = state.lang || 'no';
+  return (EF_CTX[lang] && EF_CTX[lang][fieldId]) || (EXTRA_FIELDS[fieldId] && EXTRA_FIELDS[fieldId].ctx) || '';
+}
 // Oversett EXTRA_FIELDS label basert på aktivt språk
 function TEF(fieldId) {
   var lang = state.lang || 'no';
@@ -2125,8 +2150,8 @@ var ALL_QUESTIONS = {
   q_badeplass_rampe:{text:'Er det rampe eller tilrettelagt adkomst til vannet?',ctx:'Amfistol, rampe, fast underlag',utsagn:'Det er rampe eller tilrettelagt adkomst til vannet',ikon:'🏊'},
   q_hvileplasser:{text:'Finnes det sittebenker eller hvileplasser underveis?',ctx:'Viktig for eldre og personer med begrenset gangevne',utsagn:'Det finnes sittebenker og hvileplasser underveis',ikon:'🪑'},
   q_hvileplasser_avstand:{text:'Er det hvileplass for hver 500 meter eller kortere?',ctx:'Anbefalt for å gjøre ruten tilgjengelig for eldre',utsagn:'Hvileplass finnes for hver 500 meter eller kortere',ikon:'🪑'},
-  q_luminans:{text:'Er det god luminanskontrast mellom skilt, skranker og omgivelser?',ctx:'Luminanskontrast er forskjellen i lyshet (ikke bare farge) mellom f.eks. skrift og bakgrunn, eller en dørkarm og veggen bak. Høy kontrast gjør kanter og skilt lettere å se — viktig for svaksynte.',utsagn:'God luminanskontrast på skilt og skranker — egnet for svaksynte',ikon:'👁️'},
-  q_taktil:{text:'Er det taktile eller visuelle markeringer ved trapper og nivåforskjeller?',ctx:'Taktile markeringer kan kjennes med fot eller stokk (f.eks. opphøyde knotter eller ribber i underlaget). Visuelle markeringer ses med kontrastfarge (f.eks. gul kant på et trappetrinn). Begge varsler om nivåforskjeller for personer med synsnedsettelse.',utsagn:'Taktile og visuelle markeringer finnes ved trapper og nivåforskjeller',ikon:'🦯'},
+  q_luminans:{text:'Er det god luminanskontrast mellom skilt, skranker og omgivelser?',ctx:'Lett å se forskjell på f.eks. skrift/skilt og bakgrunnen — viktig for svaksynte.',utsagn:'God luminanskontrast på skilt og skranker — egnet for svaksynte',ikon:'👁️'},
+  q_taktil:{text:'Er det taktile eller visuelle markeringer ved trapper og nivåforskjeller?',ctx:'Kjennes med fot/stokk (f.eks. knotter i underlaget) eller sees med kontrastfarge — varsler nivåforskjeller.',utsagn:'Taktile og visuelle markeringer finnes ved trapper og nivåforskjeller',ikon:'🦯'},
   q_taxi_buss:{text:'Er det av- og påstigningsmulighet for buss eller taxi nær inngang?',ctx:'',utsagn:'Det er av- og påstigningsmulighet for buss og taxi nær inngangen',ikon:'🚌'},
   q_regulerbar_seng:{text:'Er det regulerbar seng tilgjengelig?',ctx:'Viktig for gjester med bevegelsesutfordringer',utsagn:'Regulerbar seng er tilgjengelig på forespørsel',ikon:'🛏️'},
   q_lading_el:{text:'Er det mulighet for lading av elektrisk rullestol på rom om natten?',ctx:'',utsagn:'Lading av elektrisk rullestol er mulig på rommet om natten',ikon:'🔋'},
@@ -2170,9 +2195,9 @@ var EXTRA_FIELDS = {
   lading_el_rullestol:{label:'Lading el-rullestol på rom',unit:'',ph:'',type:'yn'},
   visuell_brannalarm:{label:'Visuell brannalarm',unit:'',ph:'',type:'yn'},
   alarm_resepsjon:{label:'Alarm til resepsjon fra rom',unit:'',ph:'',type:'yn'},
-  luminans_skilt:{label:'God luminanskontrast (skilt/skranke)',unit:'',ph:'',type:'yn'},
-  taktil_gangbane:{label:'Taktil / visuell gangbanemarkering',unit:'',ph:'',type:'yn'},
-  taktil_trapp:{label:'Markerte trappeneser og farefelt',unit:'',ph:'',type:'yn'},
+  luminans_skilt:{label:'God luminanskontrast (skilt/skranke)',unit:'',ph:'',type:'yn',ctx:'Lett å se forskjell på skilt/skranke og bakgrunnen — viktig for svaksynte.'},
+  taktil_gangbane:{label:'Taktil / visuell gangbanemarkering',unit:'',ph:'',type:'yn',ctx:'F.eks. ledelinjer — riflet belegning man kjenner med stokk eller fot, eller synlig kontrastfarge.'},
+  taktil_trapp:{label:'Markerte trappeneser og farefelt',unit:'',ph:'',type:'yn',ctx:'Trappenese: kanten på et trappetrinn. Farefelt: følbar varsling i underlaget, f.eks. ved toppen av en trapp.'},
   heis_assistanse:{label:'Assistanse ved på-/avstigning tilgjengelig',unit:'',ph:'',type:'yn'},
   heis_sittende:{label:'Sittende heis (stolheis/gondol) tilgjengelig — ikke bare skitrekk/T-krok',unit:'',ph:'',type:'yn'},
   tilpasset_skiutstyr_utleie:{label:'Utleie av tilpasset skiutstyr (sit-ski, mono-ski)',unit:'',ph:'',type:'yn'},
@@ -2200,7 +2225,7 @@ var ZONE_PROMPTS = {
   heis:'Beskriv heisen nøkternt. Beskriv: dørbredde (estimert), innvendig størrelse (estimert), knappepanel (plassering og høyde), informasjon i heisen. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   wc:'Beskriv toalettet nøkternt. Beskriv: dørbredde (estimert), snuplass (estimert), støttehåndtak (ja/nei, plassering), terskel (ja/nei). Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   terreng:'Beskriv terrenget/underlaget nøkternt for den aktuelle aktiviteten. For kjøretøybaserte aktiviteter (hest, hundespann, sykkel, slede, sit-ski): beskriv underlaget og stigningsforhold for kjøretøyet — deltakere sitter under hele aktiviteten, gåevne er ikke relevant. For gående aktiviteter: beskriv fremkommelighet for ulike hjelpemidler. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
-  underlag:'Beskriv stien/underlaget nøkternt. Dette er friluft — ikke sammenlign med bygg-standarder. Beskriv: underlagstype (fast grus, løs grus, jord, stein, asfalt), estimert bredde, jevnhet, synlige hindringer, vegetasjon langs kanten. Unngå karakterer og dommer — la gjesten vurdere om det passer for dem. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  underlag:'Beskriv stien/underlaget/belegget nøkternt. Beskriv: underlagstype (fast grus, løs grus, jord, stein, asfalt, brostein, betongheller), estimert bredde, jevnhet, synlige hindringer, vegetasjon langs kanten, og om det er ledelinjer eller andre taktile/visuelle markeringer i belegget (f.eks. riflet stein eller kontrastfarge) — nevn kun hvis synlig. Unngå karakterer og dommer — la gjesten vurdere om det passer for dem. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   motepunkt:'Beskriv møtepunktet/startstedet nøkternt. Beskriv: underlag, sittemuligheter (ja/nei), synlige toaletter (ja/nei), informasjonsskilting (ja/nei). Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   startpunkt:'Beskriv startpunktet nøkternt. Beskriv: underlag, parkeringsmuligheter (synlig avstand), informasjonsskilt (ja/nei), synlige fasiliteter. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   adkomst:'Beskriv adkomsten nøkternt. Beskriv: underlagstype, estimert bredde, synlig stigning/nivåforskjell, hindringer, belysning (om synlig). Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
@@ -2559,7 +2584,9 @@ function renderZoneCard(zone, idx) {
     if (!f) continue;
     if (f.type === 'yn') {
       var cur = zone.measures[fid] || '';
+      var efCtxTxt = TEFCtx(fid);
       extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + '</label>'
+        + (efCtxTxt ? '<div class="question-context">' + efCtxTxt + '</div>' : '')
         + '<div class="yn-field">'
         + '<button class="yn-field-btn' + (cur==='ja' ? ' yn-ja-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ja">'+T('ja')+'</button>'
         + '<button class="yn-field-btn' + (cur==='nei' ? ' yn-nei-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="nei">'+T('nei')+'</button>'
@@ -2744,20 +2771,20 @@ var UB_TEXT = {
 var UB_SEK_IKON = {1:'\uD83D\uDD07', 2:'\uD83E\uDDED', 3:'\uD83D\uDEBB', 4:'\uD83E\uDD1D'};
 var UB_QUESTIONS = [
  {id:'ub_stoy',grupper:['A','B'],sek:1,no:'Er støynivået generelt lavt i fellesarealer?',en:'Is the noise level generally low in common areas?',es:'¿El nivel de ruido es generalmente bajo en las áreas comunes?',
-   ctx:'Tenk på musikk, ventilasjon, mange stemmer samtidig eller harde flater som gir etterklang — ikke bare om det er stille.',
-   ctx_en:'Think of music, ventilation noise, many voices at once, or hard surfaces that create echo — not only whether it is silent.',
-   ctx_es:'Piense en música, ruido de ventilación, muchas voces a la vez o superficies duras que generan eco — no solo si está en silencio.'},
+   ctx:'Musikk, ventilasjon, mange stemmer eller etterklang fra harde flater — ikke bare om det er stille.',
+   ctx_en:'Music, ventilation, many voices, or echo from hard surfaces — not just whether it is silent.',
+   ctx_es:'Música, ventilación, muchas voces o eco de superficies duras — no solo si está en silencio.'},
  {id:'ub_stille',grupper:['A','B'],sek:1,no:'Er miljøet generelt rolig, uten mye støy eller sansestimuli?',en:'Is the environment generally calm, without much noise or sensory stimulation?',es:'¿El ambiente es generalmente tranquilo, sin mucho ruido o estimulación sensorial?'},
  {id:'ub_lys',grupper:['A','B'],sek:1,no:'Er belysningen jevn, uten flimmer eller brå lysskift?',en:'Is the lighting even, without flickering or sudden changes?',es:'¿La iluminación es uniforme, sin parpadeos ni cambios bruscos?',
-   ctx:'Gjelder overganger mellom rom (f.eks. mørk gang til lyst rom) og lys som blinker eller endrer seg brått — viktig for personer med epilepsi, migrene eller synsutfordringer.',
-   ctx_en:'Refers to transitions between rooms (e.g. dark corridor to bright room) and lighting that flickers or changes abruptly — important for people with epilepsy, migraine or visual impairments.',
-   ctx_es:'Se refiere a las transiciones entre espacios (p. ej. pasillo oscuro a sala luminosa) y a iluminación que parpadea o cambia bruscamente — importante para personas con epilepsia, migraña o discapacidad visual.'},
+   ctx:'F.eks. mørk gang til lyst rom, eller lys som blinker/endrer seg brått — viktig ved epilepsi/migrene.',
+   ctx_en:'E.g. dark corridor to bright room, or flickering/sudden light changes — important for epilepsy/migraine.',
+   ctx_es:'P. ej. pasillo oscuro a sala luminosa, o luz que parpadea o cambia de golpe — importante en epilepsia/migraña.'},
  {id:'ub_lukt',grupper:['A','B'],sek:1,no:'Er det fritt for sterke lukter i fellesarealer?',en:'Are common areas free from strong odours?',es:'¿Las áreas comunes están libres de olores fuertes?'},
  {id:'ub_skilting',grupper:['A','B','C'],sek:2,no:'Er det tydelig skilting som viser vei gjennom anlegget?',en:'Is there clear signage guiding visitors through the venue?',es:'¿Existe señalización clara que guíe a los visitantes por el establecimiento?'},
  {id:'ub_forhaand',grupper:['A','B','C'],sek:2,no:'Er informasjon om besøket tilgjengelig på forhånd (nettside, kart, beskrivelse)?',en:'Is information about the visit available in advance (website, map, description)?',es:'¿Está disponible información sobre la visita con antelación (sitio web, mapa, descripción)?',
-   ctx:'Gjelder om gjesten finner KONKRET informasjon før besøket — f.eks. bilder av inngangen, kart over området, eller en beskrivelse av tilgjengelighetsgraden. Ikke bare at det finnes en generell tilgjengelighetsside.',
-   ctx_en:'Refers to whether the guest can find CONCRETE information before the visit — e.g. photos of the entrance, a map of the area, or a description of the accessibility level. Not just that a general accessibility page exists.',
-   ctx_es:'Se refiere a si el huésped encuentra información CONCRETA antes de la visita — p. ej. fotos de la entrada, un mapa de la zona o una descripción del nivel de accesibilidad. No solo que exista una página general de accesibilidad.'},
+   ctx:'Konkret info FØR besøket — f.eks. bilder av inngangen eller et kart. Ikke bare en generell tilgjengelighetsside.',
+   ctx_en:'Concrete info BEFORE the visit — e.g. entrance photos or a map. Not just a general accessibility page.',
+   ctx_es:'Información concreta ANTES de la visita — p. ej. fotos de la entrada o un mapa. No solo una página general.'},
  {id:'ub_spraak',grupper:['A','B','C'],sek:2,no:'Er informasjonen skrevet i enkelt og tydelig språk?',en:'Is the information written in plain and clear language?',es:'¿La información está escrita en un lenguaje sencillo y claro?'},
  {id:'ub_merking',grupper:['A','B','C'],sek:2,no:'Er toalett, utganger og sitteplasser tydelig merket?',en:'Are toilets, exits and seating areas clearly marked?',es:'¿Están claramente señalizados los aseos, salidas y zonas de descanso?'},
  {id:'ub_wc',grupper:['A','B','C'],sek:3,no:'Er toalett lett tilgjengelig fra alle aktivitetsarealer?',en:'Is a toilet easily accessible from all activity areas?',es:'¿Hay un aseo fácilmente accesible desde todas las áreas de actividad?'},
