@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.14</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.16</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -313,6 +313,7 @@ textarea{resize:vertical;min-height:80px}
             <option value="hotell" data-i18n-label-val="Hotell">Hotell</option>
             <option value="hytte" data-i18n-label-val="Hytte / leilighet">Hytte / leilighet</option>
             <option value="restaurant" data-i18n-label-val="Restaurant / servering">Restaurant / servering</option>
+            <option value="butikk" data-i18n-label-val="Butikk">Butikk</option>
             <option value="aktivitet" data-i18n-label-val="Aktivitetsbedrift">Aktivitetsbedrift (innendørs)</option>
             <option value="idrett" data-i18n-label-val="Idrettsanlegg">Idrettsanlegg</option>
             <option value="alpinanlegg" data-i18n-label-val="Alpinanlegg / skiheis">Alpinanlegg / skiheis</option>
@@ -497,7 +498,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.14';
+const APP_VERSION = 'v0.5.16';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -507,6 +508,13 @@ const APP_VERSION = 'v0.5.14';
 // forskning/analyse) i selve etiketten, i stedet for en kort "OK for meg (valgfritt)".
 // v0.5.14: samtykke.tekst lagres nå i samme rekkefølge som vises på skjermen (Ole lener
 // seg på dette feltet), og server-ekko av samtykke logges i konsoll for testing.
+// v0.5.15: ny virksomhetstype 'Butikk' (gruppe A) lagt til for kartlegging av butikker —
+// se TYPE_CONFIG.butikk. Egne soner Salgsareal og Kasse/betaling, nytt målfelt
+// gangbredde_cm, og spørsmål om teleslynge/ledsagerbevis. ub_diskret ("tilbys personlig
+// assistanse") dekkes av de globale usynlige-behov-spørsmålene for gruppe A.
+// v0.5.16: ub_diskret omformulert — "diskret be om hjelp" kunne oppfattes nedlatende.
+// Byttet til en nøytral formulering om at personlig assistanse tilbys (spørsmål og
+// gjestetekst i guiden). Selve id-en (ub_diskret) er uendret, kun teksten.
 const SAMTYKKE_VERSJON = 'v4';
 // v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
@@ -1260,6 +1268,7 @@ var LABEL_MAP = {
     // Virksomhetstyper
     'Hotell':'Hotel','Hytte / leilighet':'Cabin / apartment',
     'Restaurant / servering':'Restaurant / café','Aktivitetsbedrift':'Activity provider',
+    'Butikk':'Shop','Butikkfasiliteter':'Shop facilities','Salgsareal':'Sales floor','Kasse / betaling':'Checkout / payment','Last opp bilder av butikkens fasiliteter.':'Upload images of the shop facilities.',
     'Idrettsanlegg':'Sports facility','Camping':'Camping',
     'Alpinanlegg / skiheis':'Alpine ski facility','Alpinanlegget':'The alpine ski facility',
     'Billettluke':'Ticket booth','Adkomst til heisstasjon':'Access to lift station',
@@ -1334,6 +1343,7 @@ var LABEL_MAP = {
     // Tipos de negocio
     'Hotell':'Hotel','Hytte / leilighet':'Cabaña / apartamento',
     'Restaurant / servering':'Restaurante / cafetería','Aktivitetsbedrift':'Proveedor de actividades',
+    'Butikk':'Tienda','Butikkfasiliteter':'Instalaciones de la tienda','Salgsareal':'Zona de venta','Kasse / betaling':'Caja / pago','Last opp bilder av butikkens fasiliteter.':'Suba imágenes de las instalaciones de la tienda.',
     'Idrettsanlegg':'Instalación deportiva','Camping':'Camping',
     'Alpinanlegg / skiheis':'Instalación de esquí alpino','Alpinanlegget':'La instalación de esquí alpino',
     'Billettluke':'Taquilla','Adkomst til heisstasjon':'Acceso a la estación del telesilla',
@@ -1570,6 +1580,18 @@ var TYPE_CONFIG = {
     extraOptions:['Uteplass','Bar','Buffet','Terrasse'],
     // v0.5.12: q_luminans/q_taktil fjernet — dekket av luminans_skilt (Mottakelse) / taktil_trapp (Inngang).
     questions:['q_meny','q_allergi','q_skriftlig','q_opplaering','q_teleslynge','q_ledsager','q_taxi_buss']},
+  butikk:{label:'Butikk',group:'A',ubSkip:['ub_avbryte'],pageTitle:'Butikkfasiliteter',pageDesc:'Last opp bilder av butikkens fasiliteter.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
+      {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'salgsareal',label:'Salgsareal',icon:'🛍️',extraFields:['gangbredde_cm'],optional:false},
+      {id:'kasse',label:'Kasse / betaling',icon:'💳',extraFields:['disk_cm'],optional:false},
+      {id:'wc',label:'Toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:true}],
+    extraOptions:['Prøverom','Selvbetjent kasse','Uteareal','Handlekurv/vogn tilpasset rullestol'],
+    // v0.5.15: teleslynge og ledsagerbevis tatt med på eksplisitt ønske. "Hvordan be om
+    // hjelp" dekkes ikke her som eget spørsmål, men av ub_diskret (globalt usynlige-
+    // behov-spørsmål for gruppe A: "Tilbys personlig assistanse til gjester som trenger det?").
+    questions:['q_teleslynge','q_ledsager','q_skriftlig','q_opplaering','q_luminans','q_taktil']},
   aktivitet:{label:'Aktivitetsbedrift',group:'A',pageTitle:'Aktivitetsfasiliteter',pageDesc:'Last opp bilder fra aktivitetsbedriften.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:false},
@@ -2025,6 +2047,7 @@ var EXTRA_FIELDS = {
   bord_cm:{label:'Bordhøyde',unit:'cm',ph:'f.eks. 72'},
   stigningsgrad:{label:'Stigningsgrad',unit:'%',ph:'f.eks. 8'},
   sti_bredde_cm:{label:'Sti-bredde',unit:'cm',ph:'f.eks. 120'},
+  gangbredde_cm:{label:'Gangbredde mellom hyller',unit:'cm',ph:'f.eks. 90'},
   handstotte_wc:{label:'Håndstøtte ved toalett',unit:'',ph:'',type:'yn'},
   handstotte_dusj:{label:'Håndstøtte / håndtak i dusj',unit:'',ph:'',type:'yn'},
   benk_dusj:{label:'Benk eller stol i dusj',unit:'',ph:'',type:'yn'},
@@ -2054,6 +2077,8 @@ var ZONE_PROMPTS = {
   parkering:'Beskriv parkeringsplassen nøkternt slik en gjest kan vurdere om den passer for dem. Beskriv: underlagstype og jevnhet, synlig merking for HC-plasser (ja/nei), estimert avstand til inngang, nivåforskjeller. Unngå karakterer og dommer. Avslutt med én setning om hva som fungerer bra og én om hva som kan være utfordrende. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   inngang:'Beskriv inngangspartiet nøkternt slik en gjest kan vurdere om det passer for dem. Beskriv: dørtype (automatisk/manuell/skyv), synlig terskel (ja/nei, estimert høyde), dørbredde (estimert), rampe eller nivåforskjell, underlag foran døren. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   resepsjon:'Beskriv resepsjonsområdet nøkternt. Beskriv: skrankehøyde (om synlig), plass foran skranken, synlig teleslynge-skilt, bevegelsesrom. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  salgsareal:'Beskriv salgsarealet nøkternt slik en gjest kan vurdere om det passer for dem. Beskriv: estimert gangbredde mellom hyller/reoler, underlag, nivåforskjeller eller trinn, om varer/hyller ser ut til å være nåbare fra rullestol. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  kasse:'Beskriv kasse- og betalingsområdet nøkternt. Beskriv: skrankehøyde (om synlig), fri plass foran kassen for rullestol, plassering og høyde på betalingsterminal, eventuell kø-løype. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   spisesal:'Beskriv spisesalen nøkternt. Beskriv: estimert avstand mellom bord/stoler, bordtype og høyde (om synlig), bevegelsesrom mellom møbler. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   hotellrom:'Beskriv hotellrommet nøkternt. Beskriv: synlig snuplass (estimert), sengehøyde (estimert), plass på siden av sengen, dørbredde (estimert). Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   bad:'Beskriv badet nøkternt. Beskriv: dørbredde (estimert), terskel inn (ja/nei, høyde), snuplass (estimert), dusjtype (badekar/dusj/innfelt), støttehåndtak (ja/nei, plassering), servant. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
@@ -2604,7 +2629,7 @@ var UB_QUESTIONS = [
  {id:'ub_avbryte',grupper:['A','B'],sek:3,no:'Kan gjester avbryte en aktivitet uten å måtte forklare seg?',en:'Can guests withdraw from an activity without having to explain themselves?',es:'¿Pueden los huéspedes retirarse de una actividad sin tener que dar explicaciones?'},
  {id:'ub_opplaering',grupper:['A','B'],sek:4,no:'Har ansatte fått opplæring i å møte gjester med ulike behov?',en:'Have staff received training in meeting guests with diverse needs?',es:'¿El personal ha recibido formación para atender a huéspedes con diversas necesidades?'},
  {id:'ub_medisinsk',grupper:['A','B'],sek:4,no:'Vet ansatte hva de skal gjøre ved en medisinsk hendelse (f.eks. epileptisk anfall)?',en:'Do staff know what to do in a medical emergency (e.g. epileptic seizure)?',es:'¿Sabe el personal qué hacer ante una emergencia médica (p. ej. un ataque epiléptico)?'},
- {id:'ub_diskret',grupper:['A','B'],sek:4,no:'Er det enkelt for gjester å diskret be om hjelp?',en:'Is it easy for guests to discreetly ask for help?',es:'¿Es fácil para los huéspedes pedir ayuda de forma discreta?'}
+ {id:'ub_diskret',grupper:['A','B'],sek:4,no:'Tilbys personlig assistanse til gjester som trenger det?',en:'Is personal assistance offered to guests who need it?',es:'¿Se ofrece asistencia personal a los huéspedes que la necesiten?'}
 ];
 function ubTxt(key) { var l = state.lang || 'no'; return (UB_TEXT[l] && UB_TEXT[l][key]) || UB_TEXT.no[key]; }
 function ubQTxt(q) { var l = state.lang || 'no'; return q[l] || q.no; }
