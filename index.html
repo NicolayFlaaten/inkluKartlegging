@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.18</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.21</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -332,7 +332,10 @@ textarea{resize:vertical;min-height:80px}
             <option value="skiloype" data-i18n-label-val="Skiløype">Skiløype</option>
             <option value="badeplass" data-i18n-label-val="Badeplass">Badeplass</option>
             <option value="utsiktspunkt" data-i18n-label-val="Utsiktspunkt / attraksjon">Utsiktspunkt / attraksjon</option>
-            <option value="hc_parkering" data-i18n-label-val="HC-parkering / toalett i utmark">HC-parkering / toalett i utmark</option>
+            <option value="hc_parkering" data-i18n-label-val="Rasteplass i utmark (parkering + toalett)">Rasteplass i utmark (parkering + toalett)</option>
+            <option value="offentlig_toalett" data-i18n-label-val="Offentlig toalett">Offentlig toalett</option>
+            <option value="turistinformasjon" data-i18n-label-val="Turistinformasjon">Turistinformasjon</option>
+            <option value="torg" data-i18n-label-val="Offentlig torg / møteplass">Offentlig torg / møteplass</option>
             <option value="annet_c" data-i18n-label-val="Annet (fellesgode)">Annet (fellesgode)</option>
           </optgroup>
         </select>
@@ -428,6 +431,7 @@ textarea{resize:vertical;min-height:80px}
       <div style="font-size:15px;font-weight:600;color:var(--green-dark);margin-bottom:.5rem" data-i18n="klar_tittel">Klar til å generere rapport?</div>
       <div style="font-size:13px;color:var(--text2);margin-bottom:1rem" data-i18n="klar_desc">AI analyserer bildene og lager tilgjengelighetsguide. Du kan redigere og godkjenne etterpå.</div>
       <button onclick="startGenerer()" style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px 32px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer" data-i18n="generer_btn">🤖 Generer rapport</button>
+      <div style="font-size:11px;color:var(--text3);margin-top:.75rem;line-height:1.5" data-i18n="klar_forklaring">Tilgjengelighetsguiden er siden gjestene dine ser, og som du kan lenke til fra egen nettside eller sosiale kanaler. Analyseteksten per bilde er kartleggerens eget forslag og notater om forbedringspunkter — den vises for gjestene bare der du velger å godkjenne den.</div>
     </div>
     <div id="generer-spinner" style="display:none;text-align:center;padding:2rem">
       <div class="rapport-spinner-ring" style="margin:0 auto .75rem"></div>
@@ -498,7 +502,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.18';
+const APP_VERSION = 'v0.5.21';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -543,6 +547,26 @@ const APP_VERSION = 'v0.5.18';
 // av kjente sonetyper (se advarsel til Nicolay). guide.html filtrerer denne
 // pseudo-sonen bort fra vanlig tilgjengelighetsvisning og bruker bildet som
 // forsidebilde i stedet (se der).
+// v0.5.19: gruppe C utvidet fra 7 til 10 kategorier etter diskusjon med Nicolay.
+// hc_parkering beholder id (allerede innsendte kartlegginger må ikke endre type),
+// kun label endret til 'Rasteplass i utmark (parkering + toalett)' for å tydeliggjøre
+// at den gjelder den kombinerte utmarksenheten. Tre nye typer lagt til:
+// offentlig_toalett (frittstående, tettsted/torg — egne forhold fra utmarksrasteplassen),
+// turistinformasjon (bygningsbasert, men fellesgode — driftes typisk av destinasjons-
+// selskap/kommune, ikke privat bedrift), og torg (offentlig torg/møteplass, statisk
+// oppholdssted — andre behov enn en tursti). annet_c uendret som oppsamlingskategori.
+// v0.5.20: kort forklarende linje lagt til under "Klar til å generere rapport?"
+// (steg 3, Tilgjengelighetsprofil) — Anita (INKLU) var usikker på hva tilgjengelig-
+// hetsguiden og AI-analysen faktisk brukes til. Forklarer nå kort at guiden er det
+// gjestene ser (og kan lenkes til fra egen nettside), og at analyseteksten er
+// kartleggerens eget forslag/notater, kun synlig for gjester der den godkjennes.
+// v0.5.21: hjelpetekster (Trinn 2, Anita/INKLU) — hun etterspurte forklaring på
+// hva fagbegrep faktisk BETYR, ikke bare hvorfor de er viktige. Oppdatert q_luminans
+// og q_taktil sin ctx (no/en/es), og lagt til samme ctx-mekanisme for usynlige-
+// behov-spørsmål (fantes ikke der før) for ub_stoy, ub_lys og ub_forhaand — de tre
+// hun nevnte spesifikt (høyt støynivå, jevn belysning, informasjon om besøket
+// tilgjengelig på forhånd). Resten av spørsmålene har foreløpig ikke fått
+// tilsvarende hjelpetekst — venter på tilbakemelding om omfang.
 const SAMTYKKE_VERSJON = 'v4';
 // v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
@@ -713,6 +737,7 @@ const TEKST = {
     side3_desc: 'Trykk "Generer rapport" når du er klar — AI analyserer bilder og lager tilgjengelighetsguide.',
     klar_tittel: 'Klar til å generere rapport?',
     klar_desc: 'AI analyserer bildene og lager tilgjengelighetsguide. Du kan redigere og godkjenne etterpå.',
+    klar_forklaring: 'Tilgjengelighetsguiden er siden gjestene dine ser, og som du kan lenke til fra egen nettside eller sosiale kanaler. Analyseteksten per bilde er kartleggerens eget forslag og notater om forbedringspunkter — den vises for gjestene bare der du velger å godkjenne den.',
     generer_btn: '🤖 Generer rapport',
     generer_spinner_desc: 'Dette kan ta 15–30 sekunder',
     tab_guide: '🗺️ Tilgjengelighetsguide',
@@ -927,6 +952,7 @@ const TEKST = {
     side3_desc: 'Press "Generate report" when ready — AI analyses images and creates accessibility guide.',
     klar_tittel: 'Ready to generate report?',
     klar_desc: 'AI analyses the images and creates an accessibility guide. You can edit and approve afterwards.',
+    klar_forklaring: 'The accessibility guide is the page your guests see, and which you can link to from your own website or social channels. The per-image analysis text is the mapper\'s own suggestion and notes on improvement points — it is only shown to guests where you choose to approve it.',
     generer_btn: '🤖 Generate report',
     generer_spinner_desc: 'This may take 15–30 seconds',
     tab_guide: '🗺️ Accessibility guide',
@@ -1166,6 +1192,7 @@ const TEKST = {
     side3_desc: 'Pulse "Generar informe" cuando esté listo — la IA analiza las imágenes y crea la guía de accesibilidad.',
     klar_tittel: '¿Listo para generar el informe?',
     klar_desc: 'La IA analiza las imágenes y crea una guía de accesibilidad. Podrá editarla y aprobarla después.',
+    klar_forklaring: 'La guía de accesibilidad es la página que ven sus huéspedes, y a la que puede enlazar desde su propia web o canales sociales. El texto de análisis de cada imagen es la propia sugerencia del encargado del mapeo y sus notas de mejora — solo se muestra a los huéspedes donde usted decida aprobarlo.',
     generer_btn: '🤖 Generar informe',
     generer_spinner_desc: 'Esto puede tardar 15–30 segundos',
     tab_guide: '🗺️ Guía de accesibilidad',
@@ -1310,7 +1337,19 @@ var LABEL_MAP = {
     'Tursti / natursti':'Hiking trail','Sykkelløype':'Cycling route',
     'Skiløype':'Ski trail','Badeplass':'Swimming area',
     'Utsiktspunkt / attraksjon':'Viewpoint / attraction',
-    'HC-parkering / toalett i utmark':'Accessible parking / outdoor toilet',
+    'Rasteplass i utmark (parkering + toalett)':'Accessible rest stop (parking + toilet)',
+    'Offentlig toalett':'Public toilet','Turistinformasjon':'Tourist information',
+    'Offentlig torg / møteplass':'Public square / meeting place',
+    'Skranke / betjent område':'Counter / staffed area','Toalettet':'The toilet',
+    'Underlag og belegning':'Surface and paving','Sitteplasser og hvileplasser':'Seating and rest areas',
+    'Torg / møteplass':'Square / meeting place',
+    'Last opp bilder av toalettet og adkomsten.':'Upload images of the toilet and access.',
+    'Last opp bilder av inngang, skranke og fasiliteter.':'Upload images of the entrance, counter and facilities.',
+    'Last opp bilder av underlag, sitteplasser og adkomst.':'Upload images of the surface, seating and access.',
+    'Bleieskift':'Baby changing','Låst (kode/nøkkel)':'Locked (code/key)',
+    'Digital infoskjerm':'Digital info screen','Trykt materiale i ulike formater':'Printed material in various formats',
+    'Skjerming for vind/sol':'Shelter from wind/sun','Lekeplass i nærheten':'Playground nearby',
+    'Handicap-parkering':'Accessible parking',
     'Parkering':'Parking','Parkering / innkjøring':'Parking / entrance',
     'Parkering ved start':'Parking at start','Inngang':'Entrance',
     'Inngang / resepsjon':'Entrance / reception','Resepsjon':'Reception',
@@ -1385,7 +1424,19 @@ var LABEL_MAP = {
     'Tursti / natursti':'Sendero','Sykkelløype':'Ruta ciclista',
     'Skiløype':'Pista de esquí','Badeplass':'Zona de baño',
     'Utsiktspunkt / attraksjon':'Mirador / atracción',
-    'HC-parkering / toalett i utmark':'Aparcamiento accesible / aseo exterior',
+    'Rasteplass i utmark (parkering + toalett)':'Área de descanso accesible (aparcamiento + aseo)',
+    'Offentlig toalett':'Aseo público','Turistinformasjon':'Oficina de turismo',
+    'Offentlig torg / møteplass':'Plaza pública / punto de encuentro',
+    'Skranke / betjent område':'Mostrador / área atendida','Toalettet':'El aseo',
+    'Underlag og belegning':'Superficie y pavimento','Sitteplasser og hvileplasser':'Asientos y zonas de descanso',
+    'Torg / møteplass':'Plaza / punto de encuentro',
+    'Last opp bilder av toalettet og adkomsten.':'Suba imágenes del aseo y el acceso.',
+    'Last opp bilder av inngang, skranke og fasiliteter.':'Suba imágenes de la entrada, el mostrador y las instalaciones.',
+    'Last opp bilder av underlag, sitteplasser og adkomst.':'Suba imágenes de la superficie, los asientos y el acceso.',
+    'Bleieskift':'Cambiador de bebés','Låst (kode/nøkkel)':'Cerrado (código/llave)',
+    'Digital infoskjerm':'Pantalla informativa digital','Trykt materiale i ulike formater':'Material impreso en varios formatos',
+    'Skjerming for vind/sol':'Protección contra viento/sol','Lekeplass i nærheten':'Parque infantil cerca',
+    'Handicap-parkering':'Aparcamiento accesible',
     // Zonas
     'Parkering':'Aparcamiento','Parkering / innkjøring':'Aparcamiento / entrada',
     'Parkering ved start':'Aparcamiento en inicio','Inngang':'Entrada',
@@ -1746,13 +1797,44 @@ var TYPE_CONFIG = {
       {id:'selve_stedet',label:'Selve utsiktspunktet',icon:'🏔️',extraFields:[],optional:false}],
     extraOptions:['Informasjonsskilt','Sitteplasser','WC i nærheten'],
     questions:['q_sti_rullestol','q_sti_merking','q_hc_wc','q_hvileplasser','q_ledsager']},
-  hc_parkering:{label:'HC-parkering / toalett i utmark',group:'C',pageTitle:'HC-parkering / toalett',pageDesc:'Last opp bilder.',
+  hc_parkering:{label:'Rasteplass i utmark (parkering + toalett)',group:'C',pageTitle:'HC-parkering / toalett',pageDesc:'Last opp bilder.',
     defaultZones:[
       {id:'parkering',label:'HC-parkering',icon:'🅿️',extraFields:['hc_parkering_avstand_m'],optional:false},
       {id:'wc',label:'HC-toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:false},
       {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:true}],
     extraOptions:['Rampe','Skilting','Belysning'],
     questions:['q_hc_wc','q_sti_merking','q_ledsager']},
+  // v0.5.19: frittstående offentlig toalett i tettsted/ved torg — egne forhold
+  // (fast dekke, vanntilkobling, permanent bygg) fra rasteplassen i utmark over.
+  // Parkering er her valgfri sone, ikke fast, siden den ikke alltid ligger vegg-i-vegg.
+  offentlig_toalett:{label:'Offentlig toalett',group:'C',pageTitle:'Offentlig toalett',pageDesc:'Last opp bilder av toalettet og adkomsten.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:true},
+      {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:[],optional:false},
+      {id:'toalett',label:'Toalettet',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:false},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:true}],
+    extraOptions:['Bleieskift','Skilting','Belysning','Låst (kode/nøkkel)'],
+    questions:['q_sti_merking','q_ledsager']},
+  // v0.5.19: turistinformasjon — bygningsbasert, men driftes typisk av
+  // destinasjonsselskap/kommune (fellesgode), ikke en privat bedrift — derfor C.
+  turistinformasjon:{label:'Turistinformasjon',group:'C',pageTitle:'Turistinformasjon',pageDesc:'Last opp bilder av inngang, skranke og fasiliteter.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:true},
+      {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
+      {id:'skranke',label:'Skranke / betjent område',icon:'🛎️',extraFields:['disk_cm'],optional:false},
+      {id:'wc',label:'Toalett',icon:'🚻',extraFields:['bad_dor_cm','snuplass_cm','wc_sideplass_cm'],optional:true}],
+    extraOptions:['Digital infoskjerm','Trykt materiale i ulike formater','Sitteplasser'],
+    questions:['q_skriftlig','q_opplaering','q_teleslynge','q_luminans','q_taktil','q_hc_wc']},
+  // v0.5.19: offentlig torg/møteplass — statisk oppholdssted, andre behov enn en tursti
+  // (underlag/belegning, sitteplasser, skjerming), ikke en rute man beveger seg langs.
+  torg:{label:'Offentlig torg / møteplass',group:'C',pageTitle:'Torg / møteplass',pageDesc:'Last opp bilder av underlag, sitteplasser og adkomst.',
+    defaultZones:[
+      {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:true},
+      {id:'underlag',label:'Underlag og belegning',icon:'🧱',extraFields:['sti_bredde_cm'],optional:false},
+      {id:'sitteplasser',label:'Sitteplasser og hvileplasser',icon:'🪑',extraFields:[],optional:true},
+      {id:'oversikt',label:'Oversiktsbilde',icon:'📸',extraFields:[],optional:true}],
+    extraOptions:['Skjerming for vind/sol','Lekeplass i nærheten','WC i nærheten','Handicap-parkering'],
+    questions:['q_hc_wc','q_sti_merking','q_hvileplasser','q_ledsager']},
   annet_c:{label:'Annet (fellesgode)',group:'C',pageTitle:'Fellesgode / felles rom',pageDesc:'Last opp bilder og evt. GPX.',
     defaultZones:[
       {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:[],optional:false},
@@ -1853,8 +1935,8 @@ var Q_CTX = {
     q_sti_merking: 'Signs, poles, map',
     q_hvileplasser: 'Important for elderly and people with limited walking ability',
     q_hvileplasser_avstand: 'Recommended to make the route accessible for elderly',
-    q_luminans: 'Important for visually impaired',
-    q_taktil: 'Tactile studs, stair nose markings, contrast strips',
+    q_luminans: 'Luminance contrast is the difference in lightness (not just colour) between, e.g., text and its background, or a door frame and the wall behind it. High contrast makes edges and signs easier to see — important for people with low vision.',
+    q_taktil: 'Tactile markings can be felt with a foot or cane (e.g. raised studs or ribs in the surface). Visual markings are seen via contrast colour (e.g. a yellow edge on a step). Both signal level changes for people with visual impairment.',
     q_regulerbar_seng: 'Important for guests with mobility challenges',
     q_ledsager: 'Companion for a person with disability',
     q_visuell_brannalarm: 'Important for hearing impaired',
@@ -1876,8 +1958,8 @@ var Q_CTX = {
     q_sti_merking: 'Señales, balizas, mapa',
     q_hvileplasser: 'Importante para mayores y personas con movilidad reducida',
     q_hvileplasser_avstand: 'Recomendado para hacer la ruta accesible para mayores',
-    q_luminans: 'Importante para personas con baja visión',
-    q_taktil: 'Pavimento táctil, bordes de escalón, bandas de contraste',
+    q_luminans: 'El contraste de luminancia es la diferencia en claridad (no solo color) entre, por ejemplo, el texto y su fondo, o un marco de puerta y la pared detrás. Un buen contraste facilita ver bordes y señales — importante para personas con baja visión.',
+    q_taktil: 'Las marcas táctiles se sienten con el pie o el bastón (p. ej. relieves o nervaduras en la superficie). Las marcas visuales se ven por contraste de color (p. ej. un borde amarillo en un escalón). Ambas advierten de cambios de nivel a personas con discapacidad visual.',
     q_regulerbar_seng: 'Importante para huéspedes con dificultades de movilidad',
     q_ledsager: 'Acompañante para persona con discapacidad',
     q_visuell_brannalarm: 'Importante para personas con discapacidad auditiva',
@@ -2043,8 +2125,8 @@ var ALL_QUESTIONS = {
   q_badeplass_rampe:{text:'Er det rampe eller tilrettelagt adkomst til vannet?',ctx:'Amfistol, rampe, fast underlag',utsagn:'Det er rampe eller tilrettelagt adkomst til vannet',ikon:'🏊'},
   q_hvileplasser:{text:'Finnes det sittebenker eller hvileplasser underveis?',ctx:'Viktig for eldre og personer med begrenset gangevne',utsagn:'Det finnes sittebenker og hvileplasser underveis',ikon:'🪑'},
   q_hvileplasser_avstand:{text:'Er det hvileplass for hver 500 meter eller kortere?',ctx:'Anbefalt for å gjøre ruten tilgjengelig for eldre',utsagn:'Hvileplass finnes for hver 500 meter eller kortere',ikon:'🪑'},
-  q_luminans:{text:'Er det god luminanskontrast mellom skilt, skranker og omgivelser?',ctx:'Viktig for svaksynte',utsagn:'God luminanskontrast på skilt og skranker — egnet for svaksynte',ikon:'👁️'},
-  q_taktil:{text:'Er det taktile eller visuelle markeringer ved trapper og nivåforskjeller?',ctx:'Taktile knotter, trappenesemarkering, kontrastfelt',utsagn:'Taktile og visuelle markeringer finnes ved trapper og nivåforskjeller',ikon:'🦯'},
+  q_luminans:{text:'Er det god luminanskontrast mellom skilt, skranker og omgivelser?',ctx:'Luminanskontrast er forskjellen i lyshet (ikke bare farge) mellom f.eks. skrift og bakgrunn, eller en dørkarm og veggen bak. Høy kontrast gjør kanter og skilt lettere å se — viktig for svaksynte.',utsagn:'God luminanskontrast på skilt og skranker — egnet for svaksynte',ikon:'👁️'},
+  q_taktil:{text:'Er det taktile eller visuelle markeringer ved trapper og nivåforskjeller?',ctx:'Taktile markeringer kan kjennes med fot eller stokk (f.eks. opphøyde knotter eller ribber i underlaget). Visuelle markeringer ses med kontrastfarge (f.eks. gul kant på et trappetrinn). Begge varsler om nivåforskjeller for personer med synsnedsettelse.',utsagn:'Taktile og visuelle markeringer finnes ved trapper og nivåforskjeller',ikon:'🦯'},
   q_taxi_buss:{text:'Er det av- og påstigningsmulighet for buss eller taxi nær inngang?',ctx:'',utsagn:'Det er av- og påstigningsmulighet for buss og taxi nær inngangen',ikon:'🚌'},
   q_regulerbar_seng:{text:'Er det regulerbar seng tilgjengelig?',ctx:'Viktig for gjester med bevegelsesutfordringer',utsagn:'Regulerbar seng er tilgjengelig på forespørsel',ikon:'🛏️'},
   q_lading_el:{text:'Er det mulighet for lading av elektrisk rullestol på rom om natten?',ctx:'',utsagn:'Lading av elektrisk rullestol er mulig på rommet om natten',ikon:'🔋'},
@@ -2143,7 +2225,11 @@ var ZONE_PROMPTS = {
   heisstasjon:'Beskriv heisstasjonen nøkternt. Beskriv: adkomst og underlag frem til stasjonen, trinn og nivåforskjeller, hvordan man kommer om bord (plattform, stol, gondol), synlig assistanse eller hjelpemidler. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   adkomst_heis:'Beskriv adkomsten til heisen nøkternt. Beskriv: underlag, synlig stigning og nivåforskjeller, bredde, trapper eller ramper, hindringer. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
   utleie_utstyr:'Beskriv utleiestedet for utstyr nøkternt. Beskriv: adkomst og terskel, plass inne (anslag), synlig tilpasset utstyr, hvordan utstyret er lagret og tilgjengelig. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
-  aktivitetsomrade:'Beskriv aktivitetsområdet nøkternt. Beskriv: underlag, terskler (ja/nei), bevegelsesrom, adkomst. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]'
+  aktivitetsomrade:'Beskriv aktivitetsområdet nøkternt. Beskriv: underlag, terskler (ja/nei), bevegelsesrom, adkomst. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  // v0.5.19: nye soner for gruppe C-utvidelsen (offentlig toalett, turistinformasjon, torg)
+  toalett:'Beskriv det offentlige toalettet nøkternt. Beskriv: dørbredde (estimert), snuplass (estimert), støttehåndtak (ja/nei, plassering), terskel (ja/nei), om det er merket som låst/kode/nøkkel. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  skranke:'Beskriv skranken/det betjente området nøkternt. Beskriv: skrankehøyde (om synlig, ev. senket del), plass foran for rullestol, synlig teleslynge-skilt, kontrast på skilt/informasjon. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Trenger mål:** [hvilke mål hadde vært nyttige] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]',
+  sitteplasser:'Beskriv sitteplassene/hvileområdet nøkternt. Beskriv: type sitteplass (benk/stol, med eller uten armlener og rygg), underlag rundt, skjerming for vind/sol, avstand til gangsone. Unngå karakterer og dommer. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]'
 };
 var DEFAULT_PROMPT = 'Beskriv bildet nøkternt med fokus på tilgjengelighet. Beskriv hva du ser av underlag, nivåforskjeller, bredde og hindringer. Unngå karakterer og dommer — la gjesten vurdere om det passer for dem. **Det jeg ser:** [observasjoner] **Oppsummering:** [én setning hva fungerer, én setning hva kan være utfordrende]';
 
@@ -2657,12 +2743,21 @@ var UB_TEXT = {
 };
 var UB_SEK_IKON = {1:'\uD83D\uDD07', 2:'\uD83E\uDDED', 3:'\uD83D\uDEBB', 4:'\uD83E\uDD1D'};
 var UB_QUESTIONS = [
- {id:'ub_stoy',grupper:['A','B'],sek:1,no:'Er støynivået generelt lavt i fellesarealer?',en:'Is the noise level generally low in common areas?',es:'¿El nivel de ruido es generalmente bajo en las áreas comunes?'},
+ {id:'ub_stoy',grupper:['A','B'],sek:1,no:'Er støynivået generelt lavt i fellesarealer?',en:'Is the noise level generally low in common areas?',es:'¿El nivel de ruido es generalmente bajo en las áreas comunes?',
+   ctx:'Tenk på musikk, ventilasjon, mange stemmer samtidig eller harde flater som gir etterklang — ikke bare om det er stille.',
+   ctx_en:'Think of music, ventilation noise, many voices at once, or hard surfaces that create echo — not only whether it is silent.',
+   ctx_es:'Piense en música, ruido de ventilación, muchas voces a la vez o superficies duras que generan eco — no solo si está en silencio.'},
  {id:'ub_stille',grupper:['A','B'],sek:1,no:'Er miljøet generelt rolig, uten mye støy eller sansestimuli?',en:'Is the environment generally calm, without much noise or sensory stimulation?',es:'¿El ambiente es generalmente tranquilo, sin mucho ruido o estimulación sensorial?'},
- {id:'ub_lys',grupper:['A','B'],sek:1,no:'Er belysningen jevn, uten flimmer eller brå lysskift?',en:'Is the lighting even, without flickering or sudden changes?',es:'¿La iluminación es uniforme, sin parpadeos ni cambios bruscos?'},
+ {id:'ub_lys',grupper:['A','B'],sek:1,no:'Er belysningen jevn, uten flimmer eller brå lysskift?',en:'Is the lighting even, without flickering or sudden changes?',es:'¿La iluminación es uniforme, sin parpadeos ni cambios bruscos?',
+   ctx:'Gjelder overganger mellom rom (f.eks. mørk gang til lyst rom) og lys som blinker eller endrer seg brått — viktig for personer med epilepsi, migrene eller synsutfordringer.',
+   ctx_en:'Refers to transitions between rooms (e.g. dark corridor to bright room) and lighting that flickers or changes abruptly — important for people with epilepsy, migraine or visual impairments.',
+   ctx_es:'Se refiere a las transiciones entre espacios (p. ej. pasillo oscuro a sala luminosa) y a iluminación que parpadea o cambia bruscamente — importante para personas con epilepsia, migraña o discapacidad visual.'},
  {id:'ub_lukt',grupper:['A','B'],sek:1,no:'Er det fritt for sterke lukter i fellesarealer?',en:'Are common areas free from strong odours?',es:'¿Las áreas comunes están libres de olores fuertes?'},
  {id:'ub_skilting',grupper:['A','B','C'],sek:2,no:'Er det tydelig skilting som viser vei gjennom anlegget?',en:'Is there clear signage guiding visitors through the venue?',es:'¿Existe señalización clara que guíe a los visitantes por el establecimiento?'},
- {id:'ub_forhaand',grupper:['A','B','C'],sek:2,no:'Er informasjon om besøket tilgjengelig på forhånd (nettside, kart, beskrivelse)?',en:'Is information about the visit available in advance (website, map, description)?',es:'¿Está disponible información sobre la visita con antelación (sitio web, mapa, descripción)?'},
+ {id:'ub_forhaand',grupper:['A','B','C'],sek:2,no:'Er informasjon om besøket tilgjengelig på forhånd (nettside, kart, beskrivelse)?',en:'Is information about the visit available in advance (website, map, description)?',es:'¿Está disponible información sobre la visita con antelación (sitio web, mapa, descripción)?',
+   ctx:'Gjelder om gjesten finner KONKRET informasjon før besøket — f.eks. bilder av inngangen, kart over området, eller en beskrivelse av tilgjengelighetsgraden. Ikke bare at det finnes en generell tilgjengelighetsside.',
+   ctx_en:'Refers to whether the guest can find CONCRETE information before the visit — e.g. photos of the entrance, a map of the area, or a description of the accessibility level. Not just that a general accessibility page exists.',
+   ctx_es:'Se refiere a si el huésped encuentra información CONCRETA antes de la visita — p. ej. fotos de la entrada, un mapa de la zona o una descripción del nivel de accesibilidad. No solo que exista una página general de accesibilidad.'},
  {id:'ub_spraak',grupper:['A','B','C'],sek:2,no:'Er informasjonen skrevet i enkelt og tydelig språk?',en:'Is the information written in plain and clear language?',es:'¿La información está escrita en un lenguaje sencillo y claro?'},
  {id:'ub_merking',grupper:['A','B','C'],sek:2,no:'Er toalett, utganger og sitteplasser tydelig merket?',en:'Are toilets, exits and seating areas clearly marked?',es:'¿Están claramente señalizados los aseos, salidas y zonas de descanso?'},
  {id:'ub_wc',grupper:['A','B','C'],sek:3,no:'Er toalett lett tilgjengelig fra alle aktivitetsarealer?',en:'Is a toilet easily accessible from all activity areas?',es:'¿Hay un aseo fácilmente accesible desde todas las áreas de actividad?'},
@@ -2675,6 +2770,9 @@ var UB_QUESTIONS = [
 ];
 function ubTxt(key) { var l = state.lang || 'no'; return (UB_TEXT[l] && UB_TEXT[l][key]) || UB_TEXT.no[key]; }
 function ubQTxt(q) { var l = state.lang || 'no'; return q[l] || q.no; }
+// v0.5.21: hjelpetekst for usynlige-behov-spørsmål, samme idé som ctx på ALL_QUESTIONS —
+// forklarer hva begrepet betyr, ikke bare hvorfor det er viktig (etterspurt av Anita/INKLU).
+function ubQCtx(q) { var l = state.lang || 'no'; return (l !== 'no' && q['ctx_' + l]) || q.ctx || ''; }
 function ubSvarTekst(v) { return v === 'ja' ? T('ja') : v === 'nei' ? T('nei') : T('vet_ikke_btn'); }
 // Returnerer true hvis spørsmålet er relevant for valgt virksomhetstype.
 // Filtrerer på gruppe (A/B/C) og typespesifikke unntak (ubSkip) — f.eks.
@@ -2699,7 +2797,9 @@ function buildUsynlig() {
       var q = UB_QUESTIONS[i];
       if (q.sek !== s || !ubRelevant(q)) continue;
       var v = state.usynlig[q.id];
+      var ubCtxTxt = ubQCtx(q);
       sekHtml += '<div class="question-item"><div class="question-text">' + ubQTxt(q) + '</div>' +
+        (ubCtxTxt ? '<div class="question-context">' + ubCtxTxt + '</div>' : '') +
         '<div class="yn-group">' +
         '<button class="yn-btn yes' + (v === 'ja' ? ' active' : '') + '" aria-pressed="' + (v === 'ja') + '" data-ub-id="' + q.id + '" data-ub-val="ja">' + T('ja') + '</button>' +
         '<button class="yn-btn no' + (v === 'nei' ? ' active' : '') + '" aria-pressed="' + (v === 'nei') + '" data-ub-id="' + q.id + '" data-ub-val="nei">' + T('nei') + '</button>' +

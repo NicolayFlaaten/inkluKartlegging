@@ -52,6 +52,8 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 .feil-banner{display:none;background:var(--red-light);color:#A32D2D;border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;margin-bottom:1rem}
 .rolle-spesifikk{display:none}
 .rolle-spesifikk.vis{display:block}
+.felt-hvis-ja{display:none}
+.felt-hvis-ja.vis{display:block}
 </style>
 </head>
 <body>
@@ -96,19 +98,6 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 
       <div class="card">
         <div class="field">
-          <label class="field-label">Type tilbakemelding <span style="color:var(--red)">*</span></label>
-          <div class="radio-grid" id="type-grid">
-            <label class="radio-opt"><input type="radio" name="type" value="🐛 Feil / noe virker ikke" required> 🐛 Feil / noe virker ikke</label>
-            <label class="radio-opt"><input type="radio" name="type" value="🤔 Uklar tekst eller forvirrende" required> 🤔 Uklar tekst eller forvirrende</label>
-            <label class="radio-opt"><input type="radio" name="type" value="💡 Forslag til forbedring" required> 💡 Forslag til forbedring</label>
-            <label class="radio-opt"><input type="radio" name="type" value="❓ Noe mangler" required> ❓ Noe mangler</label>
-            <label class="radio-opt"><input type="radio" name="type" value="👍 Positiv tilbakemelding" required> 👍 Positiv tilbakemelding</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="field">
           <label class="field-label" for="beskrivelse">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
           <textarea id="beskrivelse" name="beskrivelse" required placeholder="Vær så konkret du kan — f.eks. hvilken type sted eller hvilket steg du var på, og hva som skjedde."></textarea>
         </div>
@@ -138,11 +127,27 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
           </div>
         </div>
         <div class="field">
-          <label class="field-label">Tror du dette er nyttig for synlighet/markedsføring av stedet?</label>
+          <label class="field-label">Gir resultatet informasjon som kan publiseres?</label>
           <div class="radio-grid horisontal" data-navn="bedrift_nyttig">
             <label class="radio-opt"><input type="radio" name="bedrift_nyttig" value="Ja"> Ja</label>
             <label class="radio-opt"><input type="radio" name="bedrift_nyttig" value="Kanskje"> Kanskje</label>
             <label class="radio-opt"><input type="radio" name="bedrift_nyttig" value="Nei"> Nei</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Gir resultatet konkrete forbedringspunkter?</label>
+          <div class="radio-grid horisontal" data-navn="bedrift_forbedring">
+            <label class="radio-opt"><input type="radio" name="bedrift_forbedring" value="Ja"> Ja</label>
+            <label class="radio-opt"><input type="radio" name="bedrift_forbedring" value="Delvis"> Delvis</label>
+            <label class="radio-opt"><input type="radio" name="bedrift_forbedring" value="Nei"> Nei</label>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label">Var tidsbruken på kartleggingen realistisk sett i forhold til stedets størrelse?</label>
+          <div class="radio-grid horisontal" data-navn="bedrift_tidsbruk">
+            <label class="radio-opt"><input type="radio" name="bedrift_tidsbruk" value="Ja"> Ja</label>
+            <label class="radio-opt"><input type="radio" name="bedrift_tidsbruk" value="Delvis"> Delvis</label>
+            <label class="radio-opt"><input type="radio" name="bedrift_tidsbruk" value="Nei"> Nei</label>
           </div>
         </div>
       </div>
@@ -196,6 +201,17 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
             <label class="radio-opt"><input type="radio" name="bruker_respektfull" value="Nei"> Nei</label>
           </div>
         </div>
+        <div class="field">
+          <label class="field-label">Er det behov, barrierer eller brukergrupper du mener mangler i verktøyet?</label>
+          <div class="radio-grid horisontal" data-navn="bruker_mangler">
+            <label class="radio-opt"><input type="radio" name="bruker_mangler" value="Ja"> Ja</label>
+            <label class="radio-opt"><input type="radio" name="bruker_mangler" value="Nei"> Nei</label>
+          </div>
+        </div>
+        <div class="field felt-hvis-ja" id="bruker-mangler-felt">
+          <label class="field-label" for="bruker_mangler_beskrivelse">Hvis ja — beskriv kort</label>
+          <input type="text" id="bruker_mangler_beskrivelse" name="bruker_mangler_beskrivelse" placeholder="F.eks. hvilket behov, hindring eller gruppe">
+        </div>
       </div>
 
       <div class="card">
@@ -234,28 +250,36 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 <script>
 // ============================================================================
 // Google Form-kobling — satt opp 2026-09-16 mot Nicolays skjema.
-// Alle 15 entry-ID-ene er hentet fra den forhåndsutfylte lenken han sendte.
+// v2 (2026-09-23): "Type tilbakemelding" fjernet (overflødig — dekkes av fritekst).
+// 4 nye felt lagt til (bedrift_forbedring, bedrift_tidsbruk, bruker_mangler,
+// bruker_mangler_beskrivelse) — entry-ID-ene hentet fra en ny forhåndsutfylt lenke.
+// NB: rekkefølgen på entry.673912274 vs entry.732226179 er IKKE 100% bekreftet av
+// Nicolay (han var sikker på øverste = bedrift_forbedring, men ikke på de to neste)
+// — dobbeltsjekk i Google Form-svarene etter første reelle test-innsending.
 // ============================================================================
 var GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf7sx1uFHFG7jtp_d8maJHIhavri63KyqPT9qZgmojPcCwv1g/formResponse';
 
 var ENTRY_ROLLE              = 'entry.2032166637'; // Hvem svarer du som?
 var ENTRY_DEL                = 'entry.1807045652'; // Hva gjelder tilbakemeldingen?
-var ENTRY_TYPE                = 'entry.580087016'; // Type tilbakemelding
 var ENTRY_BESKRIVELSE        = 'entry.1671216463'; // Beskrivelse
 var ENTRY_STED                = 'entry.852984452'; // Sted eller type
 var ENTRY_NAVN_EPOST          = 'entry.697346171'; // Navn og e-post
 var ENTRY_BEDRIFT_STEMMER    = 'entry.1275372234'; // Stemmer informasjonen om virksomheten din?
 var ENTRY_BEDRIFT_ENKELT      = 'entry.790307546'; // Var det enkelt å gjennomføre kartleggingen?
-var ENTRY_BEDRIFT_NYTTIG     = 'entry.1373404259'; // Tror du dette er nyttig for synlighet/markedsføring?
+var ENTRY_BEDRIFT_NYTTIG     = 'entry.1373404259'; // Gir resultatet informasjon som kan publiseres?
+var ENTRY_BEDRIFT_FORBEDRING = 'entry.728241458'; // Gir resultatet konkrete forbedringspunkter?
+var ENTRY_BEDRIFT_TIDSBRUK   = 'entry.673912274'; // Var tidsbruken realistisk?
 var ENTRY_FOU_ALVORLIGHET    = 'entry.1407362862'; // Alvorlighetsgrad
 var ENTRY_BRUKER_TYPE           = 'entry.14688108'; // Type funksjonsnedsettelse
 var ENTRY_BRUKER_NOK_INFO     = 'entry.588925002'; // Ga informasjonen nok til å vurdere om stedet passer?
 var ENTRY_BRUKER_ENKEL_GUIDE  = 'entry.1363126096'; // Var guiden enkel å bruke (skjermleser)?
 var ENTRY_BRUKER_RESPEKTFULL   = 'entry.127310719'; // Føltes språket og tonen respektfull?
+var ENTRY_BRUKER_MANGLER     = 'entry.732226179'; // Behov/barrierer/brukergrupper som mangler?
+var ENTRY_BRUKER_MANGLER_BESKRIVELSE = 'entry.1494406868'; // Beskrivelse av det som mangler
 var ENTRY_KONTEKST              = 'entry.819009198'; // Teknisk kontekst (auto-generert)
 // ============================================================================
 
-var FEEDBACK_EPOST = 'test@accessnorway.no'; // ← bytt til deres faktiske test-e-post
+var FEEDBACK_EPOST = 'Elisa.Sevilla.Ulfstedt@oystre-slidre.kommune.no';
 
 function hentKontekst() {
   var params = new URLSearchParams(window.location.search);
@@ -312,6 +336,13 @@ document.querySelectorAll('input[name="rolle"]').forEach(function(input) {
   });
 });
 
+// Vis oppfølgingsfeltet ("beskriv kort") bare når "Ja" er valgt på mangler-spørsmålet
+document.querySelectorAll('input[name="bruker_mangler"]').forEach(function(input) {
+  input.addEventListener('change', function() {
+    document.getElementById('bruker-mangler-felt').classList.toggle('vis', input.value === 'Ja');
+  });
+});
+
 function hentRadioverdi(navn) {
   var el = document.querySelector('input[name="' + navn + '"]:checked');
   return el ? el.value : '';
@@ -321,9 +352,8 @@ document.getElementById('tilbake-form').addEventListener('submit', function(e) {
   e.preventDefault();
   var rolle = document.querySelector('input[name="rolle"]:checked');
   var del = document.querySelector('input[name="del"]:checked');
-  var type = document.querySelector('input[name="type"]:checked');
   var beskrivelse = document.getElementById('beskrivelse').value.trim();
-  if (!rolle || !del || !type || !beskrivelse) return;
+  if (!rolle || !del || !beskrivelse) return;
 
   var navn = document.getElementById('navn').value.trim();
   var epost = document.getElementById('epost').value.trim();
@@ -345,18 +375,21 @@ document.getElementById('tilbake-form').addEventListener('submit', function(e) {
   }
   leggTilFelt(ENTRY_ROLLE, rolle.value);
   leggTilFelt(ENTRY_DEL, del.value);
-  leggTilFelt(ENTRY_TYPE, type.value);
   leggTilFelt(ENTRY_BESKRIVELSE, beskrivelse);
   leggTilFelt(ENTRY_STED, sted);
   leggTilFelt(ENTRY_NAVN_EPOST, navnEpost);
   leggTilFelt(ENTRY_BEDRIFT_STEMMER, hentRadioverdi('bedrift_stemmer'));
   leggTilFelt(ENTRY_BEDRIFT_ENKELT, hentRadioverdi('bedrift_enkelt'));
   leggTilFelt(ENTRY_BEDRIFT_NYTTIG, hentRadioverdi('bedrift_nyttig'));
+  leggTilFelt(ENTRY_BEDRIFT_FORBEDRING, hentRadioverdi('bedrift_forbedring'));
+  leggTilFelt(ENTRY_BEDRIFT_TIDSBRUK, hentRadioverdi('bedrift_tidsbruk'));
   leggTilFelt(ENTRY_FOU_ALVORLIGHET, hentRadioverdi('fou_alvorlighet'));
   leggTilFelt(ENTRY_BRUKER_TYPE, hentRadioverdi('bruker_type'));
   leggTilFelt(ENTRY_BRUKER_NOK_INFO, hentRadioverdi('bruker_nok_info'));
   leggTilFelt(ENTRY_BRUKER_ENKEL_GUIDE, hentRadioverdi('bruker_enkel_guide'));
   leggTilFelt(ENTRY_BRUKER_RESPEKTFULL, hentRadioverdi('bruker_respektfull'));
+  leggTilFelt(ENTRY_BRUKER_MANGLER, hentRadioverdi('bruker_mangler'));
+  leggTilFelt(ENTRY_BRUKER_MANGLER_BESKRIVELSE, document.getElementById('bruker_mangler_beskrivelse').value.trim());
   leggTilFelt(ENTRY_KONTEKST, kontekst);
 
   document.body.appendChild(f);
@@ -370,13 +403,11 @@ document.getElementById('tilbake-form').addEventListener('submit', function(e) {
 function oppdaterMailto() {
   var rolle = document.querySelector('input[name="rolle"]:checked');
   var del = document.querySelector('input[name="del"]:checked');
-  var type = document.querySelector('input[name="type"]:checked');
   var beskrivelse = document.getElementById('beskrivelse').value.trim();
   var sted = document.getElementById('sted').value.trim();
   var emne = 'AccessNorway tilbakemelding' + (del ? ' — ' + del.value : '');
   var body = 'Rolle: ' + (rolle ? rolle.value : '(ikke valgt)') + '\n' +
              'Hva gjelder det: ' + (del ? del.value : '(ikke valgt)') + '\n' +
-             'Type: ' + (type ? type.value : '(ikke valgt)') + '\n' +
              'Sted/type: ' + (sted || '-') + '\n\n' +
              'Beskrivelse:\n' + (beskrivelse || '(skriv her)') + '\n\n' +
              '---\n' + hentKontekst();
