@@ -24,16 +24,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .lang-flag-btn:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.06)}
 .lang-flag-btn:active{transform:scale(.92)}
 .api-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px}
-.topbar-pill{font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.topbar-pill{font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:5px 12px;border:1px solid rgba(255,255,255,.2);border-radius:20px;white-space:nowrap;display:inline-flex;align-items:center;font-weight:600}
+.topbar-pill:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.06)}
 .topbar-versjon{font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em;white-space:nowrap}
-.topbar-ai{display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.4);margin-left:4px;white-space:nowrap}
+.topbar-ai{display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.4);white-space:nowrap}
 @media (max-width:480px){
   .topbar{padding:0 .6rem;gap:4px}
   .topbar-versjon{display:none}
-  .topbar-pill .topbar-label{display:none}
-  .topbar-pill{padding:5px 8px}
   .topbar-ai .topbar-label{display:none}
-  .topbar-ai{margin-left:0}
 }
 .progress-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:.625rem 1rem;position:sticky;top:54px;z-index:90}
 .steps-scroll{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
@@ -281,10 +279,9 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div class="topbar-versjon">v0.5.24</div>
-  <div style="display:flex;align-items:center;gap:4px">
-    <a href="dashboard.html?org_id=inklu-valdres" class="topbar-pill" title="Dashboard" data-i18n-attr-title="dashboard_lenke"><span aria-hidden="true">📊</span><span class="topbar-label" data-i18n="dashboard_lenke">Dashboard</span></a>
-    <a href="feedback.html?fra=kartlegging" class="topbar-pill" title="Tilbakemelding"><span aria-hidden="true">💬</span><span class="topbar-label">Tilbakemelding</span></a>
+  <div class="topbar-versjon">v0.5.25</div>
+  <div style="display:flex;align-items:center;gap:6px">
+    <a href="dashboard.html?org_id=inklu-valdres" class="topbar-pill" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-flag-btn" id="lang-flag-btn" onclick="syklSpraak()" title="Bytt språk" aria-label="Bytt språk. Nåværende: Norsk">🇳🇴</button>
     <div class="topbar-ai" title="AI aktiv">
       <span class="api-dot"></span><span class="topbar-label" id="ai-status-txt">AI aktiv</span>
@@ -515,7 +512,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.24';
+const APP_VERSION = 'v0.5.25';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -2150,6 +2147,7 @@ var EF_CTX = {
 // v0.5.22: kort hjelpetekst for EXTRA_FIELDS — samme idé som ctx på ALL_QUESTIONS/UB_QUESTIONS.
 // v0.5.23: kortet ned de 5 hjelpetekstene fra v0.5.21 (q_luminans, q_taktil, ub_stoy, ub_lys, ub_forhaand) til samme korte stil som v0.5.22.
 // v0.5.24: topbar ryddet opp på mobil (ikon-only under 480px, ingen tekstbrekk) + steg-piller i fremdriftslinjen er nå klikkbare bakover.
+// v0.5.25: ikonene for Dashboard/Tilbakemelding var uforståelige — fjernet lenke til spørreskjema helt, og Dashboard er nå én vanlig tekst-knapp igjen (ingen ikon).
 function TEFCtx(fieldId) {
   var lang = state.lang || 'no';
   return (EF_CTX[lang] && EF_CTX[lang][fieldId]) || (EXTRA_FIELDS[fieldId] && EXTRA_FIELDS[fieldId].ctx) || '';
