@@ -268,7 +268,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.16</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.3);font-weight:400;letter-spacing:.03em">v0.5.18</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px" data-i18n="dashboard_lenke">Dashboard</a>
     <a href="feedback.html?fra=kartlegging" style="font-size:12px;color:rgba(255,255,255,.55);text-decoration:none;padding:4px 10px;border:1px solid rgba(255,255,255,.2);border-radius:20px;margin-right:6px">💬 Tilbakemelding</a>
@@ -498,7 +498,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.16';
+const APP_VERSION = 'v0.5.18';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -515,6 +515,34 @@ const APP_VERSION = 'v0.5.16';
 // v0.5.16: ub_diskret omformulert — "diskret be om hjelp" kunne oppfattes nedlatende.
 // Byttet til en nøytral formulering om at personlig assistanse tilbys (spørsmål og
 // gjestetekst i guiden). Selve id-en (ub_diskret) er uendret, kun teksten.
+// v0.5.17: samlet fiks etter Nicolays feltkartlegging (7 saker):
+//  1) Helhetsinntrykk (profilbilde-analyse) kortet ned og rediger-knappen fikset
+//     (bygget om fra DOM+addEventListener til HTML-streng med onclick, som mistet
+//     lytterne ved serialisering).
+//  2-3) Bildeopplasting: innført samtidighetsbegrensning (maks 3 parallelle PUT
+//     i stedet for alle på én gang) for å unngå at nøyaktig ett bilde "sakker
+//     akterut" på båndbredde, og synlig fremdrift + navngitte feilede soner
+//     (før: kun "1 av 9 feilet", uten å si hvilken).
+//  4) Statusregex utvidet til å tåle norsk Ø-skrivemåte (GRØNN/RØD), ikke bare
+//     ASCII — fikset både manglende statusmerke OG synlig rå "STATUS: GRØNN"-tekst.
+//  5) Profilbildet ber nå om en opplastings-URL fra serveren (payload) og forsøker
+//     faktisk opplasting (sendTilAPI) — krever en tilhørende endring hos Ole
+//     (Supabase-funksjonen må returnere profilbilde_upload_url og senere lagre/
+//     eksponere enhet.profilbilde_url) for å fungere ende-til-ende. Guiden er
+//     klar til å vise bildet den dagen feltet finnes (se guide.html .profil-foto).
+//  6) mdInlineBold tåler nå enkelt-stjerne *kursiv* + sikkerhetsnett som fjerner
+//     eventuelle gjenværende, ubalanserte stjerner (fikset synlig "****" i gjesteteksten).
+//  7) ub_stille/ub_hvile-ordlyd skjerpet så de ikke leser som duplikater i guiden.
+// v0.5.18: profilbilde-opplasting bygget om etter forslag fra Nicolay — i stedet
+// for å be Ole om en helt ny mekanisme (profilbilde_upload_url) og vente på den,
+// sendes profilbildet nå som en syntetisk sone (id: 'profilbilde', reservert,
+// brukes ikke av noen ekte sonetype) i soner[]-listen. Den følger dermed EXAKT
+// samme, allerede fungerende vei som ekte sonebilder: signert upload_url inn,
+// faktisk opplasting via lastOppBilder, og offentlig url tilbake — ingen endring
+// nødvendig hos Ole, SÅ LENGE backend ikke validerer sone_id mot en fast liste
+// av kjente sonetyper (se advarsel til Nicolay). guide.html filtrerer denne
+// pseudo-sonen bort fra vanlig tilgjengelighetsvisning og bruker bildet som
+// forsidebilde i stedet (se der).
 const SAMTYKKE_VERSJON = 'v4';
 // v0.5.7: modellvalg samlet ett sted (lett å teste Sonnet på bildesteget — kan da også
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
@@ -1526,7 +1554,12 @@ async function analyzeProfilbilde() {
     var compressed = await compressImage(state.profilbilde.dataUrl, 1600, 0.8);
     var base64 = compressed.split(',')[1];
     var type = document.getElementById('biz-type').value;
-    var prompt = 'Dette er et profilbilde av stedet. Beskriv stedet kort og nøkternt — hva slags sted er det og hva bildet viser. Ikke vurder hvor tilgjengelig stedet er ut fra dette ene bildet. Unngå karakterer og dommer. **Helhetsinntrykk:** [kort beskrivelse av stedet og stemning] **Tilgjengelighet:** [kun det bildet faktisk viser av adkomst, underlag og nivåer; skriv «ikke synlig i bildet» hvis det ikke vises]. ' + BILDE_REGLER + ' Svar på ' + spraakNavn + '.';
+    // v0.5.17: kortet ned etter tilbakemelding fra Nicolay — forrige versjon fikk AI-en
+      // til å finne på egne underpunkter (Underlag/Adkomst/Nivåer/Terskler/Trapper/
+      // Døråpninger) som nesten alltid ble "ikke synlig i bildet" — ren duplikat av
+      // sonene, lav nytteverdi. Nå: ett kort avsnitt, ingen egne overskrifter, og
+      // uten for mye gjetting (et rimelig helhetsinntrykk er ok, ikke spekulasjon).
+    var prompt = 'Dette er et profilbilde av stedet. Skriv ett kort, nøkternt avsnitt (maks 2 setninger) om hva slags sted dette er og det generelle inntrykket. Del IKKE opp i flere underpunkter eller overskrifter. Basér deg på det som er synlig i bildet, uten for mye gjetting — et rimelig helhetsinntrykk er greit, men ikke spekuler om detaljer som ikke vises. Vurder ikke tilgjengelighet her — det dekkes av sonene under. ' + BILDE_REGLER + ' Svar på ' + spraakNavn + '.';
     var res = await fetch(WORKER_URL, {method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({model:AI_MODEL_BILDE,max_tokens:400,messages:[{role:'user',content:[
         {type:'image',source:{type:'base64',media_type:'image/jpeg',data:base64}},
@@ -2367,7 +2400,16 @@ function mdEsc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 function mdInlineBold(s) {
-  return mdEsc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  var out = mdEsc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // v0.5.17: AI-en skriver innimellom enkelt-stjerne kursiv (*tekst*), som denne
+  // funksjonen tidligere ikke forstod — stjernene ble stående rått i gjesteteksten
+  // (rapportert av Nicolay, "Sitte område"-eksempel med "****" og "*Avhenger...*").
+  out = out.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+  // Sikkerhetsnett: fjern eventuelle gjenværende, ubalanserte stjerner (f.eks.
+  // en AI-generert "****"-divider) som ikke matchet noen av mønstrene over — så
+  // ingenting rått vises uansett hva AI-en finner på.
+  out = out.replace(/\*+/g, '');
+  return out;
 }
 function mdTilHtml(raw) {
   if (!raw) return '';
@@ -2616,7 +2658,7 @@ var UB_TEXT = {
 var UB_SEK_IKON = {1:'\uD83D\uDD07', 2:'\uD83E\uDDED', 3:'\uD83D\uDEBB', 4:'\uD83E\uDD1D'};
 var UB_QUESTIONS = [
  {id:'ub_stoy',grupper:['A','B'],sek:1,no:'Er støynivået generelt lavt i fellesarealer?',en:'Is the noise level generally low in common areas?',es:'¿El nivel de ruido es generalmente bajo en las áreas comunes?'},
- {id:'ub_stille',grupper:['A','B'],sek:1,no:'Finnes det stille soner eller lavstimulerte arealer?',en:'Are there quiet zones or low-stimulation areas?',es:'¿Existen zonas tranquilas o áreas de baja estimulación?'},
+ {id:'ub_stille',grupper:['A','B'],sek:1,no:'Er miljøet generelt rolig, uten mye støy eller sansestimuli?',en:'Is the environment generally calm, without much noise or sensory stimulation?',es:'¿El ambiente es generalmente tranquilo, sin mucho ruido o estimulación sensorial?'},
  {id:'ub_lys',grupper:['A','B'],sek:1,no:'Er belysningen jevn, uten flimmer eller brå lysskift?',en:'Is the lighting even, without flickering or sudden changes?',es:'¿La iluminación es uniforme, sin parpadeos ni cambios bruscos?'},
  {id:'ub_lukt',grupper:['A','B'],sek:1,no:'Er det fritt for sterke lukter i fellesarealer?',en:'Are common areas free from strong odours?',es:'¿Las áreas comunes están libres de olores fuertes?'},
  {id:'ub_skilting',grupper:['A','B','C'],sek:2,no:'Er det tydelig skilting som viser vei gjennom anlegget?',en:'Is there clear signage guiding visitors through the venue?',es:'¿Existe señalización clara que guíe a los visitantes por el establecimiento?'},
@@ -2624,7 +2666,7 @@ var UB_QUESTIONS = [
  {id:'ub_spraak',grupper:['A','B','C'],sek:2,no:'Er informasjonen skrevet i enkelt og tydelig språk?',en:'Is the information written in plain and clear language?',es:'¿La información está escrita en un lenguaje sencillo y claro?'},
  {id:'ub_merking',grupper:['A','B','C'],sek:2,no:'Er toalett, utganger og sitteplasser tydelig merket?',en:'Are toilets, exits and seating areas clearly marked?',es:'¿Están claramente señalizados los aseos, salidas y zonas de descanso?'},
  {id:'ub_wc',grupper:['A','B','C'],sek:3,no:'Er toalett lett tilgjengelig fra alle aktivitetsarealer?',en:'Is a toilet easily accessible from all activity areas?',es:'¿Hay un aseo fácilmente accesible desde todas las áreas de actividad?'},
- {id:'ub_hvile',grupper:['A','B'],sek:3,no:'Finnes det hvilerom eller stille plass der gjester kan trekke seg unna?',en:'Is there a rest room or quiet space where guests can withdraw?',es:'¿Hay una sala de descanso o espacio tranquilo al que los huéspedes puedan retirarse?'},
+ {id:'ub_hvile',grupper:['A','B'],sek:3,no:'Finnes det et eget rom man kan trekke seg tilbake til for å ta en pause?',en:'Is there a separate room guests can withdraw to for a break?',es:'¿Hay una sala separada a la que los huéspedes puedan retirarse para descansar?'},
  {id:'ub_sitte',grupper:['A','B','C'],sek:3,no:'Er det sitteplasser tilgjengelig underveis — ikke bare ved start/mål?',en:'Are seating options available along the way — not only at the start or end?',es:'¿Hay asientos disponibles durante el recorrido, no solo al inicio o al final?'},
  {id:'ub_avbryte',grupper:['A','B'],sek:3,no:'Kan gjester avbryte en aktivitet uten å måtte forklare seg?',en:'Can guests withdraw from an activity without having to explain themselves?',es:'¿Pueden los huéspedes retirarse de una actividad sin tener que dar explicaciones?'},
  {id:'ub_opplaering',grupper:['A','B'],sek:4,no:'Har ansatte fått opplæring i å møte gjester med ulike behov?',en:'Have staff received training in meeting guests with diverse needs?',es:'¿El personal ha recibido formación para atender a huéspedes con diversas necesidades?'},
@@ -2748,10 +2790,17 @@ async function genererSoneTekster() {
 // status ble aldri satt (falt til 'ukjent'/null), OG teksten ble ikke
 // strippet — "STATUS: GUL" ble stående synlig i gjesteteksten (rapportert
 // av Ole). Ny regex tåler valgfritt mellomrom og case.
-var m = tekst.match(/STATUS:\s*(GRONN|GUL|ROD)/i);
+var m = tekst.match(/STATUS:\s*(GR[OØ]NN|GUL|R[OØ]D)/i);
+            // v0.5.17: samme type feil som ble fikset i v0.4.25 (mellomrom), nå for
+            // Ø-varianten — Haiku skriver ofte korrekt norsk "GRØNN"/"RØD" (med Ø)
+            // selv om prompten ber om ASCII "GRONN"/"ROD". Regexen tålte det ikke,
+            // så status ble aldri satt (falt til 'ukjent') OG "STATUS: GRØNN" ble
+            // stående synlig i teksten. Normaliserer til ASCII her siden resten av
+            // koden sjekker status==='gronn'/'rod' (ASCII). Rapportert av Nicolay 24.9.
+            var statusNormalisert = m ? m[1].toLowerCase().replace(/ø/g,'o') : 'ukjent';
             state.soneTekster[idx] = {
-              tekst: tekst.replace(/STATUS:\s*(GRONN|GUL|ROD)/i,'').trim(),
-              status: m ? m[1].toLowerCase() : 'ukjent'
+              tekst: tekst.replace(/STATUS:\s*(GR[OØ]NN|GUL|R[OØ]D)/i,'').trim(),
+              status: statusNormalisert
             };
           }
         })
@@ -2897,6 +2946,11 @@ async function buildGuide() {
     else annetHtml += soneHtml;
   }
 
+  // v0.5.17: bygget om fra DOM+addEventListener til en rett HTML-streng med
+  // onclick="..." (som lagSoneHTML for vanlige soner) — den forrige versjonen
+  // serialiserte et DOM-tre via tmp.innerHTML, og JS-lyttere fra addEventListener
+  // overlever ikke den serialiseringen. Rediger-knappen så riktig ut, men gjorde
+  // ingenting. Nicolay rapporterte dette 24.9.
   var profilAnalyseHtml = '';
   if (state.profilbilde && state.profilbilde.analysis) {
     var hIdx = 'helhet';
@@ -2904,80 +2958,29 @@ async function buildGuide() {
     var hStatus = (guideRedigert[hIdx] && guideRedigert[hIdx].status) ? guideRedigert[hIdx].status : '';
     var hStatusColor = hStatus==='gronn'?'var(--green-dark)':hStatus==='gul'?'var(--amber)':'var(--red)';
     var hStatusLabel = hStatus==='gronn'?'✅ Tilgjengelig':hStatus==='gul'?'🟡 Delvis tilgjengelig':hStatus==='rod'?'🔴 Begrenset':'';
+    var hBtnGronn = 'status-toggle-btn'+(hStatus==='gronn'?' active-gronn':'');
+    var hBtnGul = 'status-toggle-btn'+(hStatus==='gul'?' active-gul':'');
+    var hBtnRod = 'status-toggle-btn'+(hStatus==='rod'?' active-rod':'');
 
-    var hDiv = document.createElement('div');
-    hDiv.className = 'guide-sone';
-    hDiv.style.cssText = 'background:var(--green-light);border-color:var(--green)';
-
-    // Topp-rad
-    var topp = document.createElement('div');
-    topp.className = 'guide-sone-topp';
-    topp.innerHTML = '<div class="guide-sone-ikon">🏠</div><h3 class=\"guide-sone-navn\">'+T('rapport_helhetsinntrykk')+'</h3>';
-    var editBtn = document.createElement('button');
-    editBtn.className = 'sone-edit-btn';
-    editBtn.id = 'edit-btn-' + hIdx;
-    editBtn.textContent = T('sone_rediger');
-    editBtn.addEventListener('click', function() { toggleEditSone(hIdx); });
-    topp.appendChild(editBtn);
-    hDiv.appendChild(topp);
-
-    // Status
-    var statusDiv = document.createElement('div');
-    statusDiv.id = 'guide-sone-status-' + hIdx;
-    if (hStatus) statusDiv.innerHTML = '<span style="font-size:13px;font-weight:700;color:'+hStatusColor+'">'+hStatusLabel+'</span>';
-    statusDiv.style.marginBottom = hStatus ? '6px' : '0';
-    hDiv.appendChild(statusDiv);
-
-    // Tekst
-    var tekstDiv = document.createElement('div');
-    tekstDiv.className = 'guide-sone-tekst';
-    tekstDiv.id = 'guide-sone-tekst-' + hIdx;
-    tekstDiv.innerHTML = mdTilHtml(hTekst);
-    hDiv.appendChild(tekstDiv);
-
-    // Rediger-panel
-    var editPanel = document.createElement('div');
-    editPanel.id = 'edit-sone-' + hIdx;
-    editPanel.style.display = 'none';
-    editPanel.style.marginTop = '10px';
-
-    var banner = document.createElement('div');
-    banner.className = 'edit-mode-banner';
-    banner.textContent = T('guide_rediger_helhet');
-    editPanel.appendChild(banner);
-
-    var toggleRow = document.createElement('div');
-    toggleRow.className = 'status-toggle';
-    [['gronn','✅ Tilgjengelig'],['gul','🟡 Delvis'],['rod','🔴 Begrenset']].forEach(function(pair) {
-      var s = pair[0], label = pair[1];
-      var b = document.createElement('button');
-      b.className = 'status-toggle-btn' + (hStatus===s ? ' active-'+s : '');
-      b.id = 'status-btn-' + hIdx + '-' + s;
-      b.textContent = label;
-      b.addEventListener('click', function() { setStatusToggle(hIdx, s); });
-      toggleRow.appendChild(b);
-    });
-    editPanel.appendChild(toggleRow);
-
-    var ta = document.createElement('textarea');
-    ta.className = 'sone-edit-area';
-    ta.id = 'edit-tekst-' + hIdx;
-    ta.rows = 6;
-    ta.value = hTekst;
-    editPanel.appendChild(ta);
-
-    var saveBtn = document.createElement('button');
-    saveBtn.textContent = 'Lagre';
-    saveBtn.style.cssText = 'background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 18px;font-size:14px;font-family:inherit;font-weight:600;cursor:pointer;margin-top:8px;width:100%';
-    saveBtn.addEventListener('click', function() { saveAndClose(hIdx); });
-    editPanel.appendChild(saveBtn);
-
-    hDiv.appendChild(editPanel);
-
-    // Serialiser til HTML-streng for å sette inn i sonerHtml
-    var tmp = document.createElement('div');
-    tmp.appendChild(hDiv);
-    profilAnalyseHtml = tmp.innerHTML;
+    var hh = '<div class="guide-sone" style="background:var(--green-light);border-color:var(--green)">';
+    hh += '<div class="guide-sone-topp">';
+    hh += '<div class="guide-sone-ikon">🏠</div><h3 class=\"guide-sone-navn\">'+T('rapport_helhetsinntrykk')+'</h3>';
+    hh += '<div id="guide-sone-status-'+hIdx+'">'+(hStatus?('<span style="font-size:13px;font-weight:700;color:'+hStatusColor+'">'+hStatusLabel+'</span>'):'')+'</div>';
+    hh += '<button class="sone-edit-btn" id="edit-btn-'+hIdx+'" onclick="toggleEditSone(&quot;helhet&quot;)">'+T('sone_rediger')+'</button>';
+    hh += '</div>';
+    hh += '<div id="guide-sone-tekst-'+hIdx+'" class="guide-sone-tekst">'+mdTilHtml(hTekst)+'</div>';
+    hh += '<div id="edit-sone-'+hIdx+'" style="display:none;margin-top:10px">';
+    hh += '<div class="edit-mode-banner">'+T('guide_rediger_helhet')+'</div>';
+    hh += '<div class="status-toggle">';
+    hh += '<button class="'+hBtnGronn+'" id="status-btn-'+hIdx+'-gronn" onclick="setStatusToggle(&quot;helhet&quot;,&quot;gronn&quot;)">✅ Tilgjengelig</button>';
+    hh += '<button class="'+hBtnGul+'" id="status-btn-'+hIdx+'-gul" onclick="setStatusToggle(&quot;helhet&quot;,&quot;gul&quot;)">🟡 Delvis</button>';
+    hh += '<button class="'+hBtnRod+'" id="status-btn-'+hIdx+'-rod" onclick="setStatusToggle(&quot;helhet&quot;,&quot;rod&quot;)">🔴 Begrenset</button>';
+    hh += '</div>';
+    hh += '<textarea class="sone-edit-area" id="edit-tekst-'+hIdx+'" rows="6">'+mdEsc(hTekst)+'</textarea>';
+    hh += '<button style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 18px;font-size:14px;font-family:inherit;font-weight:600;cursor:pointer;margin-top:8px;width:100%" onclick="saveAndClose(&quot;helhet&quot;)">Lagre</button>';
+    hh += '</div>';
+    hh += '</div>';
+    profilAnalyseHtml = hh;
   }
 
   var sonerHtml = profilAnalyseHtml +
@@ -3461,7 +3464,23 @@ function byggKartleggingPayload(godkjentAvNavn) {
             return { kategori: z.id, ai_analyse: img.analysis||null, url: null };
           })
         };
-      }),
+      })
+      // v0.5.18: profilbildet legges til som en syntetisk "sone" med reservert id
+      // 'profilbilde' (brukes ikke av noen ekte sonetype) — så det følger EXAKT
+      // samme opplastings-/lagringsvei som alle andre sonebilder (upload_url inn,
+      // offentlig url tilbake), uten at Ole trenger å bygge noe nytt. Filtreres
+      // bort igjen som vanlig tilgjengelighets-sone i guide.html (se der).
+      .concat(state.profilbilde ? [{
+        id: 'profilbilde',
+        label: 'Profilbilde',
+        status: null,
+        gjeste_tekst: '',
+        ai_tekst: state.profilbilde.analysis || null,
+        ai_status: null,
+        menneske_redigert: false,
+        datapunkter: [],
+        bilder: [{ kategori: 'profilbilde', ai_analyse: state.profilbilde.analysis || null, url: null }]
+      }] : []),
     svar: state.answers || {},
     svar_usynlig: (function(){ var ut = {}; UB_QUESTIONS.filter(ubRelevant).forEach(function(q){ if (state.usynlig[q.id]) ut[q.id] = state.usynlig[q.id]; }); return ut; })(),
     gpx: state.gpxData ? {
@@ -3508,23 +3527,80 @@ async function lastOppEttBilde(url, dataUrl, forsokNr) {
       await new Promise(function(r){ setTimeout(r, 500 * forsokNr); });
       return lastOppEttBilde(url, dataUrl, forsokNr + 1);
     }
-    console.warn('Bildeopplasting feilet etter 3 forsøk:', e.message);
+    console.warn('Bildeopplasting feilet etter 3 forsøk (' + url.slice(0,80) + '...):', e.message);
     return false;
   }
 }
 
-async function lastOppBilder(bilderSvar) {
-  if (!Array.isArray(bilderSvar) || bilderSvar.length === 0) return { totalt: 0, feilet: 0 };
-  var oppgaver = bilderSvar.map(function(b) {
-    if (!b || !b.upload_url) return Promise.resolve(true); // ingen opplasting ventet — ikke tell som feil
-    var sone = state.zones.filter(function(z){ return z.id === b.sone_id; })[0];
-    var bilde = sone && sone.images[b.rekkefolge];
-    if (!bilde || !bilde.dataUrl) return Promise.resolve(true); // fantes ikke lokalt — ikke tell som feil
-    return lastOppEttBilde(b.upload_url, bilde.dataUrl);
+// v0.5.17: begrenset samtidighet ved opplasting — Nicolay rapporterte at
+// nøyaktig 1 bilde av 9-11 feilet å laste opp to ganger på rad, med god
+// dekning begge ganger (for konsekvent til å være ren signalstøy). Forrige
+// versjon sendte ALLE bildene i ett Promise.all — alle PUT-forespørslene
+// samtidig, ingen begrensning. På mobilt nett er det ofte total båndbredde,
+// ikke signalstyrke, som er begrensningen: når 9-11 bilder kjemper om samme
+// oppkobling samtidig, er det naturlig at ett "sakker akterut" og ikke
+// rekker gjennom på noen av de 3 forsøkene, fordi resten fortsatt spiser
+// bånd i samme tidsvindu. Nå: maks 3 samtidige opplastinger i en enkel kø,
+// så et bilde som må ta et nytt forsøk har mindre konkurranse om båndbredden.
+var MAKS_SAMTIDIGE_OPPLASTINGER = 3;
+
+async function lastOppMedBegrensning(oppgaveFns, maksSamtidig, fremdriftCb) {
+  var resultater = new Array(oppgaveFns.length);
+  var neste = 0, ferdig = 0;
+  function kjorNeste() {
+    if (neste >= oppgaveFns.length) return Promise.resolve();
+    var i = neste++;
+    return oppgaveFns[i]().then(function(res) {
+      resultater[i] = res;
+      ferdig++;
+      if (fremdriftCb) fremdriftCb(ferdig, oppgaveFns.length);
+      return kjorNeste();
+    });
+  }
+  var arbeidere = [];
+  for (var w = 0; w < Math.min(maksSamtidig, oppgaveFns.length); w++) arbeidere.push(kjorNeste());
+  await Promise.all(arbeidere);
+  return resultater;
+}
+
+async function lastOppBilder(bilderSvar, fremdriftCb) {
+  if (!Array.isArray(bilderSvar) || bilderSvar.length === 0) return { totalt: 0, feilet: 0, feiledeSoner: [] };
+  var oppgaveFns = bilderSvar.map(function(b) {
+    return function() {
+      if (!b || !b.upload_url) return Promise.resolve(true); // ingen opplasting ventet — ikke tell som feil
+      // v0.5.18: profilbildet er en syntetisk sone (id 'profilbilde'), finnes ikke
+      // i state.zones — bildet ligger i state.profilbilde i stedet.
+      if (b.sone_id === 'profilbilde') {
+        if (!state.profilbilde || !state.profilbilde.dataUrl) return Promise.resolve(true);
+        return lastOppEttBilde(b.upload_url, state.profilbilde.dataUrl);
+      }
+      var sone = state.zones.filter(function(z){ return z.id === b.sone_id; })[0];
+      var bilde = sone && sone.images[b.rekkefolge];
+      if (!bilde || !bilde.dataUrl) return Promise.resolve(true); // fantes ikke lokalt — ikke tell som feil
+      return lastOppEttBilde(b.upload_url, bilde.dataUrl);
+    };
   });
-  var resultater = await Promise.all(oppgaver);
-  var feilet = resultater.filter(function(ok){ return !ok; }).length;
-  return { totalt: oppgaver.length, feilet: feilet };
+  var resultater = await lastOppMedBegrensning(oppgaveFns, MAKS_SAMTIDIGE_OPPLASTINGER, fremdriftCb);
+  // v0.5.17: identifiser HVILKEN sone/bilde som feilet — Nicolay kunne tidligere
+  // ikke se dette (kun "1 av 9 feilet"), verken i UI eller i konsoll-loggen.
+  var feiledeSoner = [];
+  resultater.forEach(function(ok, i) {
+    if (!ok) {
+      var b = bilderSvar[i];
+      // v0.5.18: profilbildet er ikke en ekte sone i state.zones — gi den en
+      // lesbar etikett direkte i stedet for å slå den opp der.
+      var visningsLabel = b && b.sone_id === 'profilbilde' ? 'Profilbilde'
+        : (b && state.zones.filter(function(z){ return z.id === b.sone_id; })[0]);
+      feiledeSoner.push({
+        sone_id: b ? b.sone_id : null,
+        label: (b && b.sone_id === 'profilbilde') ? 'Profilbilde' : (visningsLabel ? TL(visningsLabel.label) : (b ? b.sone_id : '?')),
+        rekkefolge: b ? b.rekkefolge : null
+      });
+    }
+  });
+  var feilet = feiledeSoner.length;
+  if (feilet > 0) console.warn('Bildeopplasting feilet for:', feiledeSoner);
+  return { totalt: oppgaveFns.length, feilet: feilet, feiledeSoner: feiledeSoner };
 }
 
 async function sendTilAPI(payload) {
@@ -3539,8 +3615,12 @@ async function sendTilAPI(payload) {
       // v0.4.24: venter nå på at ALLE bilder faktisk er ferdig lastet opp
       // (med automatiske nye forsøk) før operasjonen regnes som fullført —
       // se lastOppBilder. Tidligere ble dette aldri ventet på.
-      var bildeResultat = { totalt: 0, feilet: 0 };
-      if (data.bilder) bildeResultat = await lastOppBilder(data.bilder);
+      var bildeResultat = { totalt: 0, feilet: 0, feiledeSoner: [] };
+      // v0.5.18: profilbildet lastes nå opp som en helt vanlig del av denne
+      // samlingen (se byggKartleggingPayload — sendt som en syntetisk sone med
+      // id 'profilbilde', matchet i lastOppBilder) — ingen egen kode nødvendig
+      // her lenger, og ingen egen mekanisme å be Ole om å bygge.
+      if (data.bilder) bildeResultat = await lastOppBilder(data.bilder, visOpplastingFremdrift);
       // v0.5.14: serveren ekko'er nå tilbake samtykket den lagret — logges i konsoll
       // som en enkel måte å bekrefte i testfasen at det faktisk kom fram til basen.
       if (data.samtykke) console.log('Samtykke bekreftet av server:', data.samtykke);
@@ -3570,12 +3650,27 @@ function visSyncStatus(tilstand, statusKode, bildeResultat) {
   } else if (tilstand === 'ok') {
     el.innerHTML = '✅ <span>' + T('sync_ok') + '</span>';
   } else if (tilstand === 'delvis') {
-    el.innerHTML = '⚠️ <span>' + T('sync_delvis').replace('{feilet}', bildeResultat.feilet).replace('{totalt}', bildeResultat.totalt) + '</span>' +
+    // v0.5.17: navngi hvilke(n) sone(r) som feilet, i stedet for bare et antall —
+    // Nicolay kunne ikke se hvilket bilde det gjaldt, verken i UI eller konsoll.
+    var soneNavn = (bildeResultat.feiledeSoner || []).map(function(f){ return f.label; }).join(', ');
+    var detaljer = soneNavn ? ' (' + soneNavn + ')' : '';
+    el.innerHTML = '⚠️ <span>' + T('sync_delvis').replace('{feilet}', bildeResultat.feilet).replace('{totalt}', bildeResultat.totalt) + detaljer + '</span>' +
       '<button class="sync-retry-btn" onclick="provLagreIgjen()">' + T('sync_prov_igjen') + '</button>';
   } else {
     el.innerHTML = '⚠️ <span>' + T('sync_feil') + (statusKode ? ' (' + statusKode + ')' : '') + '</span>' +
       '<button class="sync-retry-btn" onclick="provLagreIgjen()">' + T('sync_prov_igjen') + '</button>';
   }
+}
+
+// v0.5.17: tydelig fremdrift under selve opplastingen ("Bør kanskje være en
+// tydeligere opplastingsdialog som viser at det lastes opp" — Nicolay), i
+// stedet for at brukeren bare ser en spinner helt til alt plutselig er ferdig.
+function visOpplastingFremdrift(ferdig, totalt) {
+  var el = document.getElementById('sync-status');
+  if (!el || totalt === 0) return;
+  el.style.display = 'flex';
+  el.className = 'sync-status lagrer';
+  el.innerHTML = '<span class="sync-spinner"></span><span>Laster opp bilde ' + ferdig + ' av ' + totalt + ' \u2026</span>';
 }
 
 function lagreOgVisStatus(payload) {

@@ -78,6 +78,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 .kart-wrapper{width:100%;height:200px;border-radius:var(--radius);overflow:hidden;margin-bottom:.75rem;border:1px solid var(--border);background:var(--surface2)}
 
+/* v0.5.17: synlig profilbilde over kartet — den gamle .hero-bg (25% opacity bak
+   tekst i toppbanneret) var for svak til faktisk å hjelpe gjesten kjenne stedet
+   igjen (Nicolay). Vises kun når enhet.profilbilde_url finnes fra serveren. */
+.profil-foto{width:100%;height:180px;object-fit:cover;border-radius:var(--radius);margin-bottom:.75rem;border:1px solid var(--border);display:block}
+
 .erfaring-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:.625rem}
 .stem-btn{margin-top:.625rem;background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
 .stem-btn:hover{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
@@ -184,11 +189,16 @@ var SVAR_TEKST = {
 
 // Usynlige behov — kun 'ja'-svar vises, samme 15 spørsmål som i index.html.
 var UB_TEKST = {
-  ub_stoy:'Lavt støynivå i fellesarealer', ub_stille:'Stille soner eller lavstimulerte arealer finnes',
+  ub_stoy:'Lavt støynivå i fellesarealer',
+  // v0.5.17: skjerpet ordlyd — "Stille soner..." og "Hvilerom..." (under) lignet på
+  // hverandre for gjesten (Nicolay). ub_stille = generelt sansemiljø, ub_hvile =
+  // et konkret tilbaketrekningsrom. Speilet fra index.html sin UB_QUESTIONS-tekst.
+  ub_stille:'Rolig miljø generelt, med lite støy og sansestimuli',
   ub_lys:'Jevn belysning uten flimmer', ub_lukt:'Fritt for sterke lukter i fellesarealer',
   ub_skilting:'Tydelig skilting gjennom anlegget', ub_forhaand:'Informasjon om besøket tilgjengelig på forhånd',
   ub_spraak:'Informasjonen er skrevet i enkelt språk', ub_merking:'Toalett, utganger og sitteplasser er tydelig merket',
-  ub_wc:'Toalett lett tilgjengelig fra alle aktivitetsarealer', ub_hvile:'Hvilerom eller stille plass finnes',
+  ub_wc:'Toalett lett tilgjengelig fra alle aktivitetsarealer',
+  ub_hvile:'Eget rom å trekke seg tilbake til for en pause',
   ub_sitte:'Sitteplasser tilgjengelig underveis', ub_avbryte:'Gjester kan avbryte en aktivitet uten å forklare seg',
   ub_opplaering:'Ansatte har fått opplæring i å møte gjester med ulike behov',
   ub_medisinsk:'Ansatte vet hva de skal gjøre ved en medisinsk hendelse',
@@ -307,13 +317,25 @@ function visGuide(data) {
     html += '<div class="demo-note">⚡ Demo-visning — data er ikke hentet fra database. Lenk med <code>?enhet_id=ID</code> for live data.</div>';
   }
 
+  // v0.5.18: profilbildet kommer nå tilbake som en syntetisk sone (id 'profilbilde',
+  // reservert id — se index.html byggKartleggingPayload) i stedet for et eget
+  // enhet.profilbilde_url-felt. Plukkes ut her og vises som et faktisk synlig
+  // bilde over kartet, og filtreres bort fra vanlig tilgjengelighets-sonevisning
+  // under (den skal ikke dukke opp som en accessibility-sone med statuspille etc.).
+  var profilSone = (data.soner||[]).filter(function(s){ return s.id === 'profilbilde'; })[0];
+  var soner = (data.soner||[]).filter(function(s){ return s.id !== 'profilbilde'; });
+  var profilUrl = profilSone && profilSone.bilder && profilSone.bilder[0] && profilSone.bilder[0].url;
+  if (profilUrl) {
+    html += '<img class="profil-foto" src="' + mdEsc(profilUrl) + '" alt="' + mdEsc(enhet.navn||'') + '"/>';
+  }
+
   if (enhet.lat && enhet.lng) {
     html += '<div class="kart-wrapper" id="posisjonskart"></div>';
   }
 
   var ankomstIds = ['parkering','inngang','adkomst','resepsjon','mottakelse'];
-  var ankomst = (data.soner||[]).filter(function(s){return ankomstIds.indexOf(s.id)>=0;});
-  var opphold = (data.soner||[]).filter(function(s){return ankomstIds.indexOf(s.id)<0;});
+  var ankomst = soner.filter(function(s){return ankomstIds.indexOf(s.id)>=0;});
+  var opphold = soner.filter(function(s){return ankomstIds.indexOf(s.id)<0;});
 
   if (ankomst.length) {
     html += '<h2 class="seksjon-hd">Ankomst og adkomst</h2>';
@@ -399,7 +421,17 @@ function mdEsc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 function mdInlineBold(s) {
-  return mdEsc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  var out = mdEsc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // v0.5.17: AI-en skriver innimellom enkelt-stjerne kursiv (*tekst*), som denne
+  // funksjonen tidligere ikke forstod — stjernene ble stående rått i gjesteteksten
+  // (rapportert av Nicolay, "Sitte område"-eksempel med "****" og "*Avhenger...*").
+  // Speilet fra index.html (holdes identisk siden filene ikke deler JS-moduler).
+  out = out.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+  // Sikkerhetsnett: fjern eventuelle gjenværende, ubalanserte stjerner (f.eks.
+  // en AI-generert "****"-divider) som ikke matchet noen av mønstrene over — så
+  // ingenting rått vises uansett hva AI-en finner på.
+  out = out.replace(/\*+/g, '');
+  return out;
 }
 function mdTilHtml(raw) {
   if (!raw) return '';
