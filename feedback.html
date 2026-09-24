@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Gi tilbakemelding — AccessNorway</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231a1a18'/%3E%3Ctext x='16' y='23' font-family='Arial,sans-serif' font-size='20' font-weight='800' fill='%231D9E75' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -15,7 +16,7 @@
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface2);color:var(--text);line-height:1.5}
 .topbar{background:#1a1a18;padding:0 1.25rem;height:52px;display:flex;align-items:center}
-.topbar-logo{font-size:16px;font-weight:700;color:#fff}
+.topbar-logo{font-size:16px;font-weight:700;color:#fff;text-decoration:none}
 .topbar-logo span{color:var(--green)}
 .content{max-width:520px;margin:0 auto;padding:1.5rem 1.25rem 4rem}
 .hero-title{font-size:22px;font-weight:800;margin-bottom:.4rem}
@@ -69,7 +70,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 <body>
 
 <div class="topbar">
-  <div class="topbar-logo">Access<span>Norway</span></div>
+  <a class="topbar-logo" href="velkommen.html">Access<span>Norway</span></a>
 </div>
 
 <main class="content">
@@ -86,9 +87,9 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
         <div class="field">
           <label class="field-label">Hvem svarer du som? <span style="color:var(--red)">*</span></label>
           <div class="radio-grid" id="rolle-grid">
-            <label class="radio-opt"><input type="radio" name="rolle" value="Bedrift / destinasjon" required> 🏨 Bedrift / destinasjon</label>
-            <label class="radio-opt"><input type="radio" name="rolle" value="FoU / utvikler" required> 🛠️ FoU / utvikler</label>
-            <label class="radio-opt"><input type="radio" name="rolle" value="Bruker / brukerorganisasjon" required> ♿ Bruker / brukerorganisasjon</label>
+            <label class="radio-opt"><input type="radio" name="rolle" value="Bedrift / destinasjon"> 🏨 Bedrift / destinasjon</label>
+            <label class="radio-opt"><input type="radio" name="rolle" value="FoU / utvikler"> 🛠️ FoU / utvikler</label>
+            <label class="radio-opt"><input type="radio" name="rolle" value="Bruker / brukerorganisasjon"> ♿ Bruker / brukerorganisasjon</label>
           </div>
         </div>
       </div>
@@ -97,11 +98,11 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
         <div class="field">
           <label class="field-label">Hva gjelder tilbakemeldingen? <span style="color:var(--red)">*</span></label>
           <div class="radio-grid" id="del-grid">
-            <label class="radio-opt" data-skjul-for-bruker><input type="radio" name="del" value="Kartleggingsverktøyet (index.html)" required> Kartleggingsverktøyet — selv det å kartlegge et sted</label>
-            <label class="radio-opt"><input type="radio" name="del" value="Guiden / rapporten gjestene leser" required> Guiden / rapporten gjestene leser</label>
-            <label class="radio-opt"><input type="radio" name="del" value='"Del din erfaring"-skjemaet' required> "Del din erfaring"-skjemaet</label>
-            <label class="radio-opt" data-skjul-for-bruker><input type="radio" name="del" value="Velkomstsiden" required> Velkomstsiden</label>
-            <label class="radio-opt" data-skjul-for-bruker><input type="radio" name="del" value="Annet / usikker" required> Annet / usikker</label>
+            <label class="radio-opt" data-skjul-for-bruker><input type="radio" name="del" value="Kartleggingsverktøyet (index.html)"> Kartleggingsverktøyet — selv det å kartlegge et sted</label>
+            <label class="radio-opt"><input type="radio" name="del" value="Guiden / rapporten gjestene leser"> Guiden / rapporten gjestene leser</label>
+            <label class="radio-opt"><input type="radio" name="del" value='"Del din erfaring"-skjemaet'> "Del din erfaring"-skjemaet</label>
+            <label class="radio-opt" data-skjul-for-bruker><input type="radio" name="del" value="Velkomstsiden"> Velkomstsiden</label>
+            <label class="radio-opt"><input type="radio" name="del" value="Annet / usikker"> Annet / usikker</label>
           </div>
         </div>
       </div>
@@ -173,8 +174,8 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
           </div>
         </div>
         <div class="field">
-          <label class="field-label" for="beskrivelse_bedrift">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
-          <textarea id="beskrivelse_bedrift" name="beskrivelse_bedrift" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over." required></textarea>
+          <label class="field-label" for="beskrivelse_bedrift">Beskriv tilbakemeldingen (valgfritt)</label>
+          <textarea id="beskrivelse_bedrift" name="beskrivelse_bedrift" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over."></textarea>
         </div>
       </div>
 
@@ -238,8 +239,8 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
           </div>
         </div>
         <div class="field">
-          <label class="field-label" for="beskrivelse_fou">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
-          <textarea id="beskrivelse_fou" name="beskrivelse_fou" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over." required></textarea>
+          <label class="field-label" for="beskrivelse_fou">Beskriv tilbakemeldingen (valgfritt)</label>
+          <textarea id="beskrivelse_fou" name="beskrivelse_fou" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over."></textarea>
         </div>
         <div class="field">
           <label class="field-label">Alvorlighetsgrad</label>
@@ -299,8 +300,8 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
           <input type="text" id="bruker_mangler_beskrivelse" name="bruker_mangler_beskrivelse" placeholder="F.eks. hva som må endres eller legges til">
         </div>
         <div class="field">
-          <label class="field-label" for="beskrivelse_bruker">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
-          <textarea id="beskrivelse_bruker" name="beskrivelse_bruker" placeholder="Vær så konkret du kan." required></textarea>
+          <label class="field-label" for="beskrivelse_bruker">Beskriv tilbakemeldingen (valgfritt)</label>
+          <textarea id="beskrivelse_bruker" name="beskrivelse_bruker" placeholder="Vær så konkret du kan."></textarea>
         </div>
       </div>
 
@@ -397,6 +398,33 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 //   (funnet automatisk via skjemaets data-params, ikke lest av Nicolay manuelt).
 //   Epost-feltet fikk også autocomplete="email" (i tillegg til den allerede
 //   eksisterende type="email") for å sikre e-post-tastatur/forslag på mobil.
+// v6 (2026-09-24, kveld): på Nicolays tilbakemelding —
+//   1) «Beskriv tilbakemeldingen» er ikke lenger obligatorisk. Fjernet `required`
+//      fra alle tre tekstfelt, fjernet stjernen fra label (nå «(valgfritt)»,
+//      likt de andre valgfrie feltene), og fjernet blokkeringen i submit-
+//      handleren som viste feilmelding hvis feltet var tomt.
+//   2) Logoen i toppen ("AccessNorway") er nå en lenke til velkommen.html,
+//      slik at man kommer til velkomstsiden ved å klikke på den — samme endring
+//      gjort i alle sidene (index/guide/erfaring/dashboard/velkommen).
+// v7 (2026-09-25): FANT ROTÅRSAKEN til at "skjer ikke noe når jeg trykker send
+//   inn" (rapportert av Nicolay) — «Hvem svarer du som?» og «Hva gjelder
+//   tilbakemeldingen?» hadde fortsatt native `required` på radioknappene. Når
+//   ett av disse IKKE var valgt, blokkerte NETTLESEREN selv innsendingen helt
+//   stille (bekreftet: vårt eget submit-event fyres aldri i det hele tatt) —
+//   FØR koden vår i det hele tatt fikk sjansen til å vise en synlig
+//   feilmelding. På mobil/enkelte nettlesere er denne native blokkeringen
+//   usynlig eller lett å overse → ser ut som "ingenting skjer".
+//   Fikset: fjernet `required` fra alle rolle-/del-radioknappene. All
+//   validering skjer nå 100% i vår egen JS (samme visFeil()-logikk som
+//   allerede fantes) — garantert synlig feilmelding + scroll til feltet,
+//   uansett nettleser.
+//   Samtidig oppdaget: en Bruker/brukerorganisasjon kunne ikke velge
+//   «Annet / usikker» under «Hva gjelder tilbakemeldingen» (den var skjult for
+//   denne rollen) — dvs. INGEN gyldig «del»-valg fantes for en bruker som vil
+//   gi tilbakemelding på noe generelt som selve feedback-skjemaet. «Annet /
+//   usikker» er nå synlig for alle roller (Kartleggingsverktøyet og
+//   Velkomstsiden er fortsatt skjult for Bruker, siden de ikke kartlegger selv).
+//   La også til favicon (grønn "A" på mørk bunn, matcher logoen).
 // ============================================================================
 var GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf7sx1uFHFG7jtp_d8maJHIhavri63KyqPT9qZgmojPcCwv1g/formResponse';
 
@@ -555,17 +583,14 @@ document.getElementById('tilbake-form').addEventListener('submit', function(e) {
   var del = document.querySelector('input[name="del"]:checked');
   var beskrivelseFelt = hentBeskrivelseFelt();
   var beskrivelse = beskrivelseFelt ? beskrivelseFelt.value.trim() : '';
-  // v4: dette skal normalt aldri slå til nå (beskrivelse-feltene har `required`,
-  // så nettleseren blokkerer og viser sin egen feilmelding før submit-eventet
-  // i det hele tatt når hit) — men vis en tydelig, synlig feilmelding her også,
-  // i stedet for det tidligere stille `return`, som en ekstra sikkerhet.
+  // v7: dette er nå den ENESTE valideringen som kjører — rolle/del har ikke
+  // lenger native `required` på radioknappene (se v7-kommentar over), nettopp
+  // for at denne synlige feilmeldingen alltid skal vises i stedet for at
+  // nettleseren blokkerer stille.
   if (!rolle) { visFeil('⚠️ Velg hvem du svarer som før du sender inn.'); return; }
   if (!del) { visFeil('⚠️ Velg hva tilbakemeldingen gjelder før du sender inn.'); return; }
-  if (!beskrivelse) {
-    visFeil('⚠️ Skriv en kort beskrivelse under «Beskriv tilbakemeldingen» før du sender inn.');
-    if (beskrivelseFelt) { beskrivelseFelt.scrollIntoView({behavior:'smooth', block:'center'}); beskrivelseFelt.focus(); }
-    return;
-  }
+  // v6: «Beskriv tilbakemeldingen» er nå valgfritt (etter ønske fra Nicolay) —
+  // ingen blokkering eller feilmelding lenger hvis feltet står tomt.
   skjulFeil();
 
   var navn = document.getElementById('navn').value.trim();
