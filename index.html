@@ -192,25 +192,6 @@ textarea{resize:vertical;min-height:80px}
 .tillegg-kort{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.875rem}
 .tillegg-ikon{font-size:20px;margin-bottom:4px}
 .tillegg-verdi{font-size:13px;font-weight:600;color:var(--text)}
-.chat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1rem}
-.chat-header{background:#1a1a18;padding:1rem 1.25rem;display:flex;align-items:center;gap:10px}
-.chat-header-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
-.chat-header-title{font-size:14px;font-weight:600;color:#fff}
-.chat-header-sub{font-size:12px;color:rgba(255,255,255,.4);margin-left:auto}
-.chat-messages{padding:1rem;min-height:120px;max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
-.chat-msg{max-width:85%}
-.chat-msg.bot{align-self:flex-start}
-.chat-msg.user{align-self:flex-end}
-.chat-bubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5}
-.chat-msg.bot .chat-bubble{background:var(--surface2);color:var(--text);border-radius:4px 16px 16px 16px}
-.chat-msg.user .chat-bubble{background:var(--green);color:#fff;border-radius:16px 16px 4px 16px}
-.chat-spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--text3);border-radius:50%;animation:spin .8s linear infinite;margin-right:6px}
-.chat-input-row{display:flex;gap:8px;padding:.75rem 1rem;border-top:1px solid var(--border)}
-.chat-input{flex:1;border:1.5px solid var(--border2);border-radius:20px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none}
-.chat-input:focus{border-color:var(--green)}
-.chat-send{background:var(--green);color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 1rem .75rem}
-.chat-suggestion{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:5px 12px;font-size:12px;font-family:inherit;cursor:pointer;color:var(--text2)}
 .success-banner{background:var(--green-light);border:1px solid rgba(29,158,117,.2);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;display:flex;gap:12px;align-items:flex-start}
 .success-icon{font-size:28px;flex-shrink:0}
 .success-title{font-weight:600;color:var(--green-dark);margin-bottom:3px}
@@ -517,7 +498,16 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.30';
+const APP_VERSION = 'v0.5.31';
+// v0.5.31 (24.9.2026): Tilgjengelighetsassistenten (chatboten) er flyttet til guide.html
+// og fjernet herfra. Den fantes kun inne i kartleggerens egne forhåndsvisninger (Guide- og
+// Analyse-fanen i denne filen) og var derfor aldri tilgjengelig for faktiske gjester på den
+// publiserte guide.html-siden. Chatten (med samme system-prompt, samme AI-worker, og egen
+// kontekst bygget av sonetekst/tilrettelegging/sensorisk-info) er nå portet inn i guide.html
+// selv, der ekte gjester kan bruke den. Fjernet herfra: chat-card CSS, AI_MODEL_CHAT/
+// CHAT_SYSTEM-konstanter, sendChat/sendChatSuggestion/sendGuideChatMsg/aktuellSoneInfo/
+// appendChatMsg-funksjonene, samt tilhørende chat_*/guide_spor_om-oversettelser (no/en/es).
+// Se claude/pending-endringer.md.
 // v0.5.30 (24.9.2026): To rettinger etter Nicolays feltarbeid (spillehall-kartlegging):
 // 1) "Vet ikke"-knappen (.yn-btn.na.active) fikk ingen synlig markering ved klikk, siden
 //    aktiv-fargen var identisk med bakgrunnen for en uvalgt knapp — nå samme amber-stil
@@ -605,9 +595,7 @@ const SAMTYKKE_VERSJON = 'v4';
 // kreve at modellen er tillatt i workerens ALLOWED_MODELS)
 const AI_MODEL_BILDE = 'claude-haiku-4-5';
 const AI_MODEL_TEKST = 'claude-haiku-4-5';
-const AI_MODEL_CHAT  = 'claude-haiku-4-5';
 const BILDE_REGLER = 'Regler: (1) Størrelser og mål er kun anslag og skal merkes «anslag» og oppgis grovt (f.eks. «ca. 80–100 cm»). Oppgi bare tall hvis målebånd eller tydelig referanse er synlig i bildet; ellers beskriv kvalitativt (bred, smal, trang) og skriv hva som må måles. (2) Hvis noe ikke er synlig, skriv «ikke synlig i bildet» — ikke «nei». (3) Ikke gjett og ikke finn på detaljer. (4) Ikke omtal personer eller registreringsskilt.';
-const CHAT_SYSTEM = 'Du er en tilgjengelighetsassistent for gjester som planlegger et besøk. Bruk kun informasjonen som er gitt. Ikke gi medisinske eller juridiske råd, ikke gjett, og skill mellom målte opplysninger og anslag fra bilder. Hvis du ikke vet, si det og foreslå å kontakte virksomheten. Svar kort og konkret.';
 
 // ── UUID-identifikatorer (v0.4.16) ────────────────────────────────────────
 // enhet_id:       permanent per sted — gjenbrukes ved oppdatering (localStorage per navn+type)
@@ -628,7 +616,7 @@ function hentEllerLagEnhetId(navn, type) {
 var KARTLEGGING_ID = crypto.randomUUID();
 
 // State må deklareres før TEKST/T() siden T() leser state.lang
-const state = {step:0, tags:[], zones:[], answers:{}, usynlig:{}, soneTekster:{}, _builtForType:'', chatHistory:[], gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
+const state = {step:0, tags:[], zones:[], answers:{}, usynlig:{}, soneTekster:{}, _builtForType:'', gpxData:null, profilbilde:null, lat:null, lng:null, lang:'no'};
 
 // ── Flerspråklig støtte ───────────────────────────────────────────────────
 // Legg til nye språk ved å kopiere 'no'-blokken og oversette verdiene.
@@ -734,7 +722,6 @@ const TEKST = {
     ved_ankomst: '📍 Ved ankomst',
     ovrig: '📋 Øvrig',
     menneskelig_gjennomgang: '👤 Menneskelig gjennomgang',
-    chat_allergi: 'Hva med allergi?',
     chat_kollektivt: 'Kollektivtransport til stedet?',
     godkjent_av_prefix: 'Godkjent av ',
     guide_badge: 'AccessNorway · Tilgjengelighetsguide',
@@ -747,11 +734,9 @@ const TEKST = {
     gps_ikke_tilgjengelig: 'GPS er ikke tilgjengelig i denne nettleseren',
     gps_avslatt: 'Tilgang til posisjon ble avslått — fyll inn manuelt',
     gps_oppdater: 'Posisjon hentet — trykk for å oppdatere',
-    chat_feil: 'Beklager, kunne ikke svare nå.',
     ukjent_sted: 'Ukjent sted',
     ukjent_fylke: 'Ukjent fylke',
     kjorer_analyse: 'Kjører AI-analyse per sone...',
-    chat_hvis_ikke: 'Hvis du ikke vet svaret, si det ærlig.',
     stigning_egnet: '✅ Egnet for rullestol og rullator.',
     stigning_krevende: '🟡 Krevende for manuell rullestol. Elektrisk rullestol eller scooter kan egne seg bedre — sjekk med leverandøren.',
     stigning_bratt_gange: '⚠️ For bratt for de fleste rullestoler. Egnet for gående med god gangfunksjon.',
@@ -782,12 +767,6 @@ const TEKST = {
     modal_avbryt: 'Avbryt',
     // Navigasjonsknapper
     tilbake_pil: '← Tilbake',
-    chat_tittel: 'Tilgjengelighetsassistent',
-    chat_spor_om: 'Spør om tilgjengelighet',
-    chat_ai_assistent: 'AI-assistent',
-    chat_passer_rullestol: 'Passer for rullestol?',
-    chat_hc_parkering: 'Finnes HC-parkering?',
-    chat_input_ph: 'Skriv spørsmål...',
     edit_banner: 'Gjennomgå og rediger teksten før du godkjenner guiden. Klikk Rediger på hver sone.',
     godkjenn_desc: 'Les gjennom teksten over og gjør eventuelle rettelser. Når du er fornøyd, godkjenn guiden med ditt navn.',
     godkjenn_navn_ph: 'Ditt fulle navn...',
@@ -798,11 +777,7 @@ const TEKST = {
     guide_fasiliteter: 'Fasiliteter og tilgjengelighet',
     guide_tilleggstjenester: 'Tilleggstjenester',
     guide_godt_a_vite: 'Godt å vite',
-    guide_spor_om: 'Spør om tilgjengelighet',
     guide_under_oppholdet: '🏠 Under oppholdet',
-    chat_hei: 'Hei! Jeg kan svare på spørsmål om tilgjengeligheten på',
-    chat_hva_lurer: 'Hva lurer du på?',
-    chat_hei_generell: 'Hei! Jeg kan svare på spørsmål om tilgjengeligheten her. Hva lurer du på?',
     gruppe_a: 'A — Bygningsbasert bedrift',
     gruppe_b: 'B — Naturbasert aktivitetsbedrift',
     gruppe_c: 'C — Fellesgode / felles rom',
@@ -953,7 +928,6 @@ const TEKST = {
     ved_ankomst: '📍 On arrival',
     ovrig: '📋 Other',
     menneskelig_gjennomgang: '👤 Human review',
-    chat_allergi: 'What about allergies?',
     chat_kollektivt: 'Public transport to the venue?',
     godkjent_av_prefix: 'Approved by ',
     guide_badge: 'AccessNorway · Accessibility Guide',
@@ -966,11 +940,9 @@ const TEKST = {
     gps_ikke_tilgjengelig: 'GPS is not available in this browser',
     gps_avslatt: 'Location access denied — please fill in manually',
     gps_oppdater: 'Location detected — tap to update',
-    chat_feil: 'Sorry, could not respond right now.',
     ukjent_sted: 'Unknown location',
     ukjent_fylke: 'Unknown county',
     kjorer_analyse: 'Running AI analysis per zone...',
-    chat_hvis_ikke: 'If you do not know the answer, say so honestly.',
     stigning_egnet: '✅ Suitable for wheelchair and walker.',
     stigning_krevende: '🟡 Demanding for manual wheelchair. Electric wheelchair or scooter may handle this better — check with your supplier.',
     stigning_bratt_gange: '⚠️ Too steep for most wheelchairs. Suitable for those with good walking ability.',
@@ -997,12 +969,6 @@ const TEKST = {
     modal_legg_til: 'Add',
     modal_avbryt: 'Cancel',
     tilbake_pil: '← Back',
-    chat_tittel: 'Accessibility assistant',
-    chat_spor_om: 'Ask about accessibility',
-    chat_ai_assistent: 'AI assistant',
-    chat_passer_rullestol: 'Suitable for wheelchair?',
-    chat_hc_parkering: 'Accessible parking available?',
-    chat_input_ph: 'Type your question...',
     edit_banner: 'Review and edit the text before approving the guide. Click Edit on each zone.',
     godkjenn_desc: 'Read through the text above and make any corrections. When satisfied, approve the guide with your name.',
     godkjenn_navn_ph: 'Your full name...',
@@ -1013,11 +979,7 @@ const TEKST = {
     guide_fasiliteter: 'Facilities and accessibility',
     guide_tilleggstjenester: 'Additional services',
     guide_godt_a_vite: 'Good to know',
-    guide_spor_om: 'Ask about accessibility',
     guide_under_oppholdet: '🏠 During the stay',
-    chat_hei: 'Hello! I can answer questions about accessibility at',
-    chat_hva_lurer: 'What would you like to know?',
-    chat_hei_generell: 'Hello! I can answer questions about accessibility here. What would you like to know?',
     gruppe_a: 'A — Building-based business',
     gruppe_b: 'B — Nature-based activity provider',
     gruppe_c: 'C — Public asset / shared space',
@@ -1196,7 +1158,6 @@ const TEKST = {
     ved_ankomst: '📍 A la llegada',
     ovrig: '📋 Otros',
     menneskelig_gjennomgang: '👤 Revisión humana',
-    chat_allergi: '¿Qué hay de las alergias?',
     chat_kollektivt: '¿Transporte público al lugar?',
     godkjent_av_prefix: 'Aprobado por ',
     guide_badge: 'AccessNorway · Guía de accesibilidad',
@@ -1209,11 +1170,9 @@ const TEKST = {
     gps_ikke_tilgjengelig: 'GPS no disponible en este navegador',
     gps_avslatt: 'Acceso a ubicación denegado — rellene manualmente',
     gps_oppdater: 'Ubicación detectada — toque para actualizar',
-    chat_feil: 'Lo sentimos, no se pudo responder ahora.',
     ukjent_sted: 'Lugar desconocido',
     ukjent_fylke: 'Provincia desconocida',
     kjorer_analyse: 'Ejecutando análisis IA por zona...',
-    chat_hvis_ikke: 'Si no sabe la respuesta, dígalo con sinceridad.',
     stigning_egnet: '✅ Apto para silla de ruedas y andador.',
     stigning_krevende: '🟡 Exigente para silla de ruedas manual. La silla eléctrica o el scooter pueden manejarlo mejor — consulte con su proveedor.',
     stigning_bratt_gange: '⚠️ Demasiado empinado para la mayoría de sillas de ruedas. Apto para personas con buena capacidad de marcha.',
@@ -1240,12 +1199,6 @@ const TEKST = {
     modal_legg_til: 'Añadir',
     modal_avbryt: 'Cancelar',
     tilbake_pil: '← Atrás',
-    chat_tittel: 'Asistente de accesibilidad',
-    chat_spor_om: 'Preguntar sobre accesibilidad',
-    chat_ai_assistent: 'Asistente IA',
-    chat_passer_rullestol: '¿Apto para silla de ruedas?',
-    chat_hc_parkering: '¿Hay aparcamiento accesible?',
-    chat_input_ph: 'Escriba su pregunta...',
     edit_banner: 'Revise y edite el texto antes de aprobar la guía. Haga clic en Editar en cada zona.',
     godkjenn_desc: 'Lea el texto anterior y haga las correcciones necesarias. Cuando esté satisfecho, apruebe la guía con su nombre.',
     godkjenn_navn_ph: 'Su nombre completo...',
@@ -1256,11 +1209,7 @@ const TEKST = {
     guide_fasiliteter: 'Instalaciones y accesibilidad',
     guide_tilleggstjenester: 'Servicios adicionales',
     guide_godt_a_vite: 'Bueno saberlo',
-    guide_spor_om: 'Preguntar sobre accesibilidad',
     guide_under_oppholdet: '🏠 Durante la estancia',
-    chat_hei: '¡Hola! Puedo responder preguntas sobre la accesibilidad en',
-    chat_hva_lurer: '¿En qué puedo ayudarle?',
-    chat_hei_generell: '¡Hola! Puedo responder preguntas sobre la accesibilidad aquí. ¿En qué puedo ayudarle?',
     gruppe_a: 'A — Negocio en edificio',
     gruppe_b: 'B — Proveedor de actividades en la naturaleza',
     gruppe_c: 'C — Bien público / espacio compartido',
@@ -3293,19 +3242,6 @@ async function buildGuide() {
     (jaItems ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_tilleggstjenester')+'</h2><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
     (ubHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+ubTxt('tittel')+'</h2><div class="guide-tillegg">'+ubHtml+'</div></div>' : '') +
     (sensoriskHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_godt_a_vite')+'</h2><div class="guide-tillegg">'+sensoriskHtml+'</div></div>' : '') +
-    '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_spor_om')+'</h2>' +
-    '<div class="chat-card">' +
-    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_tittel')+'</div><div class="chat-header-sub">AI</div></div>' +
-    '<div class="chat-messages" id="guide-chat-messages" role="log" aria-live="polite"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei')+' '+name+'. '+T('chat_hva_lurer')+'</div></div></div>' +
-    '<div class="chat-suggestions">' +
-    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Passer det for rullestol?\')">'+T('chat_passer_rullestol')+'</button>' +
-    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Finnes det HC-parkering?\')">'+T('chat_hc_parkering')+'</button>' +
-    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Hva med allergi?\')">'+T('chat_allergi')+'</button>' +
-    '</div>' +
-    '<div class="chat-input-row">' +
-    '<input type="text" class="chat-input" id="guide-chat-input" placeholder="'+T('chat_input_ph')+'" onkeydown="if(event.key===\'Enter\')sendGuideChatMsg()"/>' +
-    '<button class="chat-send" onclick="sendGuideChatMsg()">➤</button>' +
-    '</div></div></div>' +
     '<div class="edit-mode-banner">✏️ <span>'+T('edit_banner')+'</span></div>' +
 
     '<div class="godkjenn-bar" id="godkjenn-bar">' +
@@ -3335,15 +3271,6 @@ async function buildGuide() {
     '<div style="text-align:center;font-size:11px;color:var(--text3);margin-top:1rem;padding-bottom:1rem">'+T('guide_footer')+' · '+new Date().toLocaleDateString('nb-NO')+'</div>';
 
   forhaandsutfyllGodkjennNavn();
-
-  var soner = state.zones.filter(function(z){return z.images.length>0||z.note;});
-  var kontekstTekst = 'Du er tilgjengelighetsassistent for "'+name+'". Svar kort og konkret på '+spraakNavn+'. Fasiliteter: ';
-  kontekstTekst += soner.map(function(z){return z.label+(z.note?' - '+z.note:'');}).join(', ');
-  var ubChatInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':v==='irr'?'Urelevant':'Vet ikke'):'';}).filter(Boolean).join('; ');
-  if (ubChatInfo) kontekstTekst += '. Tilrettelegging for alle: ' + ubChatInfo;
-  kontekstTekst += '. Kun bruk informasjonen gitt.';
-  window._guideChatKontekst = kontekstTekst;
-  window._guideChatHistory = [];
 }
 
 async function buildAnalyse() {
@@ -3408,112 +3335,11 @@ async function buildAnalyse() {
     return '<div class="tillegg-kort"><div class="tillegg-ikon">ℹ️</div><div class="tillegg-verdi">'+t+'</div></div>';
   }).join('');
 
-  var soneInfo = gyldigeSoner.map(function(s){return s.zone.label+' ('+s.statusTekst+'): '+s.gjesteTekst;}).join('\n');
-  var svarInfo = qIds.map(function(id){var q=ALL_QUESTIONS[id];var v=state.answers[id];return q&&v?q.text+': '+(v==='ja'?'Ja':v==='nei'?'Nei':v==='irr'?'Urelevant':'Vet ikke'):'';}).filter(Boolean).join('\n');
-  var ubInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':v==='irr'?'Urelevant':'Vet ikke'):'';}).filter(Boolean).join('\n');
-  if (ubInfo) svarInfo = (svarInfo ? svarInfo + '\n' : '') + 'TILRETTELEGGING FOR ALLE:\n' + ubInfo;
-  var gpxInfo = state.gpxData ? 'GPX: '+state.gpxData.totalDist+'km, maks stigning '+state.gpxData.maxSlope+'%, snitt '+state.gpxData.avgSlope+'%' : '';
-  window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?TL(config.label):type)+'). Svar på '+spraakNavn+', vennlig og konkret.\n\n'+
-    (gpxInfo?'RUTE:\n'+gpxInfo+'\n\n':'')+'FASILITETER:\n'+(soneInfo||T('ikke_registrert'))+'\n\nTILLEGGSINFO:\n'+(svarInfo||T('ikke_registrert'))+
-    '\n\n'+T('chat_hvis_ikke');
-  state.chatHistory = [];
-
   container.innerHTML =
     '<div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">'+T('rapport_fullfort')+'</div><div class="success-text">'+T('rapport_fullfort_desc')+'</div></div></div>' +
     sonerHtml +
     (jaItems?'<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">'+jaItems+'</div></div>':'') +
-    (sensoriskItems?'<div class="card"><div class="card-title">ℹ️ '+T('guide_godt_a_vite')+'</div><div class="tillegg-grid">'+sensoriskItems+'</div></div>':'') +
-    '<div class="chat-card">' +
-    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_spor_om')+'</div><div class="chat-header-sub">'+T('chat_ai_assistent')+'</div></div>' +
-    '<div class="chat-messages" id="chat-messages" role="log" aria-live="polite"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei_generell')+'</div></div></div>' +
-    '<div class="chat-suggestions">' +
-    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_passer_rullestol')+'</button>' +
-    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_hc_parkering')+'</button>' +
-    '<button class="chat-suggestion" onclick="sendChatSuggestion(this)">'+T('chat_allergi')+'</button>' +
-    '</div>' +
-    '<div class="chat-input-row">' +
-    '<input type="text" class="chat-input" id="chat-input" placeholder="'+T('chat_input_ph')+'" onkeydown="if(event.key===\'Enter\')sendChat()"/>' +
-    '<button class="chat-send" onclick="sendChat()">➤</button>' +
-    '</div></div>';
-}
-
-async function sendChat() {
-  var input = document.getElementById('chat-input');
-  var msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  appendChatMsg(mdEsc(msg), 'user');
-  var loadingId = 'loading-'+Date.now();
-  appendChatMsg('<span class="chat-spinner"></span>Tenker...', 'bot', loadingId);
-  state.chatHistory.push({role:'user',content:msg});
-  try {
-    var hist = state.chatHistory.map(function(m){return (m.role==='user'?'Gjest':'Assistent')+': '+m.content;}).join('\n');
-    var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:AI_MODEL_CHAT,max_tokens:500,system:CHAT_SYSTEM,messages:[{role:'user',content:(window._chatKontekst||'')+'\n\nGJELDENDE FASILITETSINFO (kartleggers redigeringer har forrang):\n'+aktuellSoneInfo()+'\n\n'+hist}]})});
-    var data = await res.json();
-    var el = document.getElementById(loadingId); if (el) el.remove();
-    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : T('chat_feil');
-    state.chatHistory.push({role:'assistant',content:svar});
-    appendChatMsg(mdEsc(svar), 'bot');
-  } catch(err) {
-    var el = document.getElementById(loadingId); if (el) el.remove();
-    appendChatMsg('Beklager, noe gikk galt.', 'bot');
-  }
-}
-
-function sendChatSuggestion(btn) { document.getElementById('chat-input').value = btn.textContent; sendChat(); }
-
-async function sendGuideChatMsg(msg) {
-  var input = document.getElementById('guide-chat-input');
-  var text = msg || (input ? input.value.trim() : '');
-  if (!text) return;
-  if (input) input.value = '';
-  var msgs = document.getElementById('guide-chat-messages');
-  var uDiv = document.createElement('div'); uDiv.className='chat-msg user'; uDiv.innerHTML='<div class="chat-bubble">'+mdEsc(text)+'</div>'; msgs.appendChild(uDiv);
-  var loadId = 'gl-'+Date.now();
-  var bDiv = document.createElement('div'); bDiv.className='chat-msg bot'; bDiv.id=loadId; bDiv.innerHTML='<div class="chat-bubble"><span class="chat-spinner"></span>Tenker...</div>'; msgs.appendChild(bDiv);
-  msgs.scrollTop = msgs.scrollHeight;
-  if (!window._guideChatHistory) window._guideChatHistory = [];
-  window._guideChatHistory.push({role:'user',content:text});
-  try {
-    var hist = window._guideChatHistory.map(function(m){return (m.role==='user'?'Gjest':'Assistent')+': '+m.content;}).join('\n');
-    var res = await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:AI_MODEL_CHAT,max_tokens:400,system:CHAT_SYSTEM,messages:[{role:'user',content:(window._guideChatKontekst||'')+'\n\nFASILITETSINFO (kartleggers redigeringer har forrang):\n'+aktuellSoneInfo()+'\n\n'+hist}]})});
-    var data = await res.json();
-    var el = document.getElementById(loadId); if (el) el.remove();
-    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : T('chat_feil');
-    window._guideChatHistory.push({role:'assistant',content:svar});
-    var rDiv = document.createElement('div'); rDiv.className='chat-msg bot'; rDiv.innerHTML='<div class="chat-bubble">'+mdEsc(svar)+'</div>'; msgs.appendChild(rDiv);
-    msgs.scrollTop = msgs.scrollHeight;
-  } catch(err) {
-    var el = document.getElementById(loadId); if (el) el.remove();
-    var eDiv = document.createElement('div'); eDiv.className='chat-msg bot'; eDiv.innerHTML='<div class="chat-bubble">Feil: '+err.message+'</div>'; msgs.appendChild(eDiv);
-  }
-}
-
-// v0.5.7: samler gjeldende sonetekst/status/mål — redigeringer fra kartlegger har forrang
-function aktuellSoneInfo() {
-  var linjer = [];
-  for (var i = 0; i < state.zones.length; i++) {
-    var z = state.zones[i];
-    var mal = z.extraFields.map(function(fid){var f=EXTRA_FIELDS[fid];var v=z.measures[fid];return f&&v?f.label+': '+v+(f.unit?' '+f.unit:''):'';}).filter(Boolean).join(', ');
-    var st = state.soneTekster && state.soneTekster[i];
-    var red = guideRedigert[i] || {};
-    var tekst = red.tekst || (st && st.tekst) || z.note || '';
-    var status = red.status || (st && st.status) || 'ukjent';
-    if (!tekst && !mal) continue;
-    var stTxt = {gronn:'Tilgjengelig',gul:'Delvis tilgjengelig',rod:'Begrenset tilgjengelighet',ukjent:'Ikke vurdert'}[status] || 'Ikke vurdert';
-    linjer.push(z.label + ' (' + stTxt + '): ' + String(tekst).replace(/\s+/g,' ').trim() + (mal ? ' | Målt: ' + mal : ''));
-  }
-  return linjer.join('\n');
-}
-
-function appendChatMsg(text, role, id) {
-  var msgs = document.getElementById('chat-messages');
-  var div = document.createElement('div'); div.className='chat-msg '+role;
-  if (id) div.id = id;
-  div.innerHTML = '<div class="chat-bubble">'+text+'</div>';
-  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+    (sensoriskItems?'<div class="card"><div class="card-title">ℹ️ '+T('guide_godt_a_vite')+'</div><div class="tillegg-grid">'+sensoriskItems+'</div></div>':'');
 }
 
 function downloadGuideHTML() {
@@ -3530,7 +3356,6 @@ function downloadGuideHTML() {
     '.edit-mode-banner',    // gult banner
     '.godkjenn-bar',        // godkjenn-seksjon
     '.godkjent-badge',      // godkjent-badge
-    '.chat-card',           // chatbot
     '.guide-download-bar',  // last ned knapper
     '[style*="text-align:center"][style*="font-size:11px"]' // footer-tekst med dato
   ];

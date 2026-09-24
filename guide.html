@@ -104,6 +104,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .demo-note{background:var(--amber-light);border:1px solid rgba(186,117,23,.2);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:12px;color:var(--amber);margin-bottom:1rem;line-height:1.5}
 
 .footer{text-align:center;font-size:11px;color:var(--text3);padding:1rem 0 2rem;line-height:1.8}
+
+/* v-chat (25.9): tilgjengelighetsassistent — flyttet hit fra index.html sin
+   forhåndsvisning (kartlegger så den der, men ingen gjest kunne bruke den —
+   se claude/pending-endringer.md punkt 10). CSS kopiert 1:1 fra index.html. */
+.chat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1rem}
+.chat-header{background:#1a1a18;padding:1rem 1.25rem;display:flex;align-items:center;gap:10px}
+.chat-header-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-header-title{font-size:14px;font-weight:600;color:#fff}
+.chat-header-sub{font-size:12px;color:rgba(255,255,255,.4);margin-left:auto}
+.chat-messages{padding:1rem;min-height:120px;max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.chat-msg{max-width:85%}
+.chat-msg.bot{align-self:flex-start}
+.chat-msg.user{align-self:flex-end}
+.chat-bubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5}
+.chat-msg.bot .chat-bubble{background:var(--surface2);color:var(--text);border-radius:4px 16px 16px 16px}
+.chat-msg.user .chat-bubble{background:var(--green);color:#fff;border-radius:16px 16px 4px 16px}
+.chat-spinner{display:inline-block;width:12px;height:12px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--text3);border-radius:50%;animation:spin .8s linear infinite;margin-right:6px}
+.chat-input-row{display:flex;gap:8px;padding:.75rem 1rem;border-top:1px solid var(--border)}
+.chat-input{flex:1;border:1.5px solid var(--border2);border-radius:20px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none}
+.chat-input:focus{border-color:var(--green)}
+.chat-send{background:var(--green);color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 1rem .75rem}
+.chat-suggestion{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:5px 12px;font-size:12px;font-family:inherit;cursor:pointer;color:var(--text2)}
 </style>
 </head>
 <body>
@@ -135,6 +158,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <script>
 var API_BASE = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
+
+// v-chat (25.9): tilgjengelighetsassistent, flyttet hit fra index.html sin
+// forhåndsvisning — se claude/pending-endringer.md punkt 10. Bruker samme
+// worker (API_BASE) som resten av siden, direkte POST med model/system/messages.
+var AI_MODEL_CHAT = 'claude-haiku-4-5';
+var CHAT_SYSTEM = 'Du er en tilgjengelighetsassistent for gjester som planlegger et besøk. Bruk kun informasjonen som er gitt. Ikke gi medisinske eller juridiske råd, ikke gjett, og skill mellom målte opplysninger og anslag fra bilder. Hvis du ikke vet, si det og foreslå å kontakte virksomheten. Svar kort og konkret.';
 
 var params = new URLSearchParams(window.location.search);
 var enhetId = params.get('enhet_id');
@@ -401,6 +430,34 @@ function visGuide(data) {
     html += '</div>';
   }
 
+  // v-chat (25.9): tilgjengelighetsassistent for gjesten — flyttet hit fra
+  // index.html sin forhåndsvisning, der ingen gjest kunne bruke den (kun
+  // kartlegger, i sin egen forhåndsvisningsfane). Gjenbruker samme
+  // sone-/tillegg-/UB-data som resten av siden allerede har bygget over.
+  var chatSonerTekst = vanligeSoner.map(function(z){return z.label+(z.gjeste_tekst?' - '+z.gjeste_tekst:'');}).join(', ');
+  var chatTilrettelegging = ub.ja.concat(tillegg.ja.map(function(t){return t.tekst;})).join('; ');
+  var chatGodtAVite = sensoriskNei.join('; ');
+  var chatKontekst = 'Du er tilgjengelighetsassistent for "'+enhet.navn+'". Svar kort og konkret på norsk. Fasiliteter: '+(chatSonerTekst||'ingen registrert')+'.';
+  if (chatTilrettelegging) chatKontekst += ' Tilrettelegging for alle: '+chatTilrettelegging+'.';
+  if (chatGodtAVite) chatKontekst += ' Godt å vite: '+chatGodtAVite+'.';
+  chatKontekst += ' Kun bruk informasjonen gitt over. Hvis du ikke vet svaret, si det ærlig og foreslå å kontakte virksomheten.';
+  window._guideChatKontekst = chatKontekst;
+  window._guideChatHistory = [];
+
+  html += '<h2 class="seksjon-hd">Spør om tilgjengelighet</h2>';
+  html += '<div class="chat-card">' +
+    '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">Tilgjengelighetsassistent</div><div class="chat-header-sub">AI</div></div>' +
+    '<div class="chat-messages" id="guide-chat-messages" role="log" aria-live="polite"><div class="chat-msg bot"><div class="chat-bubble">Hei! Jeg kan svare på spørsmål om tilgjengeligheten på ' + enhet.navn + '. Hva lurer du på?</div></div></div>' +
+    '<div class="chat-suggestions">' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Passer det for rullestol?\')">Passer for rullestol?</button>' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Finnes det HC-parkering?\')">Finnes HC-parkering?</button>' +
+    '<button class="chat-suggestion" onclick="sendGuideChatMsg(\'Hva med allergi?\')">Hva med allergi?</button>' +
+    '</div>' +
+    '<div class="chat-input-row">' +
+    '<input type="text" class="chat-input" id="guide-chat-input" placeholder="Skriv spørsmål..." onkeydown="if(event.key===\'Enter\')sendGuideChatMsg()"/>' +
+    '<button class="chat-send" onclick="sendGuideChatMsg()">➤</button>' +
+    '</div></div>';
+
   html += '<h2 class="seksjon-hd">Erfaringer fra gjester</h2>';
   var erfaringer = data.erfaringer || [];
   if (erfaringer.length === 0) {
@@ -638,6 +695,38 @@ function escHtml(str) {
 
 function visFeil() {
   document.getElementById('main-content').innerHTML = '<div class="feil-kort" role="alert">Kunne ikke hente tilgjengelighetsguide. Sjekk at enhet_id er korrekt.</div>';
+}
+
+// v-chat (25.9): tilgjengelighetsassistent for gjesten — samme logikk som
+// index.html sin (nå fjernede) forhåndsvisningschat, se buildGuide()-historikk
+// i claude/pending-endringer.md punkt 10. window._guideChatKontekst/-History
+// settes i visGuide() over.
+async function sendGuideChatMsg(msg) {
+  var input = document.getElementById('guide-chat-input');
+  var text = msg || (input ? input.value.trim() : '');
+  if (!text) return;
+  if (input) input.value = '';
+  var msgs = document.getElementById('guide-chat-messages');
+  var uDiv = document.createElement('div'); uDiv.className='chat-msg user'; uDiv.innerHTML='<div class="chat-bubble">'+mdEsc(text)+'</div>'; msgs.appendChild(uDiv);
+  var loadId = 'gl-'+Date.now();
+  var bDiv = document.createElement('div'); bDiv.className='chat-msg bot'; bDiv.id=loadId; bDiv.innerHTML='<div class="chat-bubble"><span class="chat-spinner"></span>Tenker...</div>'; msgs.appendChild(bDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+  if (!window._guideChatHistory) window._guideChatHistory = [];
+  window._guideChatHistory.push({role:'user',content:text});
+  try {
+    var hist = window._guideChatHistory.map(function(m){return (m.role==='user'?'Gjest':'Assistent')+': '+m.content;}).join('\n');
+    var res = await fetch(API_BASE,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:AI_MODEL_CHAT,max_tokens:400,system:CHAT_SYSTEM,messages:[{role:'user',content:(window._guideChatKontekst||'')+'\n\n'+hist}]})});
+    var data = await res.json();
+    var el = document.getElementById(loadId); if (el) el.remove();
+    var svar = (data.content&&data.content[0]&&data.content[0].text) ? data.content[0].text : 'Beklager, kunne ikke svare nå.';
+    window._guideChatHistory.push({role:'assistant',content:svar});
+    var rDiv = document.createElement('div'); rDiv.className='chat-msg bot'; rDiv.innerHTML='<div class="chat-bubble">'+mdEsc(svar)+'</div>'; msgs.appendChild(rDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  } catch(err) {
+    var el = document.getElementById(loadId); if (el) el.remove();
+    var eDiv = document.createElement('div'); eDiv.className='chat-msg bot'; eDiv.innerHTML='<div class="chat-bubble">Beklager, noe gikk galt.</div>'; msgs.appendChild(eDiv);
+  }
 }
 
 lastData();
