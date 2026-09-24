@@ -163,7 +163,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
         </div>
         <div class="field">
           <label class="field-label" for="beskrivelse_bedrift">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
-          <textarea id="beskrivelse_bedrift" name="beskrivelse_bedrift" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over."></textarea>
+          <textarea id="beskrivelse_bedrift" name="beskrivelse_bedrift" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over." required></textarea>
         </div>
       </div>
 
@@ -217,7 +217,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
         </div>
         <div class="field">
           <label class="field-label" for="beskrivelse_fou">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
-          <textarea id="beskrivelse_fou" name="beskrivelse_fou" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over."></textarea>
+          <textarea id="beskrivelse_fou" name="beskrivelse_fou" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over." required></textarea>
         </div>
         <div class="field">
           <label class="field-label">Alvorlighetsgrad</label>
@@ -278,7 +278,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
         </div>
         <div class="field">
           <label class="field-label" for="beskrivelse_bruker">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
-          <textarea id="beskrivelse_bruker" name="beskrivelse_bruker" placeholder="Vær så konkret du kan."></textarea>
+          <textarea id="beskrivelse_bruker" name="beskrivelse_bruker" placeholder="Vær så konkret du kan." required></textarea>
         </div>
       </div>
 
@@ -349,6 +349,21 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 //   - entry.732226179 (bruker_mangler) har fått ny tekst i skjemaet — samme Ja/Nei,
 //     ingen endring nødvendig i Google Form utover selve spørsmålsteksten.
 //   INGEN NYE ENTRY-ID-ER — alt er gjenbruk av eksisterende felt.
+// v4 (2026-09-24, kveld): fant — via Nicolays opplastede svar-ark — at «Spillehall
+//   på Riddergården» og «Lodge 900»-tilbakemeldingene aldri kom inn i det hele
+//   tatt. Rotårsak: «Beskriv tilbakemeldingen»-feltet hadde en stjerne i label
+//   som ser obligatorisk ut, men INGEN faktisk `required`-attributt — og submit-
+//   handleren gjorde et helt stille `return` hvis feltet var tomt, uten noen
+//   synlig feilmelding (den ferdige #feil-banner-boksen ble aldri faktisk vist
+//   av noe sted i koden). Fikset:
+//   1) La til `required` på alle tre beskrivelse-tekstfelt (native HTML5-
+//      validering — nettleseren blokkerer nå selv innsending og viser sin egen
+//      tydelige feilmelding pekende på feltet, uten noen custom-kode).
+//   2) Som ekstra sikkerhet: submit-handleren viser nå #feil-banner med en
+//      konkret tekst og fokuserer/scroller til feltet hvis noe obligatorisk
+//      likevel mangler når handleren kjører (bør normalt aldri skje nå at (1)
+//      er på plass, men dekker edge-caser og gjør feilen synlig i stedet for
+//      helt stille).
 // ============================================================================
 var GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf7sx1uFHFG7jtp_d8maJHIhavri63KyqPT9qZgmojPcCwv1g/formResponse';
 
@@ -489,13 +504,35 @@ function hentBeskrivelseFelt() {
   return null;
 }
 
+// v4: viser en konkret, synlig feilmelding i stedet for å gjøre ingenting.
+function visFeil(tekst) {
+  var banner = document.getElementById('feil-banner');
+  banner.textContent = tekst;
+  banner.style.display = 'block';
+  banner.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function skjulFeil() {
+  document.getElementById('feil-banner').style.display = 'none';
+}
+
 document.getElementById('tilbake-form').addEventListener('submit', function(e) {
   e.preventDefault();
   var rolle = document.querySelector('input[name="rolle"]:checked');
   var del = document.querySelector('input[name="del"]:checked');
   var beskrivelseFelt = hentBeskrivelseFelt();
   var beskrivelse = beskrivelseFelt ? beskrivelseFelt.value.trim() : '';
-  if (!rolle || !del || !beskrivelse) return;
+  // v4: dette skal normalt aldri slå til nå (beskrivelse-feltene har `required`,
+  // så nettleseren blokkerer og viser sin egen feilmelding før submit-eventet
+  // i det hele tatt når hit) — men vis en tydelig, synlig feilmelding her også,
+  // i stedet for det tidligere stille `return`, som en ekstra sikkerhet.
+  if (!rolle) { visFeil('⚠️ Velg hvem du svarer som før du sender inn.'); return; }
+  if (!del) { visFeil('⚠️ Velg hva tilbakemeldingen gjelder før du sender inn.'); return; }
+  if (!beskrivelse) {
+    visFeil('⚠️ Skriv en kort beskrivelse under «Beskriv tilbakemeldingen» før du sender inn.');
+    if (beskrivelseFelt) { beskrivelseFelt.scrollIntoView({behavior:'smooth', block:'center'}); beskrivelseFelt.focus(); }
+    return;
+  }
+  skjulFeil();
 
   var navn = document.getElementById('navn').value.trim();
   var epost = document.getElementById('epost').value.trim();
@@ -566,8 +603,14 @@ function oppdaterMailto() {
     'mailto:' + FEEDBACK_EPOST +
     '?subject=' + encodeURIComponent(emne) + '&body=' + encodeURIComponent(body);
 }
-document.getElementById('tilbake-form').addEventListener('input', oppdaterMailto);
-document.getElementById('tilbake-form').addEventListener('change', oppdaterMailto);
+document.getElementById('tilbake-form').addEventListener('input', function() {
+  skjulFeil();
+  oppdaterMailto();
+});
+document.getElementById('tilbake-form').addEventListener('change', function() {
+  skjulFeil();
+  oppdaterMailto();
+});
 oppdaterMailto();
 </script>
 
