@@ -92,7 +92,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .hndl-btn:hover{background:var(--surface3)}
 .hndl-btn.primary{background:var(--green);color:#fff;border-color:var(--green)}
 .hndl-btn.primary:hover{opacity:.9}
+.hndl-btn.amber{background:var(--amber-light);color:var(--amber);border-color:rgba(186,117,23,.35)}
+.hndl-btn.minor{background:none;border:none;color:var(--text3);font-size:12px;font-weight:600;padding:4px 2px;justify-content:center;text-align:center}
+.hndl-btn.minor:hover{background:none;color:var(--text2)}
 .hndl-btn-ikon{font-size:18px;flex-shrink:0}
+.detalj-mini{font-size:12px;color:var(--text3);padding:7px 0}
 
 .erfaring-rad{padding:.875rem 0;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
 .erfaring-rad:last-child{border-bottom:none}
@@ -292,6 +296,47 @@ function statKort(val, lbl, stil) {
   return '<div class="stat-kort"><div class="stat-val" ' + (stil?'style="'+stil+'"':'') + '>' + val + '</div><div class="stat-lbl">' + lbl + '</div></div>';
 }
 
+// v-neste (25.9): eget ikon per undertype (etter ønske fra Nicolay) i stedet for kun
+// Hotell/Restaurant + gruppe-fallback. Matcher på nøkkelord (ikke eksakt likhet) siden
+// vi ikke vet 100% sikkert om /api/org/{orgId}/dashboard sender akkurat samme tekst som
+// nedtrekkslisten i index.html — dette gjør at ikonet fortsatt treffer selv om ordlyden
+// avviker litt. Går til gruppe-ikonet (A=🏠, B=🥾, C=🏛️) hvis ingen nøkkelord treffer.
+function finnIkon(gruppe, type) {
+  var t = (type || '').toLowerCase();
+  function har(ord) { return t.indexOf(ord) !== -1; }
+  // Gruppe A — bygningsbaserte bedrifter
+  if (har('hotel')) return '🏨';
+  if (har('hytt')) return '🏡';
+  if (har('restaurant') || har('server')) return '🍽️';
+  if (har('butikk')) return '🛍️';
+  if (har('aktivitetsbedrift')) return '🎯';
+  if (har('idrett')) return '🏟️';
+  if (har('alpin') || har('skiheis')) return '🎿';
+  if (har('camping')) return '⛺';
+  // Gruppe B — naturbaserte aktivitetsbedrifter
+  if (har('vandr') || har('fjelltur') || har('skiguid')) return '🥾';
+  if (har('vannsport') || har('padl') || har('kajakk') || har('kano')) return '🛶';
+  // v-neste: sykling/ridning/hundekjøring er i dag ÉN type i verktøyet (kjoretoy_dyr) —
+  // se punkt i pending-endringer.md om å diskutere egne kategorier for disse.
+  if (har('sykl') || har('ridning') || har('hund')) return '🚵';
+  if (har('tilpasse')) return '🌿';
+  // Gruppe C — fellesgoder og felles rom
+  if (har('tursti') || har('natursti')) return '🌲';
+  if (har('sykkelløype') || har('sykkelsti') || har('sykkelloype')) return '🚴';
+  if (har('skiløype') || har('skiloype')) return '⛷️';
+  if (har('bade')) return '🏖️';
+  if (har('utsikt') || har('attraksjon')) return '🌄';
+  if (har('rasteplass') || har('parkering')) return '🅿️';
+  if (har('toalett')) return '🚻';
+  if (har('turistinfo')) return 'ℹ️';
+  if (har('torg') || har('møteplass') || har('moteplass')) return '🏙️';
+  // Ingen type-nøkkelord traff — bruk gruppe-fallback
+  if (gruppe === 'A') return '🏠';
+  if (gruppe === 'B') return '🥾';
+  if (gruppe === 'C') return '🏛️';
+  return '📍';
+}
+
 function lagEnhetHTML(e) {
   var statusClass, statusLabel;
   if (e.advarsel) { statusClass='sp-amber'; statusLabel='⏰ Utdatert'; }
@@ -299,7 +344,7 @@ function lagEnhetHTML(e) {
   else if (e.kartlegging_status==='paabegynt') { statusClass='sp-amber'; statusLabel='🔄 Påbegynt'; }
   else { statusClass='sp-graa'; statusLabel='— Ikke kartlagt'; }
 
-  var ikon = e.gruppe==='C'?'🌲':e.type==='Hotell'?'🏨':e.type==='Restaurant'?'🍽️':'🏃';
+  var ikon = finnIkon(e.gruppe, e.type);
   var stemmerPst = e.antall_erfaringer > 0 ? Math.round(e.stemmer_antall/e.antall_erfaringer*100) : null;
   var barFarge = stemmerPst===null?'':stemmerPst>=75?'mini-fill':stemmerPst>=50?'mini-fill-amber':'mini-fill-red';
 
@@ -318,8 +363,6 @@ function lagEnhetHTML(e) {
   h += '</div>';
 
   h += '<div class="enhet-detalj">';
-  h += '<div class="detalj-rad"><span class="detalj-lbl">📸 Bilder registrert</span><span class="detalj-val">' + e.antall_bilder + '</span></div>';
-  h += '<div class="detalj-rad"><span class="detalj-lbl">📏 Datapunkter</span><span class="detalj-val">' + e.antall_datapunkter + '</span></div>';
   h += '<div class="detalj-rad"><span class="detalj-lbl">💬 Brukererfaringer</span><span class="detalj-val">' + e.antall_erfaringer + '</span></div>';
   if (stemmerPst !== null) {
     h += '<div class="detalj-rad" style="flex-direction:column;align-items:flex-start;gap:6px">';
@@ -327,15 +370,22 @@ function lagEnhetHTML(e) {
     h += '<div class="mini-bar" style="width:100%"><div class="' + barFarge + '" style="width:' + stemmerPst + '%"></div></div>';
     h += '</div>';
   }
+  // v-neste: Bilder/Datapunkter er mindre viktig for kartlegger å se her — nedtonet til
+  // én liten grå linje i stedet for to fullverdige detalj-rader, se Nicolays ønske.
+  h += '<div class="detalj-mini">📸 ' + e.antall_bilder + ' bilder · 📏 ' + e.antall_datapunkter + ' datapunkter</div>';
 
+  // v-neste: "Se offentlig guide" er den viktigste handlingen herfra — alltid synlig,
+  // grønn/primær og først i listen. "Start ny kartlegging" er fortsatt tydelig (amber,
+  // siden den er koblet til en advarsel), mens "Bekreft at info stemmer" er nedtonet til
+  // en liten tekstlenke — begge var tidligere like fremtredende som guide-knappen.
   h += '<div class="handlinger">';
+  h += '<a class="hndl-btn primary" href="' + guideUrl + '" target="_blank">👁 Se offentlig guide</a>';
   if (e.advarsel || e.kartlegging_status !== 'bekreftet') {
-    h += '<a class="hndl-btn primary" href="index.html">📋 Start ny kartlegging</a>';
+    h += '<a class="hndl-btn amber" href="index.html">📋 Start ny kartlegging</a>';
   }
   if (e.sist_bekreftet) {
-    h += '<button class="hndl-btn" onclick="bekreft(\'' + e.id + '\',this)">✅ Bekreft at info fortsatt stemmer</button>';
+    h += '<button class="hndl-btn minor" onclick="bekreft(\'' + e.id + '\',this)">✅ Bekreft at info fortsatt stemmer</button>';
   }
-  h += '<a class="hndl-btn" href="' + guideUrl + '" target="_blank">👁 Se offentlig guide</a>';
   h += '</div>';
   h += '</div>';
   h += '</div>';
