@@ -104,7 +104,7 @@ textarea{resize:vertical;min-height:80px}
 .yn-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:var(--radius-sm);padding:10px;font-size:15px;font-family:inherit;font-weight:500;cursor:pointer;color:var(--text2);text-align:center}
 .yn-btn.yes.active{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
 .yn-btn.no.active{background:var(--red-light);border-color:var(--red);color:#A32D2D}
-.yn-btn.na.active{background:var(--surface2);border-color:var(--border2);color:var(--text3)}
+.yn-btn.na.active{background:var(--amber-light);border-color:var(--amber);color:var(--amber);font-weight:700}
 .yn-btn.irr.active{background:var(--violet-light);border-color:var(--violet);color:var(--violet)}
 .notice{background:var(--green-light);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);margin-bottom:1rem;line-height:1.5}
 .notice-blue{background:var(--blue-light);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--blue);margin-bottom:1rem;line-height:1.5}
@@ -167,6 +167,7 @@ textarea{resize:vertical;min-height:80px}
 .guide-gpx-stat-label{font-size:11px;color:var(--text3)}
 .guide-tillegg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
 .guide-tillegg-kort{background:var(--surface);border:1px solid var(--green-light);border-radius:var(--radius-sm);padding:.75rem;display:flex;align-items:center;gap:8px}
+.guide-tillegg-kort.info{border-color:rgba(6,90,130,.2);background:var(--blue-light)}
 .guide-tillegg-ikon{font-size:20px}
 .guide-tillegg-tekst{font-size:12px;color:var(--text2);line-height:1.3}
 .guide-download-bar{display:flex;gap:8px;margin-top:1rem}
@@ -282,7 +283,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div class="topbar-versjon">v0.5.29</div>
+  <div class="topbar-versjon">v0.5.30</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" class="topbar-pill" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-flag-btn" id="lang-flag-btn" onclick="syklSpraak()" title="Bytt språk" aria-label="Bytt språk. Nåværende: Norsk">🇳🇴</button>
@@ -515,7 +516,18 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.29';
+const APP_VERSION = 'v0.5.30';
+// v0.5.30 (24.9.2026): To rettinger etter Nicolays feltarbeid (spillehall-kartlegging):
+// 1) "Vet ikke"-knappen (.yn-btn.na.active) fikk ingen synlig markering ved klikk, siden
+//    aktiv-fargen var identisk med bakgrunnen for en uvalgt knapp — nå samme amber-stil
+//    som Vet-ikke bruker i det andre knapp-systemet (yn-uk-active).
+// 2) Sensoriske egenskaper (lys, lyd, lukt, stille-soner, luminanskontrast, taktile
+//    markeringer) vises nå til gjesten i guiden uavhengig av om svaret er ja ELLER nei —
+//    tidligere ble nei-svar på disse stille forkastet, slik at gjesten ikke fikk vite at
+//    f.eks. lyset var urolig eller det var støy. Vises nøytralt i egen seksjon
+//    ("Godt å vite"), ikke som et negativt/alarmerende varsel. Vet ikke/Urelevant vises
+//    fortsatt aldri — da er temaet rett og slett ikke omtalt. Se SENSORISK_UB_NEI/
+//    SENSORISK_SVAR_NEI og sensoriskInfoListe(). Samme logikk implementert i guide.html.
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -784,6 +796,7 @@ const TEKST = {
     guide_footer: 'Tilgjengelighetsguide generert med AccessNorway',
     guide_fasiliteter: 'Fasiliteter og tilgjengelighet',
     guide_tilleggstjenester: 'Tilleggstjenester',
+    guide_godt_a_vite: 'Godt å vite',
     guide_spor_om: 'Spør om tilgjengelighet',
     guide_under_oppholdet: '🏠 Under oppholdet',
     chat_hei: 'Hei! Jeg kan svare på spørsmål om tilgjengeligheten på',
@@ -998,6 +1011,7 @@ const TEKST = {
     guide_footer: 'Accessibility guide generated with AccessNorway',
     guide_fasiliteter: 'Facilities and accessibility',
     guide_tilleggstjenester: 'Additional services',
+    guide_godt_a_vite: 'Good to know',
     guide_spor_om: 'Ask about accessibility',
     guide_under_oppholdet: '🏠 During the stay',
     chat_hei: 'Hello! I can answer questions about accessibility at',
@@ -1240,6 +1254,7 @@ const TEKST = {
     guide_footer: 'Guía de accesibilidad generada con AccessNorway',
     guide_fasiliteter: 'Instalaciones y accesibilidad',
     guide_tilleggstjenester: 'Servicios adicionales',
+    guide_godt_a_vite: 'Bueno saberlo',
     guide_spor_om: 'Preguntar sobre accesibilidad',
     guide_under_oppholdet: '🏠 Durante la estancia',
     chat_hei: '¡Hola! Puedo responder preguntas sobre la accesibilidad en',
@@ -2834,6 +2849,35 @@ var UB_QUESTIONS = [
 ];
 function ubTxt(key) { var l = state.lang || 'no'; return (UB_TEXT[l] && UB_TEXT[l][key]) || UB_TEXT.no[key]; }
 function ubQTxt(q) { var l = state.lang || 'no'; return q[l] || q.no; }
+
+// v0.5.30: sensoriske egenskaper skal vises til gjesten uavhengig av om svaret er ja
+// ELLER nei, slik at gjesten selv kan vurdere om stedet passer (avtalt med Nicolay 24.9,
+// etter rapport om en spillehall med "urolig lys og en del lyd" som forsvant fra guiden).
+// Nøytral/ikke-alarmerende ordlyd — vises i egen seksjon ("Godt å vite"), ikke sammen med
+// de positive utsagnene i "Tilrettelegging for alle". Vet ikke/Urelevant vises fortsatt
+// aldri. Samme tekster (norsk) er duplisert i guide.html sitt SENSORISK_UB_NEI/
+// SENSORISK_SVAR_NEI — hold i sync ved endring, se kommentar der.
+var SENSORISK_UB_NEI = {
+  no:{ub_lys:'Belysningen i fellesarealene kan oppleves ujevn eller ha innslag av blinkende lys',ub_stoy:'Det kan forekomme støy i fellesarealene',ub_lukt:'Sterke lukter kan forekomme i fellesarealene',ub_stille:'Det finnes ingen egen stille sone eller lavstimulert areal'},
+  en:{ub_lys:'The lighting in common areas may be uneven or include flickering',ub_stoy:'There may be noise in the common areas',ub_lukt:'Strong odours may occur in the common areas',ub_stille:'There is no separate quiet zone or low-stimulation area'},
+  es:{ub_lys:'La iluminación en las áreas comunes puede ser desigual o parpadeante',ub_stoy:'Puede haber ruido en las áreas comunes',ub_lukt:'Pueden producirse olores fuertes en las áreas comunes',ub_stille:'No hay una zona tranquila o de baja estimulación independiente'}
+};
+var SENSORISK_SVAR_NEI = {
+  no:{q_luminans:'Luminanskontrasten på skilt og skranker er ikke kartlagt som god — kan være vanskelig å se for svaksynte',q_taktil:'Det er ikke registrert taktile eller visuelle markeringer ved trapper og nivåforskjeller'},
+  en:{q_luminans:'The luminance contrast on signs and counters has not been assessed as good — may be difficult to see for people with visual impairments',q_taktil:'No tactile or visual markings have been recorded at stairs or level changes'},
+  es:{q_luminans:'El contraste de luminancia en los carteles y mostradores no se ha evaluado como bueno; puede ser difícil de ver para personas con baja visión',q_taktil:'No se han registrado marcas táctiles o visuales en escaleras o cambios de nivel'}
+};
+function sensoriskInfoListe() {
+  var l = state.lang || 'no';
+  var ut = [];
+  Object.keys(SENSORISK_UB_NEI.no).forEach(function(id){
+    if (state.usynlig[id] === 'nei') ut.push((SENSORISK_UB_NEI[l] && SENSORISK_UB_NEI[l][id]) || SENSORISK_UB_NEI.no[id]);
+  });
+  Object.keys(SENSORISK_SVAR_NEI.no).forEach(function(id){
+    if (state.answers[id] === 'nei') ut.push((SENSORISK_SVAR_NEI[l] && SENSORISK_SVAR_NEI[l][id]) || SENSORISK_SVAR_NEI.no[id]);
+  });
+  return ut;
+}
 // v0.5.21: hjelpetekst for usynlige-behov-spørsmål, samme idé som ctx på ALL_QUESTIONS —
 // forklarer hva begrepet betyr, ikke bare hvorfor det er viktig (etterspurt av Anita/INKLU).
 function ubQCtx(q) { var l = state.lang || 'no'; return (l !== 'no' && q['ctx_' + l]) || q.ctx || ''; }
@@ -3191,6 +3235,8 @@ async function buildGuide() {
   }
 
   // Usynlige behov — egen seksjon i guiden (v0.4.13)
+  // v0.5.30: kun ja-svar vises her (som i guide.html sin "Tilrettelegging for alle") —
+  // nei-svar på det sensoriske utvalget vises i stedet nøytralt i sensoriskHtml under.
   var ubHtml = '';
   for (var s = 1; s <= 4; s++) {
     var ubRows = '';
@@ -3198,13 +3244,19 @@ async function buildGuide() {
       var q = UB_QUESTIONS[i];
       if (q.sek !== s || !ubRelevant(q)) continue;
       var v = state.usynlig[q.id];
-      if (v !== 'ja' && v !== 'nei') continue;
-      var farge = v === 'ja' ? 'var(--green-dark)' : (v === 'irr' ? 'var(--violet)' : 'var(--text2)');
-      ubRows += '<div class="guide-tillegg-kort"><div class="guide-tillegg-ikon">' + (v === 'ja' ? '\u2705' : '\u2796') + '</div>' +
-        '<div class="guide-tillegg-tekst">' + ubQTxt(q) + ' <span style="font-weight:700;color:' + farge + '">' + ubSvarTekst(v) + '</span></div></div>';
+      if (v !== 'ja') continue;
+      ubRows += '<div class="guide-tillegg-kort"><div class="guide-tillegg-ikon">\u2705</div>' +
+        '<div class="guide-tillegg-tekst">' + ubQTxt(q) + ' <span style="font-weight:700;color:var(--green-dark)">' + ubSvarTekst(v) + '</span></div></div>';
     }
     if (ubRows) ubHtml += '<div style="font-size:13px;font-weight:600;color:var(--text2);margin:10px 0 4px">' + UB_SEK_IKON[s] + ' ' + ubTxt('sek' + s) + '</div>' + ubRows;
   }
+
+  // v0.5.30: sensoriske egenskaper (lys, lyd, lukt, stille-soner, luminanskontrast,
+  // taktile markeringer) — nei-svar vises her, nøytralt og ikke-alarmerende, uavhengig
+  // av ja/nei, se sensoriskInfoListe(). Vet ikke/Urelevant vises fortsatt aldri.
+  var sensoriskHtml = sensoriskInfoListe().map(function(tekst){
+    return '<div class="guide-tillegg-kort info"><div class="guide-tillegg-ikon">\u2139\uFE0F</div><div class="guide-tillegg-tekst">' + tekst + '</div></div>';
+  }).join('');
 
   var metaPills = '';
   if (dest) metaPills += '<div class="guide-meta-pill">🗺️ '+dest+'</div>';
@@ -3239,6 +3291,7 @@ async function buildGuide() {
     (sonerHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_fasiliteter')+'</h2>'+sonerHtml+'</div>' : '') +
     (jaItems ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_tilleggstjenester')+'</h2><div class="guide-tillegg">'+jaItems+'</div></div>' : '') +
     (ubHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+ubTxt('tittel')+'</h2><div class="guide-tillegg">'+ubHtml+'</div></div>' : '') +
+    (sensoriskHtml ? '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_godt_a_vite')+'</h2><div class="guide-tillegg">'+sensoriskHtml+'</div></div>' : '') +
     '<div class="guide-section"><h2 class=\"guide-section-title\">'+T('guide_spor_om')+'</h2>' +
     '<div class="chat-card">' +
     '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_tittel')+'</div><div class="chat-header-sub">AI</div></div>' +
@@ -3348,6 +3401,12 @@ async function buildAnalyse() {
     jaItems += '<div class="tillegg-kort"><div class="tillegg-ikon">'+ikon+'</div><div class="tillegg-verdi">'+q.text+'</div></div>';
   }
 
+  // v0.5.30: sensoriske egenskaper med nei-svar, samme nøytrale liste som i Guide-fanen
+  // og guide.html — se sensoriskInfoListe().
+  var sensoriskItems = sensoriskInfoListe().map(function(t){
+    return '<div class="tillegg-kort"><div class="tillegg-ikon">ℹ️</div><div class="tillegg-verdi">'+t+'</div></div>';
+  }).join('');
+
   var soneInfo = gyldigeSoner.map(function(s){return s.zone.label+' ('+s.statusTekst+'): '+s.gjesteTekst;}).join('\n');
   var svarInfo = qIds.map(function(id){var q=ALL_QUESTIONS[id];var v=state.answers[id];return q&&v?q.text+': '+(v==='ja'?'Ja':v==='nei'?'Nei':v==='irr'?'Urelevant':'Vet ikke'):'';}).filter(Boolean).join('\n');
   var ubInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':v==='irr'?'Urelevant':'Vet ikke'):'';}).filter(Boolean).join('\n');
@@ -3362,6 +3421,7 @@ async function buildAnalyse() {
     '<div class="success-banner"><div class="success-icon">✅</div><div><div class="success-title">'+T('rapport_fullfort')+'</div><div class="success-text">'+T('rapport_fullfort_desc')+'</div></div></div>' +
     sonerHtml +
     (jaItems?'<div class="card"><div class="card-title">ℹ️ Tilleggstjenester</div><div class="tillegg-grid">'+jaItems+'</div></div>':'') +
+    (sensoriskItems?'<div class="card"><div class="card-title">ℹ️ '+T('guide_godt_a_vite')+'</div><div class="tillegg-grid">'+sensoriskItems+'</div></div>':'') +
     '<div class="chat-card">' +
     '<div class="chat-header"><div class="chat-header-dot"></div><div class="chat-header-title">'+T('chat_spor_om')+'</div><div class="chat-header-sub">'+T('chat_ai_assistent')+'</div></div>' +
     '<div class="chat-messages" id="chat-messages" role="log" aria-live="polite"><div class="chat-msg bot"><div class="chat-bubble">'+T('chat_hei_generell')+'</div></div></div>' +

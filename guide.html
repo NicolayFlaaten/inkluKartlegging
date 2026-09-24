@@ -73,6 +73,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 .tillegg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.75rem}
 .tillegg-kort{background:var(--surface);border:1px solid var(--green-light);border-radius:var(--radius-sm);padding:.875rem;display:flex;align-items:flex-start;gap:10px}
+.tillegg-kort.info{border-color:rgba(6,90,130,.2);background:var(--blue-light)}
 .tillegg-ikon{font-size:20px;flex-shrink:0}
 .tillegg-tekst{font-size:13px;color:var(--text2);line-height:1.4}
 
@@ -195,6 +196,27 @@ var UB_TEKST = {
   ub_diskret:'Det tilbys personlig assistanse'
 };
 
+// v0.5.30: sensoriske egenskaper skal vises til gjesten uavhengig av om svaret er ja
+// ELLER nei, slik at gjesten selv kan vurdere om stedet passer (avtalt med Nicolay 24.9,
+// etter rapport om en spillehall med "urolig lys og en del lyd" som forsvant fra guiden
+// fordi byggUsynligeFraSvar/byggTilleggsFraSvar kun viste 'ja'-svar). Nøytral, ikke-
+// alarmerende ordlyd — vises i egen seksjon ("Godt å vite"), ikke sammen med de positive
+// utsagnene i "Tilrettelegging for alle"/"Tilleggstjenester". Vet ikke/Urelevant vises
+// fortsatt aldri — da er temaet rett og slett ikke omtalt. Norsk-only, som resten av
+// UB_TEKST/SVAR_TEKST (guide.html støtter ikke språkvalg) — samme tekster (norsk-
+// varianten) er duplisert i index.html sitt SENSORISK_UB_NEI/SENSORISK_SVAR_NEI, hold i
+// sync ved endring.
+var SENSORISK_UB_NEI = {
+  ub_lys:'Belysningen i fellesarealene kan oppleves ujevn eller ha innslag av blinkende lys',
+  ub_stoy:'Det kan forekomme støy i fellesarealene',
+  ub_lukt:'Sterke lukter kan forekomme i fellesarealene',
+  ub_stille:'Det finnes ingen egen stille sone eller lavstimulert areal'
+};
+var SENSORISK_SVAR_NEI = {
+  q_luminans:'Luminanskontrasten på skilt og skranker er ikke kartlagt som god — kan være vanskelig å se for svaksynte',
+  q_taktil:'Det er ikke registrert taktile eller visuelle markeringer ved trapper og nivåforskjeller'
+};
+
 var DEMO_DATA = {
   enhet: {
     id: 'demo-bhss',
@@ -268,19 +290,21 @@ async function lastData() {
 }
 
 function byggTilleggsFraSvar(svar) {
-  if (!svar) return [];
-  var ut = [];
+  var ut = {ja:[], nei:[]};
+  if (!svar) return ut;
   Object.keys(svar).forEach(function(id) {
-    if (svar[id] === 'ja' && SVAR_TEKST[id]) ut.push(SVAR_TEKST[id]);
+    if (svar[id] === 'ja' && SVAR_TEKST[id]) ut.ja.push(SVAR_TEKST[id]);
+    if (svar[id] === 'nei' && SENSORISK_SVAR_NEI[id]) ut.nei.push(SENSORISK_SVAR_NEI[id]);
   });
   return ut;
 }
 
 function byggUsynligeFraSvar(svarUsynlig) {
-  if (!svarUsynlig) return [];
-  var ut = [];
+  var ut = {ja:[], nei:[]};
+  if (!svarUsynlig) return ut;
   Object.keys(svarUsynlig).forEach(function(id) {
-    if (svarUsynlig[id] === 'ja' && UB_TEKST[id]) ut.push(UB_TEKST[id]);
+    if (svarUsynlig[id] === 'ja' && UB_TEKST[id]) ut.ja.push(UB_TEKST[id]);
+    if (svarUsynlig[id] === 'nei' && SENSORISK_UB_NEI[id]) ut.nei.push(SENSORISK_UB_NEI[id]);
   });
   return ut;
 }
@@ -342,22 +366,36 @@ function visGuide(data) {
 
   // v-guide: Ole sender rå svar/svar_usynlig (ikke ferdig tilleggstjenester) —
   // frontend eier oversettelsen, se SVAR_TEKST/UB_TEKST over.
-  var tilleggsListe = data.tilleggstjenester || byggTilleggsFraSvar(data.svar);
-  if (tilleggsListe.length) {
+  var tillegg = data.tilleggstjenester ? {ja:data.tilleggstjenester, nei:[]} : byggTilleggsFraSvar(data.svar);
+  if (tillegg.ja.length) {
     html += '<h2 class="seksjon-hd">Tilleggstjenester</h2>';
     html += '<div class="tillegg-grid">';
-    tilleggsListe.forEach(function(t){
+    tillegg.ja.forEach(function(t){
       html += '<div class="tillegg-kort"><span class="tillegg-ikon">' + t.ikon + '</span><span class="tillegg-tekst">' + t.tekst + '</span></div>';
     });
     html += '</div>';
   }
 
-  var ubListe = byggUsynligeFraSvar(data.svar_usynlig);
-  if (ubListe.length) {
+  var ub = byggUsynligeFraSvar(data.svar_usynlig);
+  if (ub.ja.length) {
     html += '<h2 class="seksjon-hd">Tilrettelegging for alle</h2>';
     html += '<div class="tillegg-grid">';
-    ubListe.forEach(function(tekst){
+    ub.ja.forEach(function(tekst){
       html += '<div class="tillegg-kort"><span class="tillegg-ikon">✅</span><span class="tillegg-tekst">' + tekst + '</span></div>';
+    });
+    html += '</div>';
+  }
+
+  // v0.5.30: sensoriske egenskaper med nei-svar (lys, lyd, lukt, stille-soner,
+  // luminanskontrast, taktile markeringer) — nøytral, ikke-alarmerende egen seksjon,
+  // separat fra "Tilrettelegging for alle"/"Tilleggstjenester" (som kun viser positive
+  // egenskaper). Vet ikke/Urelevant vises fortsatt aldri her.
+  var sensoriskNei = ub.nei.concat(tillegg.nei);
+  if (sensoriskNei.length) {
+    html += '<h2 class="seksjon-hd">Godt å vite</h2>';
+    html += '<div class="tillegg-grid">';
+    sensoriskNei.forEach(function(tekst){
+      html += '<div class="tillegg-kort info"><span class="tillegg-ikon">ℹ️</span><span class="tillegg-tekst">' + tekst + '</span></div>';
     });
     html += '</div>';
   }
