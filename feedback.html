@@ -150,15 +150,26 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
             </div>
           </div>
           <div class="field">
-            <label class="field-label">Hvordan var din opplevelse med bruk av kartleggingsverktøyet — enkelthet og tidsbruk?</label>
-            <div class="skala-row" data-navn="q_opplevelse_skala">
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="1">1</label>
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="2">2</label>
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="3">3</label>
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="4">4</label>
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="5">5</label>
+            <label class="field-label">Hvor enkelt eller vanskelig var det å bruke kartleggingsverktøyet?</label>
+            <div class="skala-row" data-navn="q_enkelhet_skala">
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="1">1</label>
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="2">2</label>
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="3">3</label>
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="4">4</label>
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="5">5</label>
             </div>
-            <div class="field-hint">1 = tungvint / tidkrevende, 5 = enkelt / raskt</div>
+            <div class="field-hint">1 = Enkelt, 3 = Som forventet, 5 = Vanskelig</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Hvordan var tidsbruken på kartleggingen?</label>
+            <div class="skala-row" data-navn="q_tidsbruk_skala">
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="1">1</label>
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="2">2</label>
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="3">3</label>
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="4">4</label>
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="5">5</label>
+            </div>
+            <div class="field-hint">1 = Raskt, 3 = Som forventet, 5 = Tidkrevende</div>
           </div>
         </div>
         <div class="field">
@@ -204,15 +215,26 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
             </div>
           </div>
           <div class="field">
-            <label class="field-label">Hvordan var din opplevelse med bruk av kartleggingsverktøyet — enkelthet og tidsbruk?</label>
-            <div class="skala-row" data-navn="q_opplevelse_skala">
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="1">1</label>
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="2">2</label>
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="3">3</label>
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="4">4</label>
-              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="5">5</label>
+            <label class="field-label">Hvor enkelt eller vanskelig var det å bruke kartleggingsverktøyet?</label>
+            <div class="skala-row" data-navn="q_enkelhet_skala">
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="1">1</label>
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="2">2</label>
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="3">3</label>
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="4">4</label>
+              <label class="skala-opt"><input type="radio" name="q_enkelhet_skala" value="5">5</label>
             </div>
-            <div class="field-hint">1 = tungvint / tidkrevende, 5 = enkelt / raskt</div>
+            <div class="field-hint">1 = Enkelt, 3 = Som forventet, 5 = Vanskelig</div>
+          </div>
+          <div class="field">
+            <label class="field-label">Hvordan var tidsbruken på kartleggingen?</label>
+            <div class="skala-row" data-navn="q_tidsbruk_skala">
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="1">1</label>
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="2">2</label>
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="3">3</label>
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="4">4</label>
+              <label class="skala-opt"><input type="radio" name="q_tidsbruk_skala" value="5">5</label>
+            </div>
+            <div class="field-hint">1 = Raskt, 3 = Som forventet, 5 = Tidkrevende</div>
           </div>
         </div>
         <div class="field">
@@ -291,7 +313,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
           </div>
           <div class="field">
             <label class="field-label" for="epost">E-post (valgfritt)</label>
-            <input type="email" id="epost" name="epost" placeholder="For oppfølging">
+            <input type="email" id="epost" name="epost" autocomplete="email" placeholder="For oppfølging">
           </div>
         </div>
       </div>
@@ -364,6 +386,17 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 //      likevel mangler når handleren kjører (bør normalt aldri skje nå at (1)
 //      er på plass, men dekker edge-caser og gjør feilen synlig i stedet for
 //      helt stille).
+// v5 (2026-09-24, kveld): på Nicolays tilbakemelding delt "opplevelse"-skalaen
+//   i to separate 1-5-skalaer, siden én skala for to ulike ting (enkelthet OG
+//   tidsbruk) ikke var intuitiv. Retningen er også snudd (var feil vei før):
+//     q_enkelhet_skala:  1 = Enkelt,  3 = Som forventet, 5 = Vanskelig
+//     q_tidsbruk_skala:  1 = Raskt,   3 = Som forventet, 5 = Tidkrevende
+//   entry.673912274 gjenbrukes til enkelhet-skalaen (var allerede endret til
+//   "Kort svar" i Google-skjemaet). Tidsbruk-skalaen trengte et nytt felt —
+//   Nicolay dupliserte spørsmålet i Google Forms, som ga entry.1472973208
+//   (funnet automatisk via skjemaets data-params, ikke lest av Nicolay manuelt).
+//   Epost-feltet fikk også autocomplete="email" (i tillegg til den allerede
+//   eksisterende type="email") for å sikre e-post-tastatur/forslag på mobil.
 // ============================================================================
 var GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf7sx1uFHFG7jtp_d8maJHIhavri63KyqPT9qZgmojPcCwv1g/formResponse';
 
@@ -376,7 +409,8 @@ var ENTRY_AI_BESKRIVELSE     = 'entry.1275372234'; // Ga AI-analysen en god besk
 var ENTRY_AI_REDIGER          = 'entry.790307546'; // Var det enkelt å redigere AI-teksten?
 var ENTRY_SPORSMAL_FORSTAELIG = 'entry.1373404259'; // Var spørsmålene forståelige?
 var ENTRY_GUIDE_NYTTIG       = 'entry.728241458'; // Gir guiden nyttig/relevant/realistisk info for kundene?
-var ENTRY_OPPLEVELSE_SKALA   = 'entry.673912274'; // Opplevelse (enkelthet/tidsbruk), skala 1-5
+var ENTRY_ENKELHET_SKALA     = 'entry.673912274'; // v5: Hvor enkelt/vanskelig var verktøyet, skala 1-5 (1=enkelt, 5=vanskelig)
+var ENTRY_TIDSBRUK_SKALA     = 'entry.1472973208'; // v5: Tidsbruk på kartleggingen, skala 1-5 (1=raskt, 5=tidkrevende) — nytt felt, duplisert fra entry.673912274 i selve Google-skjemaet 24.9
 var ENTRY_FOU_ALVORLIGHET    = 'entry.1407362862'; // Alvorlighetsgrad
 var ENTRY_BRUKER_TYPE           = 'entry.14688108'; // Type funksjonsnedsettelse
 var ENTRY_BRUKER_NOK_INFO     = 'entry.588925002'; // Ga informasjonen nok til å vurdere om stedet passer?
@@ -561,7 +595,8 @@ document.getElementById('tilbake-form').addEventListener('submit', function(e) {
   leggTilFelt(ENTRY_AI_REDIGER, hentRadioverdi('q_ai_rediger'));
   leggTilFelt(ENTRY_SPORSMAL_FORSTAELIG, hentRadioverdi('q_sporsmal_forstaelig'));
   leggTilFelt(ENTRY_GUIDE_NYTTIG, hentRadioverdi('q_guide_nyttig'));
-  leggTilFelt(ENTRY_OPPLEVELSE_SKALA, hentRadioverdi('q_opplevelse_skala'));
+  leggTilFelt(ENTRY_ENKELHET_SKALA, hentRadioverdi('q_enkelhet_skala'));
+  leggTilFelt(ENTRY_TIDSBRUK_SKALA, hentRadioverdi('q_tidsbruk_skala'));
   leggTilFelt(ENTRY_FOU_ALVORLIGHET, hentRadioverdi('fou_alvorlighet'));
   leggTilFelt(ENTRY_BRUKER_TYPE, hentRadioverdi('bruker_type'));
   leggTilFelt(ENTRY_BRUKER_NOK_INFO, hentRadioverdi('bruker_nok_info'));
