@@ -14,6 +14,7 @@
   --text:#1a1a18;--text2:#5f5e5a;--text3:#6b6a62;
   --surface:#fff;--surface2:#f7f6f2;--surface3:#f1efe8;
   --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --violet:#6B5FC7;--violet-light:#EFECFB;
   --radius:16px;--radius-sm:10px;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface3);color:var(--text);min-height:100vh;font-size:16px;line-height:1.6;-webkit-text-size-adjust:100%}
@@ -99,11 +100,12 @@ textarea{resize:vertical;min-height:80px}
 .question-item:last-child{border-bottom:none;padding-bottom:0}
 .question-text{font-size:15px;color:var(--text);line-height:1.5;margin-bottom:4px}
 .question-context{font-size:12px;color:var(--text3);margin-bottom:8px}
-.yn-group{display:flex;gap:8px;margin-top:8px}
-.yn-btn{flex:1;border:1.5px solid var(--border2);background:var(--surface2);border-radius:var(--radius-sm);padding:10px;font-size:15px;font-family:inherit;font-weight:500;cursor:pointer;color:var(--text2);text-align:center}
+.yn-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.yn-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:var(--radius-sm);padding:10px;font-size:15px;font-family:inherit;font-weight:500;cursor:pointer;color:var(--text2);text-align:center}
 .yn-btn.yes.active{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
 .yn-btn.no.active{background:var(--red-light);border-color:var(--red);color:#A32D2D}
 .yn-btn.na.active{background:var(--surface2);border-color:var(--border2);color:var(--text3)}
+.yn-btn.irr.active{background:var(--violet-light);border-color:var(--violet);color:var(--violet)}
 .notice{background:var(--green-light);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--green-dark);margin-bottom:1rem;line-height:1.5}
 .notice-blue{background:var(--blue-light);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--blue);margin-bottom:1rem;line-height:1.5}
 .gpx-zone{border:2px dashed rgba(6,90,130,.3);border-radius:var(--radius);padding:1.25rem 1rem;text-align:center;cursor:pointer;background:var(--blue-light);position:relative;margin-bottom:1rem}
@@ -261,12 +263,13 @@ textarea{resize:vertical;min-height:80px}
 .kommune-hint-btn{border:1.5px solid var(--border2);background:var(--surface2);border-radius:20px;padding:5px 12px;font-size:13px;font-family:inherit;cursor:pointer;color:var(--text2)}
 .kommune-hint-btn:active{background:var(--green-light);border-color:var(--green);color:var(--green-dark)}
 .fylke-auto-hint{font-size:12px;color:var(--amber);background:var(--amber-light);border-radius:6px;padding:5px 9px;margin-top:5px;display:none}
-.yn-field{display:flex;gap:6px;margin-top:2px}
-.yn-field-btn{flex:1;padding:10px 4px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;font-weight:500;background:var(--surface);color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.yn-field{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:2px}
+.yn-field-btn{padding:10px 4px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;font-weight:500;background:var(--surface);color:var(--text2);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
 .yn-field-btn:active{transform:scale(.96)}
 .yn-ja-active{background:var(--green-light);border-color:var(--green);color:var(--green-dark);font-weight:700}
 .yn-nei-active{background:#fef2f2;border-color:#ef4444;color:#b91c1c;font-weight:700}
 .yn-uk-active{background:var(--amber-light);border-color:var(--amber);color:var(--amber);font-weight:700}
+.yn-irr-active{background:var(--violet-light);border-color:var(--violet);color:var(--violet);font-weight:700}
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:.875rem 1rem;padding-bottom:calc(.875rem + env(safe-area-inset-bottom));display:flex;gap:10px;z-index:100}
 .btn-primary{flex:1;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-family:inherit;font-weight:600;cursor:pointer}
 .btn-primary:active{opacity:.85}
@@ -278,7 +281,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div class="topbar-versjon">v0.5.27</div>
+  <div class="topbar-versjon">v0.5.28</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" class="topbar-pill" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-flag-btn" id="lang-flag-btn" onclick="syklSpraak()" title="Bytt språk" aria-label="Bytt språk. Nåværende: Norsk">🇳🇴</button>
@@ -511,7 +514,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.27';
+const APP_VERSION = 'v0.5.28';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -826,7 +829,7 @@ const TEKST = {
     sone_lukk: '✓ Lukk',
     sone_lagre: 'Lagre endringer',
     // Spørsmål
-    vet_ikke_btn: 'Vet ikke',
+    vet_ikke_btn: 'Vet ikke', urelevant_btn: 'Urelevant',
     ikke_registrert: 'Ikke registrert',
     ikke_vurdert: 'Ikke vurdert',
     // Status
@@ -1039,7 +1042,7 @@ const TEKST = {
     sone_lukk: '✓ Close',
     sone_lagre: 'Save changes',
     // Questions
-    vet_ikke_btn: "Don't know",
+    vet_ikke_btn: "Don't know", urelevant_btn: 'Not relevant',
     ikke_registrert: 'Not registered',
     ikke_vurdert: 'Not assessed',
     // Status
@@ -1119,7 +1122,7 @@ const TEKST = {
     sone_lukk: '✓ Cerrar',
     sone_lagre: 'Guardar cambios',
     // Preguntas
-    vet_ikke_btn: 'No sé',
+    vet_ikke_btn: 'No sé', urelevant_btn: 'No aplica',
     ikke_registrert: 'No registrado',
     ikke_vurdert: 'No evaluado',
     // Página 0 — Lugar
@@ -2149,6 +2152,7 @@ var EF_CTX = {
 // v0.5.25: ikonene for Dashboard/Tilbakemelding var uforståelige — fjernet lenke til spørreskjema helt, og Dashboard er nå én vanlig tekst-knapp igjen (ingen ikon).
 // v0.5.26: versjonsnummeret vises igjen på mobil (var skjult under 480px i v0.5.24) — nå er det plass siden Tilbakemelding-lenken er borte.
 // v0.5.27: GPX-opplasting skjules nå for offentlig_toalett, turistinformasjon og torg (ingen rute å laste opp GPX for) — resten av gruppe B/C er uendret.
+// v0.5.28: (1) ub_wc omformulert til "Er toalett tilgjengelig underveis?" — den gamle ordlyden overlappet med q_hc_wc/ub_merking. (2) Ny 4. knapp "Urelevant" på ALLE ja/nei/vet-ikke-spørsmål (type-spørsmål, usynlige-behov, sone-tilleggsfelt) — for spørsmål som ikke passer virksomheten (f.eks. "tilpasset sykkel" for hundespann). "Vet ikke" er beholdt som egen knapp, "Urelevant" er ny, ikke en erstatning — etter samtale med Nicolay om at disse betyr forskjellige ting for rapportkvaliteten. Knappene vises nå i et 2×2-rutenett så det ikke blir trangt på mobil.
 function TEFCtx(fieldId) {
   var lang = state.lang || 'no';
   return (EF_CTX[lang] && EF_CTX[lang][fieldId]) || (EXTRA_FIELDS[fieldId] && EXTRA_FIELDS[fieldId].ctx) || '';
@@ -2618,6 +2622,7 @@ function renderZoneCard(zone, idx) {
         + '<button class="yn-field-btn' + (cur==='ja' ? ' yn-ja-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ja">'+T('ja')+'</button>'
         + '<button class="yn-field-btn' + (cur==='nei' ? ' yn-nei-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="nei">'+T('nei')+'</button>'
         + '<button class="yn-field-btn' + (cur==='ukjent' ? ' yn-uk-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="ukjent">'+T('vet_ikke_btn')+'</button>'
+        + '<button class="yn-field-btn' + (cur==='irrelevant' ? ' yn-irr-active' : '') + '" data-zi="' + idx + '" data-fid="' + fid + '" data-val="irrelevant">'+T('urelevant_btn')+'</button>'
         + '</div></div>';
     } else if (f.type === 'valg') {
       var curV = zone.measures[fid] || '';
@@ -2814,7 +2819,7 @@ var UB_QUESTIONS = [
    ctx_es:'Información concreta ANTES de la visita — p. ej. fotos de la entrada o un mapa. No solo una página general.'},
  {id:'ub_spraak',grupper:['A','B','C'],sek:2,no:'Er informasjonen skrevet i enkelt og tydelig språk?',en:'Is the information written in plain and clear language?',es:'¿La información está escrita en un lenguaje sencillo y claro?'},
  {id:'ub_merking',grupper:['A','B','C'],sek:2,no:'Er toalett, utganger og sitteplasser tydelig merket?',en:'Are toilets, exits and seating areas clearly marked?',es:'¿Están claramente señalizados los aseos, salidas y zonas de descanso?'},
- {id:'ub_wc',grupper:['A','B','C'],sek:3,no:'Er toalett lett tilgjengelig fra alle aktivitetsarealer?',en:'Is a toilet easily accessible from all activity areas?',es:'¿Hay un aseo fácilmente accesible desde todas las áreas de actividad?'},
+ {id:'ub_wc',grupper:['A','B','C'],sek:3,no:'Er toalett tilgjengelig underveis?',en:'Is a toilet accessible along the way?',es:'¿Hay un aseo accesible durante el recorrido?'},
  {id:'ub_hvile',grupper:['A','B'],sek:3,no:'Finnes det et eget rom man kan trekke seg tilbake til for å ta en pause?',en:'Is there a separate room guests can withdraw to for a break?',es:'¿Hay una sala separada a la que los huéspedes puedan retirarse para descansar?'},
  {id:'ub_sitte',grupper:['A','B','C'],sek:3,no:'Er det sitteplasser tilgjengelig underveis — ikke bare ved start/mål?',en:'Are seating options available along the way — not only at the start or end?',es:'¿Hay asientos disponibles durante el recorrido, no solo al inicio o al final?'},
  {id:'ub_avbryte',grupper:['A','B'],sek:3,no:'Kan gjester avbryte en aktivitet uten å måtte forklare seg?',en:'Can guests withdraw from an activity without having to explain themselves?',es:'¿Pueden los huéspedes retirarse de una actividad sin tener que dar explicaciones?'},
@@ -2827,7 +2832,7 @@ function ubQTxt(q) { var l = state.lang || 'no'; return q[l] || q.no; }
 // v0.5.21: hjelpetekst for usynlige-behov-spørsmål, samme idé som ctx på ALL_QUESTIONS —
 // forklarer hva begrepet betyr, ikke bare hvorfor det er viktig (etterspurt av Anita/INKLU).
 function ubQCtx(q) { var l = state.lang || 'no'; return (l !== 'no' && q['ctx_' + l]) || q.ctx || ''; }
-function ubSvarTekst(v) { return v === 'ja' ? T('ja') : v === 'nei' ? T('nei') : T('vet_ikke_btn'); }
+function ubSvarTekst(v) { return v === 'ja' ? T('ja') : v === 'nei' ? T('nei') : v === 'irr' ? T('urelevant_btn') : T('vet_ikke_btn'); }
 // Returnerer true hvis spørsmålet er relevant for valgt virksomhetstype.
 // Filtrerer på gruppe (A/B/C) og typespesifikke unntak (ubSkip) — f.eks.
 // har et fellesgode som en sti verken personal eller innendørs fellesarealer.
@@ -2858,6 +2863,7 @@ function buildUsynlig() {
         '<button class="yn-btn yes' + (v === 'ja' ? ' active' : '') + '" aria-pressed="' + (v === 'ja') + '" data-ub-id="' + q.id + '" data-ub-val="ja">' + T('ja') + '</button>' +
         '<button class="yn-btn no' + (v === 'nei' ? ' active' : '') + '" aria-pressed="' + (v === 'nei') + '" data-ub-id="' + q.id + '" data-ub-val="nei">' + T('nei') + '</button>' +
         '<button class="yn-btn na' + (v === 'na' ? ' active' : '') + '" aria-pressed="' + (v === 'na') + '" data-ub-id="' + q.id + '" data-ub-val="na">' + T('vet_ikke_btn') + '</button>' +
+        '<button class="yn-btn irr' + (v === 'irr' ? ' active' : '') + '" aria-pressed="' + (v === 'irr') + '" data-ub-id="' + q.id + '" data-ub-val="irr">' + T('urelevant_btn') + '</button>' +
         '</div></div>';
     }
     if (sekHtml) html += '<div class="card"><h2 class="card-title">' + UB_SEK_IKON[s] + ' ' + ubTxt('sek' + s) + '</h2>' + sekHtml + '</div>';
@@ -2893,6 +2899,7 @@ function buildQuestions() {
       '<button class="yn-btn yes '+(state.answers[id]==='ja'?'active':'')+'" aria-pressed="'+(state.answers[id]==='ja')+'" onclick="setAns(\''+id+'\',\'ja\',this)">'+T('ja')+'</button>' +
       '<button class="yn-btn no '+(state.answers[id]==='nei'?'active':'')+'" aria-pressed="'+(state.answers[id]==='nei')+'" onclick="setAns(\''+id+'\',\'nei\',this)">'+T('nei')+'</button>' +
       '<button class="yn-btn na '+(state.answers[id]==='na'?'active':'')+'" aria-pressed="'+(state.answers[id]==='na')+'" onclick="setAns(\''+id+'\',\'na\',this)">'+T('vet_ikke_btn')+'</button>' +
+      '<button class="yn-btn irr '+(state.answers[id]==='irr'?'active':'')+'" aria-pressed="'+(state.answers[id]==='irr')+'" onclick="setAns(\''+id+'\',\'irr\',this)">'+T('urelevant_btn')+'</button>' +
       '</div></div>';
   }
   document.getElementById('questions-container').innerHTML = html;
@@ -3175,7 +3182,7 @@ async function buildGuide() {
       if (q.sek !== s || !ubRelevant(q)) continue;
       var v = state.usynlig[q.id];
       if (v !== 'ja' && v !== 'nei') continue;
-      var farge = v === 'ja' ? 'var(--green-dark)' : 'var(--text2)';
+      var farge = v === 'ja' ? 'var(--green-dark)' : (v === 'irr' ? 'var(--violet)' : 'var(--text2)');
       ubRows += '<div class="guide-tillegg-kort"><div class="guide-tillegg-ikon">' + (v === 'ja' ? '\u2705' : '\u2796') + '</div>' +
         '<div class="guide-tillegg-tekst">' + ubQTxt(q) + ' <span style="font-weight:700;color:' + farge + '">' + ubSvarTekst(v) + '</span></div></div>';
     }
@@ -3261,7 +3268,7 @@ async function buildGuide() {
   var soner = state.zones.filter(function(z){return z.images.length>0||z.note;});
   var kontekstTekst = 'Du er tilgjengelighetsassistent for "'+name+'". Svar kort og konkret på '+spraakNavn+'. Fasiliteter: ';
   kontekstTekst += soner.map(function(z){return z.label+(z.note?' - '+z.note:'');}).join(', ');
-  var ubChatInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('; ');
+  var ubChatInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':v==='irr'?'Urelevant':'Vet ikke'):'';}).filter(Boolean).join('; ');
   if (ubChatInfo) kontekstTekst += '. Tilrettelegging for alle: ' + ubChatInfo;
   kontekstTekst += '. Kun bruk informasjonen gitt.';
   window._guideChatKontekst = kontekstTekst;
@@ -3325,8 +3332,8 @@ async function buildAnalyse() {
   }
 
   var soneInfo = gyldigeSoner.map(function(s){return s.zone.label+' ('+s.statusTekst+'): '+s.gjesteTekst;}).join('\n');
-  var svarInfo = qIds.map(function(id){var q=ALL_QUESTIONS[id];var v=state.answers[id];return q&&v?q.text+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('\n');
-  var ubInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':'Vet ikke'):'';}).filter(Boolean).join('\n');
+  var svarInfo = qIds.map(function(id){var q=ALL_QUESTIONS[id];var v=state.answers[id];return q&&v?q.text+': '+(v==='ja'?'Ja':v==='nei'?'Nei':v==='irr'?'Urelevant':'Vet ikke'):'';}).filter(Boolean).join('\n');
+  var ubInfo = UB_QUESTIONS.filter(ubRelevant).map(function(q){var v=state.usynlig[q.id];return v?q.no+': '+(v==='ja'?'Ja':v==='nei'?'Nei':v==='irr'?'Urelevant':'Vet ikke'):'';}).filter(Boolean).join('\n');
   if (ubInfo) svarInfo = (svarInfo ? svarInfo + '\n' : '') + 'TILRETTELEGGING FOR ALLE:\n' + ubInfo;
   var gpxInfo = state.gpxData ? 'GPX: '+state.gpxData.totalDist+'km, maks stigning '+state.gpxData.maxSlope+'%, snitt '+state.gpxData.avgSlope+'%' : '';
   window._chatKontekst = 'Du er tilgjengelighetsassistent for "'+name+'" ('+( config?TL(config.label):type)+'). Svar på '+spraakNavn+', vennlig og konkret.\n\n'+
