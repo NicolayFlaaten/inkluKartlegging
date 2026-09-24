@@ -54,6 +54,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 .takk-ikon{font-size:48px;margin-bottom:1rem}
 .takk-title{font-size:20px;font-weight:800;margin-bottom:.5rem}
 .takk-desc{font-size:14px;color:var(--text2);max-width:340px;margin:0 auto}
+.takk-dashboard-link{display:none;align-items:center;justify-content:center;gap:6px;margin:1.5rem auto 0;background:var(--green);color:#fff;border-radius:var(--radius-sm);padding:12px 22px;font-size:14px;font-weight:700;text-decoration:none;max-width:240px}
 .feil-banner{display:none;background:var(--red-light);color:#A32D2D;border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;margin-bottom:1rem}
 .rolle-spesifikk{display:none}
 .rolle-spesifikk.vis{display:block}
@@ -308,6 +309,10 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
     <div class="takk-ikon">✅</div>
     <div class="takk-title">Tusen takk!</div>
     <div class="takk-desc">Tilbakemeldingen din hjelper oss å gjøre AccessNorway bedre før lansering.</div>
+    <!-- v0.5.29: Dashboard-lenke vises kun her (ikke i toppmenyen) og kun for
+         Bedrift/destinasjon og FoU/utvikler — Bruker/brukerorganisasjon (gjester)
+         har ikke tilgang til et dashboard, se toggling i submit-handleren. -->
+    <a href="dashboard.html?org_id=inklu-valdres" class="takk-dashboard-link" id="takk-dashboard-link">Gå til Dashboard →</a>
   </div>
 
 </main>
@@ -532,6 +537,14 @@ document.getElementById('tilbake-form').addEventListener('submit', function(e) {
   document.body.appendChild(f);
   f.submit();
   setTimeout(function() { f.remove(); }, 1000);
+
+  // v0.5.29: vis Dashboard-lenken på takk-siden bare for Bedrift/destinasjon og
+  // FoU/utvikler — Bruker/brukerorganisasjon (gjester) har ikke et dashboard å gå til.
+  var dashLink = document.getElementById('takk-dashboard-link');
+  if (dashLink) {
+    var visDash = rolle.value === 'Bedrift / destinasjon' || rolle.value === 'FoU / utvikler';
+    dashLink.style.display = visDash ? 'inline-flex' : 'none';
+  }
 
   document.getElementById('skjema-wrap').style.display = 'none';
   document.getElementById('takk').style.display = 'block';

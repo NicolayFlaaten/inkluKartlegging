@@ -220,6 +220,7 @@ textarea{resize:vertical;min-height:80px}
 .sone-edit-btn{background:none;border:none;cursor:pointer;font-size:12px;color:var(--text3);padding:4px 8px;border-radius:6px;font-family:inherit}
 .sone-edit-btn:hover{background:var(--surface2);color:var(--text2)}
 .sone-edit-area{width:100%;border:1.5px solid var(--green);border-radius:var(--radius-sm);padding:12px 14px;font-size:15px;line-height:1.55;font-family:inherit;color:var(--text);background:var(--surface);outline:none;resize:vertical;min-height:180px;margin-top:6px}
+.edit-hint{font-size:12px;color:var(--text2);background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:8px;line-height:1.45}
 .status-toggle{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
 .status-edit-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:2px 0 10px}
 .status-edit-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.03em}
@@ -281,7 +282,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div class="topbar-versjon">v0.5.28</div>
+  <div class="topbar-versjon">v0.5.29</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" class="topbar-pill" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-flag-btn" id="lang-flag-btn" onclick="syklSpraak()" title="Bytt språk" aria-label="Bytt språk. Nåværende: Norsk">🇳🇴</button>
@@ -514,7 +515,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.28';
+const APP_VERSION = 'v0.5.29';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -826,6 +827,7 @@ const TEKST = {
     sone_valgfri: 'valgfri',
     sone_rediger: '✏️ Rediger',
     sone_rediger_tekst: 'Rediger tekst',
+    stjerne_hint: '💡 Stjernene rundt et ord (**Ord:**) blir vist som en overskrift i den ferdige guiden — la dem stå.',
     sone_lukk: '✓ Lukk',
     sone_lagre: 'Lagre endringer',
     // Spørsmål
@@ -1039,6 +1041,7 @@ const TEKST = {
     sone_valgfri: 'optional',
     sone_rediger: '✏️ Edit',
     sone_rediger_tekst: 'Edit text',
+    stjerne_hint: '💡 The asterisks around a word (**Word:**) become a heading in the finished guide — leave them in place.',
     sone_lukk: '✓ Close',
     sone_lagre: 'Save changes',
     // Questions
@@ -1119,6 +1122,7 @@ const TEKST = {
     sone_valgfri: 'opcional',
     sone_rediger: '✏️ Editar',
     sone_rediger_tekst: 'Editar texto',
+    stjerne_hint: '💡 Los asteriscos alrededor de una palabra (**Palabra:**) se convierten en un título en la guía final — no los borres.',
     sone_lukk: '✓ Cerrar',
     sone_lagre: 'Guardar cambios',
     // Preguntas
@@ -2153,6 +2157,7 @@ var EF_CTX = {
 // v0.5.26: versjonsnummeret vises igjen på mobil (var skjult under 480px i v0.5.24) — nå er det plass siden Tilbakemelding-lenken er borte.
 // v0.5.27: GPX-opplasting skjules nå for offentlig_toalett, turistinformasjon og torg (ingen rute å laste opp GPX for) — resten av gruppe B/C er uendret.
 // v0.5.28: (1) ub_wc omformulert til "Er toalett tilgjengelig underveis?" — den gamle ordlyden overlappet med q_hc_wc/ub_merking. (2) Ny 4. knapp "Urelevant" på ALLE ja/nei/vet-ikke-spørsmål (type-spørsmål, usynlige-behov, sone-tilleggsfelt) — for spørsmål som ikke passer virksomheten (f.eks. "tilpasset sykkel" for hundespann). "Vet ikke" er beholdt som egen knapp, "Urelevant" er ny, ikke en erstatning — etter samtale med Nicolay om at disse betyr forskjellige ting for rapportkvaliteten. Knappene vises nå i et 2×2-rutenett så det ikke blir trangt på mobil.
+// v0.5.29: (1) Kort hjelpetekst lagt til over "Rediger tekst"-boksen (sone og helhetsinntrykk) som forklarer at **stjerner** rundt et ord blir overskrift i guiden — stjernene i redigeringsboksen var forvirrende (rapportert av Nicolay). (2) genererSoneTekster()-prompten er strammet inn så AI-en ALDRI skriver overskrifter/punktlister i selve gjesteteksten, uansett hvor mye strukturert bildeanalyse den får inn — den skrev tidligere hele dokumenter med egne overskrifter i stedet for "1-2 setninger" som instruert (rot-årsaken til "Hva bør avklares"-eksempelet Nicolay viste). Usikre/anslåtte mål som AI-en tidligere skrev rett inn i gjesteteksten (og dermed i den PUBLISERTE guiden) flagges nå i stedet på en egen "TIPS:"-linje som parses ut og ALDRI havner i gjeste_tekst — vises kun som en tips-boks for kartlegger over redigeringsfeltet.
 function TEFCtx(fieldId) {
   var lang = state.lang || 'no';
   return (EF_CTX[lang] && EF_CTX[lang][fieldId]) || (EXTRA_FIELDS[fieldId] && EXTRA_FIELDS[fieldId].ctx) || '';
@@ -2937,7 +2942,7 @@ async function genererSoneTekster() {
       var malInfo = zone.extraFields.map(function(fid){var f=EXTRA_FIELDS[fid];var v=zone.measures[fid];return f&&v?f.label+': '+v+' '+f.unit:'';}).filter(Boolean).join(', ');
       if (!alleAnalyser && !malInfo && !zone.note) return;
       var kontekst = [alleAnalyser, malInfo?T('malte_data')+malInfo:'', zone.note?'Notater: '+zone.note:''].filter(Boolean).join('\n');
-      var prompt = 'Du skriver tilgjengelighetsprofil for "'+name+'" som gjester skal lese. Basert på: '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på '+spraakNavn+' som forteller gjesten konkret hva som finnes. Beskriv fakta — ikke vurder om det er bra eller dårlig. Unngå ord som "dessverre", "mangelfull", "ikke egnet". La gjesten selv avgjøre om det passer for dem. Mål og opplysninger fra kartlegger (målte data og notater) går alltid foran bildeanalysen hvis de avviker. Ikke oppgi mål som ikke er oppgitt, og merk anslag fra bilder som «anslag». Hvis informasjonen er for tynn til å avgjøre, velg STATUS:GUL og skriv kort hva som bør avklares. Avslutt med: STATUS:GRONN (fungerer for de fleste), STATUS:GUL (avhenger av behov) eller STATUS:ROD (begrenset — beskriv hva).';
+      var prompt = 'Du skriver tilgjengelighetsprofil for "'+name+'" som gjester skal lese. Basert på: '+zone.label+':\n\n'+kontekst+'\n\nSkriv 1-2 korte, nøkterne setninger på '+spraakNavn+' som forteller gjesten konkret hva som finnes — løpende tekst, ALDRI overskrifter, punktlister eller flere avsnitt, uansett hvor mye informasjon du får inn her. Beskriv fakta — ikke vurder om det er bra eller dårlig. Unngå ord som "dessverre", "mangelfull", "ikke egnet". La gjesten selv avgjøre om det passer for dem. Mål og opplysninger fra kartlegger (målte data og notater) går alltid foran bildeanalysen hvis de avviker. Ikke oppgi mål som ikke er oppgitt, og merk anslag fra bilder som «anslag». Hvis noe er usikkert og bør bekreftes eller måles av kartlegger (f.eks. et anslag), skal du ALDRI skrive det i selve gjesteteksten — skriv det i stedet til slutt på en egen linje som starter med nøyaktig "TIPS: " (kun hvis det er noe å nevne, ellers utelat linjen helt). Avslutt gjesteteksten med: STATUS:GRONN (fungerer for de fleste), STATUS:GUL (avhenger av behov) eller STATUS:ROD (begrenset — beskriv hva), og legg en eventuell TIPS-linje etter STATUS-linjen.';
       jobs.push(
         fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({model:AI_MODEL_TEKST,max_tokens:450,messages:[{role:'user',content:prompt}]})})
@@ -2959,9 +2964,18 @@ var m = tekst.match(/STATUS:\s*(GR[OØ]NN|GUL|R[OØ]D)/i);
             // stående synlig i teksten. Normaliserer til ASCII her siden resten av
             // koden sjekker status==='gronn'/'rod' (ASCII). Rapportert av Nicolay 24.9.
             var statusNormalisert = m ? m[1].toLowerCase().replace(/ø/g,'o') : 'ukjent';
+            var utenStatus = tekst.replace(/STATUS:\s*(GR[OØ]NN|GUL|R[OØ]D)/i,'').trim();
+            // v0.5.29: AI-en flagger usikre/anslåtte mål på en egen "TIPS:"-linje i stedet
+            // for å skrive dem inn i selve gjesteteksten (som tidligere endte opp i den
+            // PUBLISERTE guiden — rapportert av Nicolay, "Hva bør avklares"-eksempelet).
+            // tips vises kun i redigeringsflaten for kartlegger, aldri i gjeste_tekst.
+            var tipsM = utenStatus.match(/TIPS:\s*([\s\S]*)$/i);
+            var tips = tipsM ? tipsM[1].trim() : '';
+            var gjestetekstUtenTips = tipsM ? utenStatus.slice(0, tipsM.index).trim() : utenStatus;
             state.soneTekster[idx] = {
-              tekst: tekst.replace(/STATUS:\s*(GR[OØ]NN|GUL|R[OØ]D)/i,'').trim(),
-              status: statusNormalisert
+              tekst: gjestetekstUtenTips,
+              status: statusNormalisert,
+              tips: tips
             };
           }
         })
@@ -3021,6 +3035,8 @@ function lagSoneHTML(sd, idx, malChips, bilderHtml) {
   if (bilderHtml) h += '<div class="guide-bilder">'+bilderHtml+'</div>';
   h += '<div id="edit-sone-'+idx+'" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">';
   h += '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">'+T('sone_rediger_tekst')+'</div>';
+  h += '<div class="edit-hint">'+T('stjerne_hint')+'</div>';
+  if (sd.tips) h += '<div class="notice-blue">💡 '+mdInlineBold(sd.tips)+'</div>';
   h += '<textarea class="sone-edit-area" id="edit-tekst-'+idx+'" rows="8" oninput="guideRedigert['+idx+']=guideRedigert['+idx+']||{};guideRedigert['+idx+'].tekst=this.value;autosizeTA(this)">'+mdEsc(sd.gjesteTekst)+'</textarea>';
   h += '<button style="margin-top:10px;width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px;font-family:inherit;font-weight:600;cursor:pointer;font-size:13px" onclick="saveAndClose('+idx+')">Lagre endringer</button>';
   h += '</div>';
@@ -3099,7 +3115,7 @@ async function buildGuide() {
     var bilderHtml='';
     for (var j=0;j<zone.images.length;j++){bilderHtml+='<div class="guide-bilde"><img src="'+zone.images[j].dataUrl+'" alt="'+TL(zone.label)+'"/></div>';}
 
-    var sd = {zone:zone, gjesteTekst:gjesteTekst, status:status};
+    var sd = {zone:zone, gjesteTekst:gjesteTekst, status:status, tips:(_st && _st.tips) || ''};
     var soneHtml = lagSoneHTML(sd, i, malChips, bilderHtml);
 
     if (ankomstIds.indexOf(zone.id)>=0) ankomstHtml += soneHtml;
@@ -3137,6 +3153,7 @@ async function buildGuide() {
     hh += '<button class="'+hBtnGul+'" id="status-btn-'+hIdx+'-gul" onclick="setStatusToggle(&quot;helhet&quot;,&quot;gul&quot;)">🟡 Delvis</button>';
     hh += '<button class="'+hBtnRod+'" id="status-btn-'+hIdx+'-rod" onclick="setStatusToggle(&quot;helhet&quot;,&quot;rod&quot;)">🔴 Begrenset</button>';
     hh += '</div>';
+    hh += '<div class="edit-hint">'+T('stjerne_hint')+'</div>';
     hh += '<textarea class="sone-edit-area" id="edit-tekst-'+hIdx+'" rows="6">'+mdEsc(hTekst)+'</textarea>';
     hh += '<button style="background:var(--green);color:#fff;border:none;border-radius:var(--radius-sm);padding:10px 18px;font-size:14px;font-family:inherit;font-weight:600;cursor:pointer;margin-top:8px;width:100%" onclick="saveAndClose(&quot;helhet&quot;)">Lagre</button>';
     hh += '</div>';

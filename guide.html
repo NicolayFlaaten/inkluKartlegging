@@ -311,9 +311,21 @@ function visGuide(data) {
     html += '<div class="kart-wrapper" id="posisjonskart"></div>';
   }
 
+  // v0.5.29: profilbildet sendes fra index.html som en syntetisk "sone" med
+  // reservert id 'profilbilde' (se index.html-kommentar v0.5.18) — plukkes ut
+  // her og brukes som forsidebilde i stedet for å vises som en vanlig
+  // tilgjengelighets-sone. Var dokumentert som TODO siden v0.5.18, men aldri
+  // faktisk skrevet — rapportert av Nicolay 24.9 ("Profilbilde mangler fortsatt").
+  var profilSone = (data.soner||[]).filter(function(s){return s.id === 'profilbilde';})[0];
+  var vanligeSoner = (data.soner||[]).filter(function(s){return s.id !== 'profilbilde';});
+  var profilUrl = profilSone && profilSone.bilder && profilSone.bilder[0] && profilSone.bilder[0].url;
+  if (profilUrl) {
+    document.getElementById('hero-bg').style.backgroundImage = 'url(' + profilUrl + ')';
+  }
+
   var ankomstIds = ['parkering','inngang','adkomst','resepsjon','mottakelse'];
-  var ankomst = (data.soner||[]).filter(function(s){return ankomstIds.indexOf(s.id)>=0;});
-  var opphold = (data.soner||[]).filter(function(s){return ankomstIds.indexOf(s.id)<0;});
+  var ankomst = vanligeSoner.filter(function(s){return ankomstIds.indexOf(s.id)>=0;});
+  var opphold = vanligeSoner.filter(function(s){return ankomstIds.indexOf(s.id)<0;});
 
   if (ankomst.length) {
     html += '<h2 class="seksjon-hd">Ankomst og adkomst</h2>';
