@@ -278,7 +278,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <div class="topbar-logo">Access<span>Norway</span></div>
-  <div class="topbar-versjon">v0.5.26</div>
+  <div class="topbar-versjon">v0.5.27</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" class="topbar-pill" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-flag-btn" id="lang-flag-btn" onclick="syklSpraak()" title="Bytt språk" aria-label="Bytt språk. Nåværende: Norsk">🇳🇴</button>
@@ -511,7 +511,7 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.26';
+const APP_VERSION = 'v0.5.27';
 // v0.5.9: versjonsmerke på samtykketeksten — økes hvis ordlyden endres, så eldre
 // godkjenninger i databasen kan spores til nøyaktig hvilken tekst kartlegger så.
 // v0.5.11: samtykke er nå valgfritt (kartlegging sendes inn uansett) og teksten er
@@ -1837,7 +1837,7 @@ var TYPE_CONFIG = {
   // v0.5.19: frittstående offentlig toalett i tettsted/ved torg — egne forhold
   // (fast dekke, vanntilkobling, permanent bygg) fra rasteplassen i utmark over.
   // Parkering er her valgfri sone, ikke fast, siden den ikke alltid ligger vegg-i-vegg.
-  offentlig_toalett:{label:'Offentlig toalett',group:'C',pageTitle:'Offentlig toalett',pageDesc:'Last opp bilder av toalettet og adkomsten.',
+  offentlig_toalett:{label:'Offentlig toalett',group:'C',gpx:false,pageTitle:'Offentlig toalett',pageDesc:'Last opp bilder av toalettet og adkomsten.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:true},
       {id:'adkomst',label:'Adkomst',icon:'🚶',extraFields:[],optional:false},
@@ -1847,7 +1847,7 @@ var TYPE_CONFIG = {
     questions:['q_sti_merking','q_ledsager']},
   // v0.5.19: turistinformasjon — bygningsbasert, men driftes typisk av
   // destinasjonsselskap/kommune (fellesgode), ikke en privat bedrift — derfor C.
-  turistinformasjon:{label:'Turistinformasjon',group:'C',pageTitle:'Turistinformasjon',pageDesc:'Last opp bilder av inngang, skranke og fasiliteter.',
+  turistinformasjon:{label:'Turistinformasjon',group:'C',gpx:false,pageTitle:'Turistinformasjon',pageDesc:'Last opp bilder av inngang, skranke og fasiliteter.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:true},
       {id:'inngang',label:'Inngang',icon:'🚪',extraFields:['terskel_mm','dor_cm'],optional:false},
@@ -1857,7 +1857,7 @@ var TYPE_CONFIG = {
     questions:['q_skriftlig','q_opplaering','q_teleslynge','q_luminans','q_taktil','q_hc_wc']},
   // v0.5.19: offentlig torg/møteplass — statisk oppholdssted, andre behov enn en tursti
   // (underlag/belegning, sitteplasser, skjerming), ikke en rute man beveger seg langs.
-  torg:{label:'Offentlig torg / møteplass',group:'C',pageTitle:'Torg / møteplass',pageDesc:'Last opp bilder av underlag, sitteplasser og adkomst.',
+  torg:{label:'Offentlig torg / møteplass',group:'C',gpx:false,pageTitle:'Torg / møteplass',pageDesc:'Last opp bilder av underlag, sitteplasser og adkomst.',
     defaultZones:[
       {id:'parkering',label:'Parkering',icon:'🅿️',extraFields:['hc_parkering_naer','hc_parkering_avstand_m'],optional:true},
       {id:'underlag',label:'Underlag og belegning',icon:'🧱',extraFields:['sti_bredde_cm'],optional:false},
@@ -2148,6 +2148,7 @@ var EF_CTX = {
 // v0.5.24: topbar ryddet opp på mobil (ikon-only under 480px, ingen tekstbrekk) + steg-piller i fremdriftslinjen er nå klikkbare bakover.
 // v0.5.25: ikonene for Dashboard/Tilbakemelding var uforståelige — fjernet lenke til spørreskjema helt, og Dashboard er nå én vanlig tekst-knapp igjen (ingen ikon).
 // v0.5.26: versjonsnummeret vises igjen på mobil (var skjult under 480px i v0.5.24) — nå er det plass siden Tilbakemelding-lenken er borte.
+// v0.5.27: GPX-opplasting skjules nå for offentlig_toalett, turistinformasjon og torg (ingen rute å laste opp GPX for) — resten av gruppe B/C er uendret.
 function TEFCtx(fieldId) {
   var lang = state.lang || 'no';
   return (EF_CTX[lang] && EF_CTX[lang][fieldId]) || (EXTRA_FIELDS[fieldId] && EXTRA_FIELDS[fieldId].ctx) || '';
@@ -2500,7 +2501,7 @@ function buildZones() {
   var grp = config.group;
   var grpLabel = {A:T('gruppe_a'),B:T('gruppe_b'),C:T('gruppe_c')}[grp];
   document.getElementById('group-badge-container').innerHTML = '<div class="group-badge '+grp+'">'+grpLabel+'</div>';
-  document.getElementById('gpx-section').style.display = (grp==='B'||grp==='C') ? 'block' : 'none';
+  document.getElementById('gpx-section').style.display = (grp==='B' || (grp==='C' && config.gpx!==false)) ? 'block' : 'none';
   if (state.zones.length===0 || state._builtForType!==type) {
     state.zones = config.defaultZones.map(function(z) {
       return {id:z.id,label:z.label,icon:z.icon,extraFields:z.extraFields,optional:z.optional,images:[],aiAnalysis:null,measures:{},note:''};
