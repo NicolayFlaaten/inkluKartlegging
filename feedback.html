@@ -35,6 +35,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .radio-opt.active{border-color:var(--green);background:var(--green-light);color:var(--green-dark);font-weight:600}
 .radio-opt input{margin-top:2px;accent-color:var(--green)}
 .radio-grid.horisontal .radio-opt input{margin-top:0}
+.skala-row{display:flex;gap:6px}
+.skala-opt{position:relative;flex:1;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 0;cursor:pointer;font-size:16px;font-weight:700;transition:all .15s}
+.skala-opt:hover{border-color:var(--green)}
+.skala-opt.active{border-color:var(--green);background:var(--green-light);color:var(--green-dark)}
+.skala-opt input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
 textarea,input[type=text],input[type=email]{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:15px;font-family:inherit;background:var(--surface)}
 textarea{min-height:120px;resize:vertical}
 textarea:focus,input:focus{outline:none;border-color:var(--green)}
@@ -54,6 +59,10 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 .rolle-spesifikk.vis{display:block}
 .felt-hvis-ja{display:none}
 .felt-hvis-ja.vis{display:block}
+.vis-hvis-kartlegging{display:none}
+.vis-hvis-kartlegging.vis{display:block}
+.radio-opt.skjult{display:none}
+.lede-tekst{font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.5}
 </style>
 </head>
 <body>
@@ -87,20 +96,16 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
         <div class="field">
           <label class="field-label">Hva gjelder tilbakemeldingen? <span style="color:var(--red)">*</span></label>
           <div class="radio-grid" id="del-grid">
-            <label class="radio-opt"><input type="radio" name="del" value="Kartleggingsverktøyet (index.html)" required> Kartleggingsverktøyet — selv det å kartlegge et sted</label>
+            <label class="radio-opt" data-skjul-for-bruker><input type="radio" name="del" value="Kartleggingsverktøyet (index.html)" required> Kartleggingsverktøyet — selv det å kartlegge et sted</label>
             <label class="radio-opt"><input type="radio" name="del" value="Guiden / rapporten gjestene leser" required> Guiden / rapporten gjestene leser</label>
             <label class="radio-opt"><input type="radio" name="del" value='"Del din erfaring"-skjemaet' required> "Del din erfaring"-skjemaet</label>
-            <label class="radio-opt"><input type="radio" name="del" value="Velkomstsiden" required> Velkomstsiden</label>
-            <label class="radio-opt"><input type="radio" name="del" value="Annet / usikker" required> Annet / usikker</label>
+            <label class="radio-opt" data-skjul-for-bruker><input type="radio" name="del" value="Velkomstsiden" required> Velkomstsiden</label>
+            <label class="radio-opt" data-skjul-for-bruker><input type="radio" name="del" value="Annet / usikker" required> Annet / usikker</label>
           </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="field">
-          <label class="field-label" for="beskrivelse">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
-          <textarea id="beskrivelse" name="beskrivelse" required placeholder="Vær så konkret du kan — f.eks. hvilken type sted eller hvilket steg du var på, og hva som skjedde."></textarea>
-        </div>
         <div class="field">
           <label class="field-label" for="sted">Hvilket sted / hvilken type testet du? (valgfritt)</label>
           <input type="text" id="sted" name="sted" placeholder="F.eks. Solset, eller «Hotell»-typen">
@@ -110,51 +115,109 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
       <!-- ================= Bedrift / destinasjon ================= -->
       <div class="card rolle-spesifikk" data-rolle="Bedrift / destinasjon">
         <div class="seksjon-hd">Ekstra spørsmål — Bedrift / destinasjon</div>
-        <div class="field">
-          <label class="field-label">Stemmer informasjonen om virksomheten din?</label>
-          <div class="radio-grid horisontal" data-navn="bedrift_stemmer">
-            <label class="radio-opt"><input type="radio" name="bedrift_stemmer" value="Ja"> Ja</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_stemmer" value="Delvis"> Delvis</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_stemmer" value="Nei"> Nei</label>
+        <div class="vis-hvis-kartlegging">
+          <div class="field">
+            <label class="field-label">Ga AI-analysen en god beskrivelse av bildene du tok?</label>
+            <div class="radio-grid horisontal" data-navn="q_ai_beskrivelse">
+              <label class="radio-opt"><input type="radio" name="q_ai_beskrivelse" value="Ja"> Ja</label>
+              <label class="radio-opt"><input type="radio" name="q_ai_beskrivelse" value="Delvis"> Delvis</label>
+              <label class="radio-opt"><input type="radio" name="q_ai_beskrivelse" value="Nei"> Nei</label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Var det enkelt å redigere AI-teksten så beskrivelsen stemmer med virkeligheten?</label>
+            <div class="radio-grid horisontal" data-navn="q_ai_rediger">
+              <label class="radio-opt"><input type="radio" name="q_ai_rediger" value="Ja"> Ja</label>
+              <label class="radio-opt"><input type="radio" name="q_ai_rediger" value="Delvis"> Delvis</label>
+              <label class="radio-opt"><input type="radio" name="q_ai_rediger" value="Nei"> Nei</label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Var spørsmålene forståelige?</label>
+            <div class="radio-grid horisontal" data-navn="q_sporsmal_forstaelig">
+              <label class="radio-opt"><input type="radio" name="q_sporsmal_forstaelig" value="Ja"> Ja</label>
+              <label class="radio-opt"><input type="radio" name="q_sporsmal_forstaelig" value="Delvis"> Delvis</label>
+              <label class="radio-opt"><input type="radio" name="q_sporsmal_forstaelig" value="Nei"> Nei</label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Gir den ferdige tilgjengelighetsguiden nyttig, relevant og realistisk informasjon for kundene?</label>
+            <div class="radio-grid horisontal" data-navn="q_guide_nyttig">
+              <label class="radio-opt"><input type="radio" name="q_guide_nyttig" value="Ja"> Ja</label>
+              <label class="radio-opt"><input type="radio" name="q_guide_nyttig" value="Delvis"> Delvis</label>
+              <label class="radio-opt"><input type="radio" name="q_guide_nyttig" value="Nei"> Nei</label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Hvordan var din opplevelse med bruk av kartleggingsverktøyet — enkelthet og tidsbruk?</label>
+            <div class="skala-row" data-navn="q_opplevelse_skala">
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="1">1</label>
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="2">2</label>
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="3">3</label>
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="4">4</label>
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="5">5</label>
+            </div>
+            <div class="field-hint">1 = tungvint / tidkrevende, 5 = enkelt / raskt</div>
           </div>
         </div>
         <div class="field">
-          <label class="field-label">Var det enkelt å gjennomføre kartleggingen?</label>
-          <div class="radio-grid horisontal" data-navn="bedrift_enkelt">
-            <label class="radio-opt"><input type="radio" name="bedrift_enkelt" value="Ja"> Ja</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_enkelt" value="Delvis"> Delvis</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_enkelt" value="Nei"> Nei</label>
-          </div>
-        </div>
-        <div class="field">
-          <label class="field-label">Gir resultatet informasjon som kan publiseres?</label>
-          <div class="radio-grid horisontal" data-navn="bedrift_nyttig">
-            <label class="radio-opt"><input type="radio" name="bedrift_nyttig" value="Ja"> Ja</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_nyttig" value="Kanskje"> Kanskje</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_nyttig" value="Nei"> Nei</label>
-          </div>
-        </div>
-        <div class="field">
-          <label class="field-label">Gir resultatet konkrete forbedringspunkter?</label>
-          <div class="radio-grid horisontal" data-navn="bedrift_forbedring">
-            <label class="radio-opt"><input type="radio" name="bedrift_forbedring" value="Ja"> Ja</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_forbedring" value="Delvis"> Delvis</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_forbedring" value="Nei"> Nei</label>
-          </div>
-        </div>
-        <div class="field">
-          <label class="field-label">Var tidsbruken på kartleggingen realistisk sett i forhold til stedets størrelse?</label>
-          <div class="radio-grid horisontal" data-navn="bedrift_tidsbruk">
-            <label class="radio-opt"><input type="radio" name="bedrift_tidsbruk" value="Ja"> Ja</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_tidsbruk" value="Delvis"> Delvis</label>
-            <label class="radio-opt"><input type="radio" name="bedrift_tidsbruk" value="Nei"> Nei</label>
-          </div>
+          <label class="field-label" for="beskrivelse_bedrift">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
+          <textarea id="beskrivelse_bedrift" name="beskrivelse_bedrift" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over."></textarea>
         </div>
       </div>
 
       <!-- ================= FoU / utvikler ================= -->
       <div class="card rolle-spesifikk" data-rolle="FoU / utvikler">
         <div class="seksjon-hd">Ekstra spørsmål — FoU / utvikler</div>
+        <div class="vis-hvis-kartlegging">
+          <div class="field">
+            <label class="field-label">Ga AI-analysen en god beskrivelse av bildene du tok?</label>
+            <div class="radio-grid horisontal" data-navn="q_ai_beskrivelse">
+              <label class="radio-opt"><input type="radio" name="q_ai_beskrivelse" value="Ja"> Ja</label>
+              <label class="radio-opt"><input type="radio" name="q_ai_beskrivelse" value="Delvis"> Delvis</label>
+              <label class="radio-opt"><input type="radio" name="q_ai_beskrivelse" value="Nei"> Nei</label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Var det enkelt å redigere AI-teksten så beskrivelsen stemmer med virkeligheten?</label>
+            <div class="radio-grid horisontal" data-navn="q_ai_rediger">
+              <label class="radio-opt"><input type="radio" name="q_ai_rediger" value="Ja"> Ja</label>
+              <label class="radio-opt"><input type="radio" name="q_ai_rediger" value="Delvis"> Delvis</label>
+              <label class="radio-opt"><input type="radio" name="q_ai_rediger" value="Nei"> Nei</label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Var spørsmålene forståelige?</label>
+            <div class="radio-grid horisontal" data-navn="q_sporsmal_forstaelig">
+              <label class="radio-opt"><input type="radio" name="q_sporsmal_forstaelig" value="Ja"> Ja</label>
+              <label class="radio-opt"><input type="radio" name="q_sporsmal_forstaelig" value="Delvis"> Delvis</label>
+              <label class="radio-opt"><input type="radio" name="q_sporsmal_forstaelig" value="Nei"> Nei</label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Gir den ferdige tilgjengelighetsguiden nyttig, relevant og realistisk informasjon for kundene?</label>
+            <div class="radio-grid horisontal" data-navn="q_guide_nyttig">
+              <label class="radio-opt"><input type="radio" name="q_guide_nyttig" value="Ja"> Ja</label>
+              <label class="radio-opt"><input type="radio" name="q_guide_nyttig" value="Delvis"> Delvis</label>
+              <label class="radio-opt"><input type="radio" name="q_guide_nyttig" value="Nei"> Nei</label>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">Hvordan var din opplevelse med bruk av kartleggingsverktøyet — enkelthet og tidsbruk?</label>
+            <div class="skala-row" data-navn="q_opplevelse_skala">
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="1">1</label>
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="2">2</label>
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="3">3</label>
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="4">4</label>
+              <label class="skala-opt"><input type="radio" name="q_opplevelse_skala" value="5">5</label>
+            </div>
+            <div class="field-hint">1 = tungvint / tidkrevende, 5 = enkelt / raskt</div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="beskrivelse_fou">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
+          <textarea id="beskrivelse_fou" name="beskrivelse_fou" placeholder="Vær så konkret du kan — spesielt om du svarte «delvis» eller «nei» over."></textarea>
+        </div>
         <div class="field">
           <label class="field-label">Alvorlighetsgrad</label>
           <div class="radio-grid horisontal" data-navn="fou_alvorlighet">
@@ -202,7 +265,7 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
           </div>
         </div>
         <div class="field">
-          <label class="field-label">Er det behov, barrierer eller brukergrupper du mener mangler i verktøyet?</label>
+          <label class="field-label">Er det noe som mangler i tilgjengelighetsguiden som vi må få med, endre eller forbedre?</label>
           <div class="radio-grid horisontal" data-navn="bruker_mangler">
             <label class="radio-opt"><input type="radio" name="bruker_mangler" value="Ja"> Ja</label>
             <label class="radio-opt"><input type="radio" name="bruker_mangler" value="Nei"> Nei</label>
@@ -210,11 +273,16 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
         </div>
         <div class="field felt-hvis-ja" id="bruker-mangler-felt">
           <label class="field-label" for="bruker_mangler_beskrivelse">Hvis ja — beskriv kort</label>
-          <input type="text" id="bruker_mangler_beskrivelse" name="bruker_mangler_beskrivelse" placeholder="F.eks. hvilket behov, hindring eller gruppe">
+          <input type="text" id="bruker_mangler_beskrivelse" name="bruker_mangler_beskrivelse" placeholder="F.eks. hva som må endres eller legges til">
+        </div>
+        <div class="field">
+          <label class="field-label" for="beskrivelse_bruker">Beskriv tilbakemeldingen <span style="color:var(--red)">*</span></label>
+          <textarea id="beskrivelse_bruker" name="beskrivelse_bruker" placeholder="Vær så konkret du kan."></textarea>
         </div>
       </div>
 
       <div class="card">
+        <p class="lede-tekst">Vi vil gjerne ha navn og e-post slik at vi kan følge opp tilbakemeldingen din i etterkant.</p>
         <div class="two-col">
           <div class="field">
             <label class="field-label" for="navn">Navn (valgfritt)</label>
@@ -250,31 +318,51 @@ textarea:focus,input:focus{outline:none;border-color:var(--green)}
 <script>
 // ============================================================================
 // Google Form-kobling — satt opp 2026-09-16 mot Nicolays skjema.
-// v2 (2026-09-23): "Type tilbakemelding" fjernet (overflødig — dekkes av fritekst).
-// 4 nye felt lagt til (bedrift_forbedring, bedrift_tidsbruk, bruker_mangler,
-// bruker_mangler_beskrivelse) — entry-ID-ene hentet fra en ny forhåndsutfylt lenke.
-// NB: rekkefølgen på entry.673912274 vs entry.732226179 er IKKE 100% bekreftet av
-// Nicolay (han var sikker på øverste = bedrift_forbedring, men ikke på de to neste)
-// — dobbeltsjekk i Google Form-svarene etter første reelle test-innsending.
+// v2 (2026-09-23): "Type tilbakemelding" fjernet. 4 nye felt lagt til
+// (bedrift_forbedring, bedrift_tidsbruk, bruker_mangler, bruker_mangler_beskrivelse).
+// v3 (2026-09-24): full omstrukturering av skjemaet —
+//   - De 5 gamle Bedrift-spørsmålene er BYTTET UT med 5 nye spørsmål (se under).
+//     Feltene i Google Form er GJENBRUKT (samme entry-ID), bare tekst/alternativer
+//     må redigeres i selve Google Form-dokumentet:
+//       entry.1275372234 (var "Stemmer info om virksomheten") → ny tekst:
+//         "Ga AI-analysen en god beskrivelse av bildene du tok?" (Ja/Delvis/Nei — uendret)
+//       entry.790307546 (var "Var det enkelt å gjennomføre kartleggingen") → ny tekst:
+//         "Var det enkelt å redigere AI-teksten så beskrivelsen stemmer med virkeligheten?" (Ja/Delvis/Nei)
+//       entry.1373404259 (var "Gir resultatet info som kan publiseres", Ja/Kanskje/Nei) → ny tekst:
+//         "Var spørsmålene forståelige?" — ENDRE alternativene til Ja/Delvis/Nei (var Ja/Kanskje/Nei)
+//       entry.728241458 (var "Gir resultatet konkrete forbedringspunkter") → ny tekst:
+//         "Gir den ferdige tilgjengelighetsguiden nyttig, relevant og realistisk info for kundene?" (Ja/Delvis/Nei)
+//       entry.673912274 (var "Var tidsbruken realistisk", Ja/Delvis/Nei) → ny tekst:
+//         "Hvordan var din opplevelse med bruk av kartleggingsverktøyet — enkelthet og tidsbruk?"
+//         — ENDRE alternativene til en skala 1/2/3/4/5 (var Ja/Delvis/Nei)
+//   - De 5 spørsmålene over vises nå også for FoU/utvikler (samme felt/entry-ID,
+//     bare duplisert i skjemaet — vises for begge roller, aldri samtidig).
+//   - De 5 spørsmålene vises bare når "Hva gjelder tilbakemeldingen" = Kartleggingsverktøyet.
+//   - "Beskriv tilbakemeldingen" er flyttet inn i hver rolle-seksjon (tre separate
+//     tekstfelt i HTML: beskrivelse_bedrift/beskrivelse_fou/beskrivelse_bruker),
+//     men alle tre sender fortsatt til SAMME Google Form-felt (ENTRY_BESKRIVELSE).
+//   - entry.732226179 (bruker_mangler) har fått ny tekst i skjemaet — samme Ja/Nei,
+//     ingen endring nødvendig i Google Form utover selve spørsmålsteksten.
+//   INGEN NYE ENTRY-ID-ER — alt er gjenbruk av eksisterende felt.
 // ============================================================================
 var GOOGLE_FORM_ACTION_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSf7sx1uFHFG7jtp_d8maJHIhavri63KyqPT9qZgmojPcCwv1g/formResponse';
 
 var ENTRY_ROLLE              = 'entry.2032166637'; // Hvem svarer du som?
 var ENTRY_DEL                = 'entry.1807045652'; // Hva gjelder tilbakemeldingen?
-var ENTRY_BESKRIVELSE        = 'entry.1671216463'; // Beskrivelse
+var ENTRY_BESKRIVELSE        = 'entry.1671216463'; // Beskrivelse (delt av alle tre roller)
 var ENTRY_STED                = 'entry.852984452'; // Sted eller type
 var ENTRY_NAVN_EPOST          = 'entry.697346171'; // Navn og e-post
-var ENTRY_BEDRIFT_STEMMER    = 'entry.1275372234'; // Stemmer informasjonen om virksomheten din?
-var ENTRY_BEDRIFT_ENKELT      = 'entry.790307546'; // Var det enkelt å gjennomføre kartleggingen?
-var ENTRY_BEDRIFT_NYTTIG     = 'entry.1373404259'; // Gir resultatet informasjon som kan publiseres?
-var ENTRY_BEDRIFT_FORBEDRING = 'entry.728241458'; // Gir resultatet konkrete forbedringspunkter?
-var ENTRY_BEDRIFT_TIDSBRUK   = 'entry.673912274'; // Var tidsbruken realistisk?
+var ENTRY_AI_BESKRIVELSE     = 'entry.1275372234'; // Ga AI-analysen en god beskrivelse av bildene?
+var ENTRY_AI_REDIGER          = 'entry.790307546'; // Var det enkelt å redigere AI-teksten?
+var ENTRY_SPORSMAL_FORSTAELIG = 'entry.1373404259'; // Var spørsmålene forståelige?
+var ENTRY_GUIDE_NYTTIG       = 'entry.728241458'; // Gir guiden nyttig/relevant/realistisk info for kundene?
+var ENTRY_OPPLEVELSE_SKALA   = 'entry.673912274'; // Opplevelse (enkelthet/tidsbruk), skala 1-5
 var ENTRY_FOU_ALVORLIGHET    = 'entry.1407362862'; // Alvorlighetsgrad
 var ENTRY_BRUKER_TYPE           = 'entry.14688108'; // Type funksjonsnedsettelse
 var ENTRY_BRUKER_NOK_INFO     = 'entry.588925002'; // Ga informasjonen nok til å vurdere om stedet passer?
 var ENTRY_BRUKER_ENKEL_GUIDE  = 'entry.1363126096'; // Var guiden enkel å bruke (skjermleser)?
 var ENTRY_BRUKER_RESPEKTFULL   = 'entry.127310719'; // Føltes språket og tonen respektfull?
-var ENTRY_BRUKER_MANGLER     = 'entry.732226179'; // Behov/barrierer/brukergrupper som mangler?
+var ENTRY_BRUKER_MANGLER     = 'entry.732226179'; // Noe som mangler i tilgjengelighetsguiden?
 var ENTRY_BRUKER_MANGLER_BESKRIVELSE = 'entry.1494406868'; // Beskrivelse av det som mangler
 var ENTRY_KONTEKST              = 'entry.819009198'; // Teknisk kontekst (auto-generert)
 // ============================================================================
@@ -314,14 +402,16 @@ function hentKontekst() {
   }
 })();
 
-// Visuell aktiv-styling på alle radioknapper
-document.querySelectorAll('.radio-opt input').forEach(function(input) {
+// Visuell aktiv-styling på alle radio-/skala-knapper
+document.querySelectorAll('.radio-opt input, .skala-opt input').forEach(function(input) {
   input.addEventListener('change', function() {
     var navn = input.name;
     document.querySelectorAll('input[name="' + navn + '"]').forEach(function(i) {
-      i.closest('.radio-opt').classList.remove('active');
+      var wrap = i.closest('.radio-opt') || i.closest('.skala-opt');
+      if (wrap) wrap.classList.remove('active');
     });
-    input.closest('.radio-opt').classList.add('active');
+    var wrap = input.closest('.radio-opt') || input.closest('.skala-opt');
+    if (wrap) wrap.classList.add('active');
   });
 });
 
@@ -332,9 +422,44 @@ document.querySelectorAll('input[name="rolle"]').forEach(function(input) {
     document.querySelectorAll('.rolle-spesifikk').forEach(function(seksjon) {
       seksjon.classList.toggle('vis', seksjon.dataset.rolle === valgtRolle);
     });
+    oppdaterDelAlternativer();
     oppdaterMailto();
   });
 });
+
+// Bruker/brukerorganisasjon kartlegger ikke selv — "Hva gjelder tilbakemeldingen"
+// skal for dem bare vise Guiden og "Del din erfaring"-skjemaet. Hvis et alternativ
+// som blir skjult allerede var valgt, nullstilles valget slik at man må velge på nytt.
+function oppdaterDelAlternativer() {
+  var rolle = document.querySelector('input[name="rolle"]:checked');
+  var erBruker = !!rolle && rolle.value === 'Bruker / brukerorganisasjon';
+  document.querySelectorAll('#del-grid .radio-opt[data-skjul-for-bruker]').forEach(function(opt) {
+    opt.classList.toggle('skjult', erBruker);
+    if (erBruker) {
+      var inp = opt.querySelector('input');
+      if (inp.checked) { inp.checked = false; opt.classList.remove('active'); }
+    }
+  });
+  oppdaterKartleggingVis();
+}
+
+// Vis de 5 "kartlegging"-spørsmålene (Bedrift/FoU) bare når "Hva gjelder
+// tilbakemeldingen" = Kartleggingsverktøyet. Kjøres også ved innlasting, siden
+// ?fra=kartlegging kan ha forhåndsvalgt "del" uten å trigge en change-event.
+function oppdaterKartleggingVis() {
+  var del = document.querySelector('input[name="del"]:checked');
+  var vis = !!del && del.value === 'Kartleggingsverktøyet (index.html)';
+  document.querySelectorAll('.vis-hvis-kartlegging').forEach(function(el) {
+    el.classList.toggle('vis', vis);
+  });
+}
+document.querySelectorAll('input[name="del"]').forEach(function(input) {
+  input.addEventListener('change', function() {
+    oppdaterKartleggingVis();
+    oppdaterMailto();
+  });
+});
+oppdaterKartleggingVis();
 
 // Vis oppfølgingsfeltet ("beskriv kort") bare når "Ja" er valgt på mangler-spørsmålet
 document.querySelectorAll('input[name="bruker_mangler"]').forEach(function(input) {
@@ -348,11 +473,23 @@ function hentRadioverdi(navn) {
   return el ? el.value : '';
 }
 
+// "Beskriv tilbakemeldingen" ligger i tre separate tekstfelt (ett per rolle-seksjon)
+// siden bare ett er synlig av gangen — denne henter det som faktisk gjelder nå.
+function hentBeskrivelseFelt() {
+  var rolle = document.querySelector('input[name="rolle"]:checked');
+  if (!rolle) return null;
+  if (rolle.value === 'Bedrift / destinasjon') return document.getElementById('beskrivelse_bedrift');
+  if (rolle.value === 'FoU / utvikler') return document.getElementById('beskrivelse_fou');
+  if (rolle.value === 'Bruker / brukerorganisasjon') return document.getElementById('beskrivelse_bruker');
+  return null;
+}
+
 document.getElementById('tilbake-form').addEventListener('submit', function(e) {
   e.preventDefault();
   var rolle = document.querySelector('input[name="rolle"]:checked');
   var del = document.querySelector('input[name="del"]:checked');
-  var beskrivelse = document.getElementById('beskrivelse').value.trim();
+  var beskrivelseFelt = hentBeskrivelseFelt();
+  var beskrivelse = beskrivelseFelt ? beskrivelseFelt.value.trim() : '';
   if (!rolle || !del || !beskrivelse) return;
 
   var navn = document.getElementById('navn').value.trim();
@@ -378,11 +515,11 @@ document.getElementById('tilbake-form').addEventListener('submit', function(e) {
   leggTilFelt(ENTRY_BESKRIVELSE, beskrivelse);
   leggTilFelt(ENTRY_STED, sted);
   leggTilFelt(ENTRY_NAVN_EPOST, navnEpost);
-  leggTilFelt(ENTRY_BEDRIFT_STEMMER, hentRadioverdi('bedrift_stemmer'));
-  leggTilFelt(ENTRY_BEDRIFT_ENKELT, hentRadioverdi('bedrift_enkelt'));
-  leggTilFelt(ENTRY_BEDRIFT_NYTTIG, hentRadioverdi('bedrift_nyttig'));
-  leggTilFelt(ENTRY_BEDRIFT_FORBEDRING, hentRadioverdi('bedrift_forbedring'));
-  leggTilFelt(ENTRY_BEDRIFT_TIDSBRUK, hentRadioverdi('bedrift_tidsbruk'));
+  leggTilFelt(ENTRY_AI_BESKRIVELSE, hentRadioverdi('q_ai_beskrivelse'));
+  leggTilFelt(ENTRY_AI_REDIGER, hentRadioverdi('q_ai_rediger'));
+  leggTilFelt(ENTRY_SPORSMAL_FORSTAELIG, hentRadioverdi('q_sporsmal_forstaelig'));
+  leggTilFelt(ENTRY_GUIDE_NYTTIG, hentRadioverdi('q_guide_nyttig'));
+  leggTilFelt(ENTRY_OPPLEVELSE_SKALA, hentRadioverdi('q_opplevelse_skala'));
   leggTilFelt(ENTRY_FOU_ALVORLIGHET, hentRadioverdi('fou_alvorlighet'));
   leggTilFelt(ENTRY_BRUKER_TYPE, hentRadioverdi('bruker_type'));
   leggTilFelt(ENTRY_BRUKER_NOK_INFO, hentRadioverdi('bruker_nok_info'));
@@ -403,7 +540,8 @@ document.getElementById('tilbake-form').addEventListener('submit', function(e) {
 function oppdaterMailto() {
   var rolle = document.querySelector('input[name="rolle"]:checked');
   var del = document.querySelector('input[name="del"]:checked');
-  var beskrivelse = document.getElementById('beskrivelse').value.trim();
+  var beskrivelseFelt = hentBeskrivelseFelt();
+  var beskrivelse = beskrivelseFelt ? beskrivelseFelt.value.trim() : '';
   var sted = document.getElementById('sted').value.trim();
   var emne = 'AccessNorway tilbakemelding' + (del ? ' — ' + del.value : '');
   var body = 'Rolle: ' + (rolle ? rolle.value : '(ikke valgt)') + '\n' +
