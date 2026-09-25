@@ -265,7 +265,7 @@ textarea{resize:vertical;min-height:80px}
 
 <div class="topbar" role="banner">
   <a class="topbar-logo" href="velkommen.html">Access<span>Norway</span></a>
-  <div class="topbar-versjon">v0.5.30</div>
+  <div class="topbar-versjon" id="topbar-versjon">v0.5.32</div>
   <div style="display:flex;align-items:center;gap:6px">
     <a href="dashboard.html?org_id=inklu-valdres" class="topbar-pill" data-i18n="dashboard_lenke">Dashboard</a>
     <button class="lang-flag-btn" id="lang-flag-btn" onclick="syklSpraak()" title="Bytt språk" aria-label="Bytt språk. Nåværende: Norsk">🇳🇴</button>
@@ -4399,6 +4399,11 @@ downloadProfile = function() {
 };
 
 // Start
+// v-neste (25.9): toppbarens versjonstall var hardkodet tekst i HTML-en, helt frakoblet
+// fra APP_VERSION-konstanten — måtte oppdateres manuelt to steder ved hver versjon, og
+// ble glemt her flere ganger (viste v0.5.30 lenge etter at APP_VERSION var v0.5.32).
+// Settes nå fra APP_VERSION ved oppstart, så de aldri kan komme ut av sync igjen.
+(function(){ var vEl = document.getElementById('topbar-versjon'); if (vEl) vEl.textContent = APP_VERSION; })();
 buildSteps();
 gjenopprettOkt();
 // v0.4.23: kartleggerorganisasjon er nå en nedtrekksmeny (fast liste) i stedet
