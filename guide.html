@@ -346,8 +346,12 @@ function visGuide(data) {
   document.getElementById('hero-type').textContent = enhet.type + (enhet.gruppe ? ' · Gruppe ' + enhet.gruppe : '');
 
   var meta = document.getElementById('hero-meta');
-  if (enhet.kommune) meta.innerHTML += '<span class="hero-pill">📍 ' + enhet.kommune + '</span>';
-  if (enhet.ssb_region) meta.innerHTML += '<span class="hero-pill">🗺️ ' + enhet.ssb_region + '</span>';
+  // v-neste (25.9): kommune/ssb_region escapes nå med mdEsc() — samme funn som H2 i
+  // index.html sin sikkerhetsgjennomgang (se pending-endringer.md), men her enda mer
+  // reelt siden guide.html er den faktiske siden ekte gjester besøker, ikke bare en
+  // forhåndsvisning for kartlegger.
+  if (enhet.kommune) meta.innerHTML += '<span class="hero-pill">📍 ' + mdEsc(enhet.kommune) + '</span>';
+  if (enhet.ssb_region) meta.innerHTML += '<span class="hero-pill">🗺️ ' + mdEsc(enhet.ssb_region) + '</span>';
   if (enhet.access_norway_symbol) meta.innerHTML += '<span class="hero-pill" style="background:rgba(29,158,117,.25);color:#4fd1a5">✓ Access Norway</span>';
 
   if (enhet.sist_bekreftet) {
@@ -504,7 +508,10 @@ function visGuide(data) {
 // fra AI-svaret var synlige som rå tegn for gjesten i den offentlige guiden. Se index.html for
 // samme funksjon (holdes identisk i begge filer siden de ikke deler JS-moduler).
 function mdEsc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // v-neste (25.9): escaper nå også anførselstegn (" og '), samme utvidelse som i
+  // index.html (se pending-endringer.md) — nødvendig fordi mdEsc() nå også brukes inni
+  // et alt="..."-attributt (sone-bilder), ikke bare i tekstinnhold.
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function mdInlineBold(s) {
   var out = mdEsc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -567,7 +574,7 @@ function lagSoneHTML(s) {
   var h = '<div class="sone-kort">';
   h += '<div class="sone-topp">';
   h += '<div class="sone-ikon">' + (s.ikon || SONE_IKON[s.id] || '📋') + '</div>';
-  h += '<h3 class="sone-navn">' + s.label + '</h3>';
+  h += '<h3 class="sone-navn">' + mdEsc(s.label) + '</h3>';
   if (s.status && s.status !== 'ukjent') h += '<span class="status-pill ' + statusClass + '">' + statusLabel + '</span>';
   h += '</div>';
   h += '<div class="sone-tekst">' + mdTilHtml(s.gjeste_tekst||'') + '</div>';
@@ -581,7 +588,7 @@ function lagSoneHTML(s) {
   if ((s.bilder||[]).length) {
     h += '<div class="sone-bilder">';
     s.bilder.forEach(function(b){
-      h += '<div class="sone-bilde"><img src="' + b.url + '" alt="Bilde av ' + s.label + '" loading="lazy"/></div>';
+      h += '<div class="sone-bilde"><img src="' + b.url + '" alt="Bilde av ' + mdEsc(s.label) + '" loading="lazy"/></div>';
     });
     h += '</div>';
   }

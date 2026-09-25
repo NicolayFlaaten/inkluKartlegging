@@ -498,7 +498,21 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.31';
+const APP_VERSION = 'v0.5.32';
+// v0.5.32 (25.9.2026): Sikkerhetsrettinger etter kodegjennomgang (se pending-endringer.md):
+// 1) mdEsc() escaper nå også anførselstegn (" og '), ikke bare &/</>, slik at den er trygg
+//    å bruke inni HTML-attributter (value="...", alt="...") og ikke bare i tekstinnhold.
+// 2) Sonens notatfelt (<textarea>) og målte verdier (input value=) escapet nå med mdEsc() —
+//    fritekst en kartlegger skriver inn kunne tidligere bryte ut av HTML-en og kjøre egen
+//    kode neste gang sonekortene ble tegnet på nytt (f.eks. ved å legge til et bilde).
+// 3) Bedriftsnavn/adresse/destinasjon/kommune (fritekst kartlegger skriver inn) escapet nå
+//    med mdEsc() alle steder de settes inn i guidens HTML — inkl. <h1>, alt-tekst, kart-
+//    lenketekst og <title> i den nedlastbare guide-filen. Guiden vises for ekte gjester og
+//    lastes ned som fil, så dette var et reelt sikkerhetshull, ikke bare teoretisk.
+// 4) analyzeProfilbilde() hadde en helt tom catch — feilet AI-kallet i bakgrunnen fikk
+//    verken kartlegger eller vi noe signal om det. Logger nå til konsollen og lagrer
+//    feilen atskilt fra selve analyseteksten (som vises for gjester), slik at en feiltekst
+//    aldri kan havne foran en gjest.
 // v0.5.31 (24.9.2026): Tilgjengelighetsassistenten (chatboten) er flyttet til guide.html
 // og fjernet herfra. Den fantes kun inne i kartleggerens egne forhåndsvisninger (Guide- og
 // Analyse-fanen i denne filen) og var derfor aldri tilgjengelig for faktiske gjester på den
@@ -1622,7 +1636,15 @@ async function analyzeProfilbilde() {
     if (data.content && data.content[0] && data.content[0].text) {
       state.profilbilde.analysis = data.content[0].text;
     }
-  } catch(err) {}
+  } catch(err) {
+    // v-neste (25.9): var tidligere en tom catch — feilet AI-kallet (f.eks. nettverksfeil),
+    // fikk verken kartlegger eller vi noe signal om det, siden dette kjøres i bakgrunnen
+    // rett etter opplasting uten egen laste-indikator. Logger nå til konsollen, og lagrer
+    // feilen atskilt fra .analysis (som vises i gjesteguiden og sendes til backend) slik at
+    // en feiltekst aldri kan havne foran en gjest. Se pending-endringer.md.
+    console.error('Kunne ikke AI-analysere profilbilde:', err);
+    if (state.profilbilde) state.profilbilde.analysisError = err && err.message ? err.message : String(err);
+  }
 }
 
 // TYPE CONFIG
@@ -2509,7 +2531,10 @@ function renderZones() {
 // slik at markdown-overskrifter (# / ##) og "**Label:**"-mønstre fra AI-svar ble vist som rå tegn for
 // både kartlegger og gjest. Denne funksjonen bygger ordentlige overskrifter og avsnitt av samme tekst.
 function mdEsc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // v-neste (25.9): escaper nå også anførselstegn (" og '), ikke bare &/</>, slik at
+  // funksjonen er trygg å bruke også inni HTML-attributter (value="...", alt="..."),
+  // ikke bare i tekstinnhold. Del av sikkerhetsgjennomgangen — se pending-endringer.md.
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function mdInlineBold(s) {
   var out = mdEsc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
@@ -2604,10 +2629,10 @@ function renderZoneCard(zone, idx) {
         + '<select class="measure-input" data-zi="' + idx + '" data-fid="' + fid + '">' + optsHtml + '</select></div>';
     } else if (f.type === 'text') {
       extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + '</label>'
-        + '<input type="text" placeholder="' + f.ph + '" value="' + (zone.measures[fid]||'') + '" data-zi="' + idx + '" data-fid="' + fid + '" class="measure-input"/></div>';
+        + '<input type="text" placeholder="' + f.ph + '" value="' + mdEsc(zone.measures[fid]||'') + '" data-zi="' + idx + '" data-fid="' + fid + '" class="measure-input"/></div>';
     } else {
       extraFieldsHtml += '<div class="field"><label class="field-label">' + (TEF(fid)||f.label) + (f.unit ? ' (' + f.unit + ')' : '') + '</label>'
-        + '<div class="number-field"><input type="number" placeholder="' + f.ph + '" value="' + (zone.measures[fid]||'') + '" data-zi="' + idx + '" data-fid="' + fid + '" class="measure-input"/>'
+        + '<div class="number-field"><input type="number" placeholder="' + f.ph + '" value="' + mdEsc(zone.measures[fid]||'') + '" data-zi="' + idx + '" data-fid="' + fid + '" class="measure-input"/>'
         + (f.unit ? '<span class="unit">' + f.unit + '</span>' : '') + '</div></div>';
     }
   }
@@ -2622,7 +2647,7 @@ function renderZoneCard(zone, idx) {
     '<div class="ai-box" id="ai-loading-'+idx+'" style="display:none"><div class="ai-header"><div class="ai-spinner on"></div><span>'+T('analyserer_bilde')+'</span></div></div>' +
     (zone.extraFields.length ? '<div style="margin-top:1rem">'+extraFieldsHtml+'</div>' : '') +
     '<div class="field" style="margin-top:.75rem"><label class="field-label">'+T('notat_label')+'</label>' +
-    '<textarea placeholder="'+T('notat_ph')+'" oninput="state.zones['+idx+'].note=this.value">'+( zone.note||'')+'</textarea></div>' +
+    '<textarea placeholder="'+T('notat_ph')+'" oninput="state.zones['+idx+'].note=this.value">'+mdEsc(zone.note||'')+'</textarea></div>' +
     '</div>';
 }
 
@@ -3208,11 +3233,15 @@ async function buildGuide() {
     return '<div class="guide-tillegg-kort info"><div class="guide-tillegg-ikon">\u2139\uFE0F</div><div class="guide-tillegg-tekst">' + tekst + '</div></div>';
   }).join('');
 
+  // v-neste (25.9): navn/adresse/destinasjon/kommune escapes nå med mdEsc() før de settes
+  // inn i guidens HTML — dette er tekst kartlegger selv skriver inn, og guiden vises for
+  // ekte gjester og lastes ned som fil, så ueskapert tekst var et reelt sikkerhetshull.
+  // Se pending-endringer.md.
   var metaPills = '';
-  if (dest) metaPills += '<div class="guide-meta-pill">🗺️ '+dest+'</div>';
-  if (kommune) metaPills += '<div class="guide-meta-pill">📍 '+kommune+'</div>';
-  if (addr) metaPills += '<div class="guide-meta-pill">🏠 '+addr+'</div>';
-  for (var i = 0; i < state.tags.length; i++) metaPills += '<div class="guide-meta-pill">'+state.tags[i]+'</div>';
+  if (dest) metaPills += '<div class="guide-meta-pill">🗺️ '+mdEsc(dest)+'</div>';
+  if (kommune) metaPills += '<div class="guide-meta-pill">📍 '+mdEsc(kommune)+'</div>';
+  if (addr) metaPills += '<div class="guide-meta-pill">🏠 '+mdEsc(addr)+'</div>';
+  for (var i = 0; i < state.tags.length; i++) metaPills += '<div class="guide-meta-pill">'+mdEsc(state.tags[i])+'</div>';
 
   // Adressekart vises alltid hvis adresse finnes, men som sekundær når GPX er tilgjengelig
   var mapHtml = '';
@@ -3221,7 +3250,7 @@ async function buildGuide() {
     mapHtml = '<div class="guide-map"><iframe src="https://maps.google.com/maps?q='+mapQuery+'&output=embed&z=15" allowfullscreen loading="lazy"></iframe></div>';
   } else if (addr && state.gpxData) {
     // Adresse vises som kompakt lenke under GPX-kartet
-    mapHtml = '<div style="font-size:12px;color:var(--text3);margin:-8px 0 8px;padding:0 2px">&#128205; '+addr+' &mdash; <a href="https://maps.google.com/maps?q='+mapQuery+'" target="_blank" style="color:var(--blue)">Åpne i Google Maps</a></div>';
+    mapHtml = '<div style="font-size:12px;color:var(--text3);margin:-8px 0 8px;padding:0 2px">&#128205; '+mdEsc(addr)+' &mdash; <a href="https://maps.google.com/maps?q='+mapQuery+'" target="_blank" style="color:var(--blue)">Åpne i Google Maps</a></div>';
   }
 
   var container = document.getElementById('tab-content-guide');
@@ -3230,10 +3259,10 @@ async function buildGuide() {
   await new Promise(function(r){setTimeout(r,50);});
   container.innerHTML =
     '<div class="guide-hero">' +
-    ((state.profilbilde && state.profilbilde.dataUrl) ? '<img class="guide-hero-img" src="'+state.profilbilde.dataUrl+'" alt="'+name+'"/>' : firstImg ? '<img class="guide-hero-img" src="'+firstImg.dataUrl+'" alt="'+name+'"/>' : '') +
+    ((state.profilbilde && state.profilbilde.dataUrl) ? '<img class="guide-hero-img" src="'+state.profilbilde.dataUrl+'" alt="'+mdEsc(name)+'"/>' : firstImg ? '<img class="guide-hero-img" src="'+firstImg.dataUrl+'" alt="'+mdEsc(name)+'"/>' : '') +
     '<div class="guide-hero-body">' +
     '<div class="guide-hero-badge">'+T('guide_badge')+'</div>' +
-    '<h1 class="guide-hero-name">'+name+'</h1>' +
+    '<h1 class="guide-hero-name">'+mdEsc(name)+'</h1>' +
     '<div class="guide-hero-type">'+(config?TL(config.label):'')+'</div>' +
     '<div class="guide-hero-meta">'+metaPills+'</div>' +
     '</div></div>' +
@@ -3373,7 +3402,7 @@ function downloadGuideHTML() {
 
   var name = document.getElementById('biz-name').value || 'AccessNorway';
   var styles = document.querySelector('style').textContent;
-  var blob = new Blob(['<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+name+' — Tilgjengelighetsguide</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f1efe8;padding:1rem;max-width:640px;margin:0 auto}img{max-width:100%}'+styles+'</style></head><body>'+tempDiv.innerHTML+'</body></html>'], {type:'text/html'});
+  var blob = new Blob(['<!DOCTYPE html><html lang="no"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+mdEsc(name)+' — Tilgjengelighetsguide</title><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#f1efe8;padding:1rem;max-width:640px;margin:0 auto}img{max-width:100%}'+styles+'</style></head><body>'+tempDiv.innerHTML+'</body></html>'], {type:'text/html'});
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a'); a.href=url; a.download=name.replace(/\s+/g,'_')+'_tilgjengelighetsguide.html'; a.click(); URL.revokeObjectURL(url);
 }
