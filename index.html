@@ -63,8 +63,10 @@ textarea{resize:vertical;min-height:80px}
 .tag-row{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
 .tag-btn{border:1.5px solid var(--border2);background:var(--surface);border-radius:20px;padding:6px 14px;font-size:14px;cursor:pointer;font-family:inherit;color:var(--text2)}
 .tag-btn.active{background:var(--green-light);border-color:var(--green);color:var(--green-dark);font-weight:500}
-.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:1.25rem 1rem;text-align:center;cursor:pointer;background:var(--surface2);position:relative}
-.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone{border:2px dashed var(--border2);border-radius:var(--radius);padding:1.25rem 1rem;text-align:center;background:var(--surface2);position:relative}
+.upload-btn-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.upload-btn{position:relative;display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1.5px solid var(--border2);border-radius:20px;padding:9px 16px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer}
+.upload-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .upload-icon{font-size:28px;margin-bottom:6px}
 .upload-title{font-size:14px;font-weight:500;margin-bottom:2px}
 .upload-hint{font-size:12px;color:var(--text3)}
@@ -289,7 +291,6 @@ textarea{resize:vertical;min-height:80px}
       <div class="field">
         <label class="field-label" data-i18n="profilbilde_label">Profilbilde</label>
         <div class="upload-zone" style="padding:1rem">
-          <input type="file" accept="image/*" onchange="handleProfilbilde(event)"/>
           <div id="profilbilde-preview" style="display:none">
             <img id="profilbilde-img" src="" alt="Profilbilde" style="width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:8px"/>
             <div style="font-size:12px;color:var(--green-dark)" data-i18n="profilbilde_lastet">✓ Profilbilde lastet opp</div>
@@ -298,6 +299,15 @@ textarea{resize:vertical;min-height:80px}
             <div class="upload-icon">🖼️</div>
             <div class="upload-title" data-i18n="profilbilde_tittel">Last opp profilbilde</div>
             <div class="upload-hint" data-i18n="profilbilde_hint">Representativt bilde av stedet — brukes i guide og rapport</div>
+          </div>
+          <!-- v0.5.33: to separate knapper istedenfor én usynlig full-dekkende input —
+               på Chrome/Edge for Android 14/15 dropper OS-ens filvelger kamera-valget helt
+               når man bruker accept="image/*" uten et eget capture-flagg (kjent, dokumentert
+               atferdsendring). Med capture="environment" på "Ta bilde" tvinges kamera-appen
+               opp direkte på Android, mens knappen uten capture åpner bildebiblioteket. -->
+          <div class="upload-btn-row">
+            <label class="upload-btn">📷 <span data-i18n="btn_ta_bilde">Ta bilde</span><input type="file" accept="image/*" capture="environment" onchange="handleProfilbilde(event)"/></label>
+            <label class="upload-btn">🖼️ <span data-i18n="btn_velg_bibliotek">Velg fra bibliotek</span><input type="file" accept="image/*" onchange="handleProfilbilde(event)"/></label>
           </div>
         </div>
       </div>
@@ -499,7 +509,15 @@ textarea{resize:vertical;min-height:80px}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 const WORKER_URL = 'https://green-block-aa07accessnorway.rzt4p6sh68.workers.dev';
-const APP_VERSION = 'v0.5.32';
+const APP_VERSION = 'v0.5.33';
+// v0.5.33 (26.9.2026): Kamera manglet som valg ved bildeopplasting på Android (bekreftet i
+// feltest). Årsak: en enkelt usynlig <input type="file" accept="image/*"> uten eget capture-
+// flagg — Chrome/Edge på Android 14/15 har endret atferd slik at OS-ens filvelger da bare
+// tilbyr bildebibliotek, ikke kamera (kjent, dokumentert endring, gjelder ikke iOS). Løst ved
+// å dele opp i to synlige knapper: "Ta bilde" (capture="environment", tvinger kamera-appen
+// direkte opp) og "Velg fra bibliotek" (vanlig filvelger). Gjort både for profilbilde (side 1)
+// og bilde-opplasting per fasilitets-sone (side 2). Nye tekster: btn_ta_bilde/btn_velg_bibliotek
+// (no/en/es).
 // v0.5.32 (25.9.2026): Sikkerhetsrettinger etter kodegjennomgang (se pending-endringer.md):
 // 1) mdEsc() escaper nå også anførselstegn (" og '), ikke bare &/</>, slik at den er trygg
 //    å bruke inni HTML-attributter (value="...", alt="...") og ikke bare i tekstinnhold.
@@ -730,6 +748,8 @@ const TEKST = {
     legg_til_sone_btn: '+ Legg til sone / område',
     upload_tittel: 'Ta bilde eller velg fra bibliotek',
     upload_hint: 'Alle bilder kan analyseres individuelt',
+    btn_ta_bilde: 'Ta bilde',
+    btn_velg_bibliotek: 'Velg fra bibliotek',
     notat_label: 'Egne notater (valgfritt)',
     notat_ph: 'Ekstra observasjoner eller beskrivelse...',
     analyserer_bilde: 'Analyserer...',
@@ -936,6 +956,8 @@ const TEKST = {
     legg_til_sone_btn: '+ Add zone / area',
     upload_tittel: 'Take photo or choose from library',
     upload_hint: 'All images can be analysed individually',
+    btn_ta_bilde: 'Take photo',
+    btn_velg_bibliotek: 'Choose from library',
     notat_label: 'Your notes (optional)',
     notat_ph: 'Extra observations or description...',
     analyserer_bilde: 'Analysing...',
@@ -1166,6 +1188,8 @@ const TEKST = {
     legg_til_sone_btn: '+ Añadir zona / área',
     upload_tittel: 'Tomar foto o elegir de la biblioteca',
     upload_hint: 'Todas las imágenes se pueden analizar individualmente',
+    btn_ta_bilde: 'Tomar foto',
+    btn_velg_bibliotek: 'Elegir de la biblioteca',
     notat_label: 'Tus notas (opcional)',
     notat_ph: 'Observaciones adicionales o descripción...',
     analyserer_bilde: 'Analizando...',
@@ -2639,9 +2663,13 @@ function renderZoneCard(zone, idx) {
   }
   return '<div class="zone-card" id="zone-card-'+idx+'">' +
     '<div class="zone-card-title">'+zone.icon+' '+TL(zone.label)+(zone.optional?'<span class="zone-optional">('+T('sone_valgfri')+')</span>':'')+'</div>' +
-    '<div class="upload-zone"><input type="file" accept="image/*" multiple onchange="handleFiles(event,'+idx+')"/>' +
+    '<div class="upload-zone">' +
     '<div class="upload-icon">📷</div><div class="upload-title">'+T('upload_tittel')+'</div>' +
-    '<div class="upload-hint">'+T('upload_hint')+'</div></div>' +
+    '<div class="upload-hint">'+T('upload_hint')+'</div>' +
+    '<div class="upload-btn-row">' +
+      '<label class="upload-btn">📷 '+T('btn_ta_bilde')+'<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event,'+idx+')"/></label>' +
+      '<label class="upload-btn">🖼️ '+T('btn_velg_bibliotek')+'<input type="file" accept="image/*" multiple onchange="handleFiles(event,'+idx+')"/></label>' +
+    '</div></div>' +
     (zone.images.length ? '<div class="image-preview">'+previewHtml+'</div>' : '') +
     (combinedAnalysis ? '<div class="ai-box visible"><div class="ai-header"><span>'+T('ai_analyse_label')+' ('+analyses.length+' '+(analyses.length>1?T('bilde_plural'):T('bilde_singular'))+')</span></div>' +
       '<div class="ai-text">'+mdTilHtml(combinedAnalysis)+'</div></div>' : '') +
